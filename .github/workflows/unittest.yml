@@ -30,7 +30,7 @@ jobs:
     - name: Generate coverage report
       run: |
         coverage report -m > coverage.txt
-    - name: Post coverage report as PR comment
+    - name: Update or Post coverage report as PR comment
       if: github.event_name == 'pull_request'
       uses: actions/github-script@v3
       with:
@@ -38,10 +38,27 @@ jobs:
         script: |
           const fs = require('fs');
           const report = fs.readFileSync('coverage.txt', {encoding:'utf8', flag:'r'});
-          const commentBody = `📊 **Coverage Report**:\n\`\`\`\n${report}\n\`\`\``;
+          const commentIdentifier = '<!-- coverage-comment -->';
+          const commentBody = `${commentIdentifier}\n📊 **Coverage Report**:\n\`\`\`\n${report}\n\`\`\``;
+
           const issue_number = context.issue.number;
-          github.issues.createComment({
+          const comments = await github.issues.listComments({
             ...context.repo,
-            issue_number,
-            body: commentBody
+            issue_number
           });
+
+          const coverageComment = comments.data.find(comment => comment.body.includes(commentIdentifier));
+
+          if (coverageComment) {
+            await github.issues.updateComment({
+              ...context.repo,
+              comment_id: coverageComment.id,
+              body: commentBody
+            });
+          } else {
+            await github.issues.createComment({
+              ...context.repo,
+              issue_number,
+              body: commentBody
+            });
+          }
