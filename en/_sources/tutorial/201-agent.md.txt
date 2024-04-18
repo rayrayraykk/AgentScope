@@ -42,7 +42,8 @@ class AgentBase(Operator):
         # messages it has observed. This method can be used to enrich the
         # agent's understanding and memory without producing an immediate
         # response.
-        self.memory.add(x)
+        if self.memory:
+            self.memory.add(x)
 
     def reply(self, x: dict = None) -> dict:
         # The core method to be implemented by custom agents. It defines the
@@ -62,12 +63,15 @@ The *AgentPool* within AgentScope is a curated ensemble of ready-to-use, special
 
 Below is a table summarizing the functionality of some of the key agents available in the Agent Pool:
 
-| Agent Type     | Description                                                  | Typical Use Cases                                            |
-| -------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| `AgentBase`    | Serves as the superclass for all agents, providing essential attributes and methods. | The foundation for building any custom agent.                |
-| `DialogAgent`  | Manages dialogues by understanding context and generating coherent responses. | Customer service bots, virtual assistants.                   |
-| `UserAgent`    | Interacts with the user to collect input, generating messages that may include URLs or additional specifics based on required keys. | Collecting user input for agents                             |
-| *More to Come* | AgentScope is continuously expanding its pool with more specialized agents for diverse applications. |                                                              |
+| Agent Type         | Description                                                                                                                         | Typical Use Cases                             |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `AgentBase`        | Serves as the superclass for all agents, providing essential attributes and methods.                                                | The foundation for building any custom agent. |
+| `DialogAgent`      | Manages dialogues by understanding context and generating coherent responses.                                                       | Customer service bots, virtual assistants.    |
+| `DictDialogAgent`  | Manages dialogues by understanding context and generating coherent responses, and the responses are in json format.                 | Customer service bots, virtual assistants.    |
+| `UserAgent`        | Interacts with the user to collect input, generating messages that may include URLs or additional specifics based on required keys. | Collecting user input for agents              |
+| `TextToImageAgent` | An agent that convert user input text to image.                                                                                     | Converting text to image                      |
+| `ReActAgent`       | An agent class that implements the ReAct algorithm.                                                                                 | Solving complex tasks                         |
+| *More to Come*     | AgentScope is continuously expanding its pool with more specialized agents for diverse applications.                                |                                               |
 
 ## Customizing Agents from the AgentPool
 
@@ -83,23 +87,31 @@ Below, we provide usages of how to configure various agents from the AgentPool:
 def reply(self, x: dict = None) -> dict:
     # Additional processing steps can occur here
 
+    # Record the input if needed
     if self.memory:
-        self.memory.add(x)  # Update the memory with the input
+        self.memory.add(x)
 
     # Generate a prompt for the language model using the system prompt and memory
-    prompt = self.engine.join(
-        self.sys_prompt,
-        self.memory and self.memory.get_memory(),
+    prompt = self.model.format(
+        Msg("system", self.sys_prompt, role="system"),
+        self.memory
+        and self.memory.get_memory()
+        or x,  # type: ignore[arg-type]
     )
 
     # Invoke the language model with the prepared prompt
     response = self.model(prompt).text
 
-    # Format the response and create a message object
-    msg = Msg(self.name, response)
+    #Format the response and create a message object
+    msg = Msg(self.name, response, role="assistant")
+
+    # Print/speak the message in this agent's voice
+    self.speak(msg)
 
     # Record the message to memory and return it
-    self.memory.add(msg)
+    if self.memory:
+        self.memory.add(msg)
+
     return msg
 ```
 

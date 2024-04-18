@@ -18,13 +18,13 @@
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="About AgentScope" href="101-agentscope.html" />
-    <link rel="prev" title="Getting Started" href="quick_start.html" /> 
+    <link rel="next" title="Quick Start" href="103-example.html" />
+    <link rel="prev" title="About AgentScope" href="101-agentscope.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,27 +46,15 @@
   </form>
 </div> <!-- language_selector.html -->
 <div class="language-selector">
-    <a href="../../en/index.html">English</a></li> |
-    <a href="../../zh_CN/index.html">中文</a></li>
+    <a href="../../en/tutorial/102-installation.html">English</a></li> |
+    <a href="../../zh_CN/tutorial/102-installation.html">中文</a></li>
 </div> 
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">AgentScope Tutorial</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="quick_start.html">Getting Started</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#create-a-virtual-environment">Create a Virtual Environment</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#using-conda">Using Conda</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#using-virtualenv">Using Virtualenv</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#installing-agentscope">Installing AgentScope</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#install-with-pip">Install with Pip</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#install-from-source">Install from Source</a></li>
-</ul>
-</li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="101-agentscope.html">About AgentScope</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="103-example.html">Quick Start</a></li>
 <li class="toctree-l2"><a class="reference internal" href="104-usecase.html">Crafting Your First Application</a></li>
 <li class="toctree-l2"><a class="reference internal" href="105-logging.html">Logging and WebUI</a></li>
@@ -77,15 +65,15 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">AgentScope API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../agentscope.agents.html">Agents package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../agentscope.memory.html">Memory package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../agentscope.models.html">Models package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../agentscope.pipelines.html">Pipelines package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../agentscope.service.html">Service package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../agentscope.rpc.html">RPC package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../agentscope.utils.html">Utils package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../agentscope.web.html">Web UI package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../agentscope.html">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agentscope.agents.html">agentscope.agents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agentscope.memory.html">agentscope.memory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agentscope.models.html">agentscope.models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agentscope.pipelines.html">agentscope.pipelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agentscope.service.html">agentscope.service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agentscope.rpc.html">agentscope.rpc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agentscope.utils.html">agentscope.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agentscope.web.html">agentscope.web</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../agentscope.html">agentscope</a></li>
 </ul>
 
         </div>
@@ -162,7 +150,7 @@ pip<span class="w"> </span>install<span class="w"> </span>agentscope<span class=
 <p><strong><em>Note: This project is under active development, it’s recommended to install AgentScope from source.</em></strong></p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pull the source code from Github</span>
 git<span class="w"> </span>clone<span class="w"> </span>https://github.com/modelscope/agentscope.git
-<span class="nb">cd</span><span class="w"> </span>AgentScope
+<span class="nb">cd</span><span class="w"> </span>agentscope
 
 <span class="c1"># For centralized multi-agent applications</span>
 pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
@@ -180,8 +168,8 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="quick_start.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="101-agentscope.html" class="btn btn-neutral float-right" title="About AgentScope" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="101-agentscope.html" class="btn btn-neutral float-left" title="About AgentScope" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="103-example.html" class="btn btn-neutral float-right" title="Quick Start" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
