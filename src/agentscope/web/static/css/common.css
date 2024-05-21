@@ -1,0 +1,90 @@
+.select-container {
+    position: absolute;
+    top: 15px;
+    right: 150px;
+    z-index: 1000;
+}
+
+select#language_switch {
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 16px;
+    cursor: pointer;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+select#language_switch:hover {
+    border-color: #888;
+}
+
+select#language_switch:focus {
+    border-color: #555;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+select#language_switch option {
+    padding: 8px 16px;
+    background: white;
+    border-bottom: 1px solid #ccc;
+}
+
+#surveyModal {
+    display: none;
+    position: fixed;
+    bottom: 60px;
+    right: 20px;
+    background-color: white;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    border-radius: 10px;
+    overflow: hidden;
+    animation: fadeIn 0.3s;
+}
+
+#surveyContent {
+    position: relative;
+    padding: 20px;
+    text-align: center;
+}
+
+#surveyButton {
+    padding: 10px 20px;
+    background-color: #2ea44f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+#surveyButton:hover {
+    background-color: #258741;
+    transform: scale(1.05);
+}
+
+#surveyClose {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #aaaaaa;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+#surveyClose:hover {
+    color: #777;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}

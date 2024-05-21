@@ -1,21 +1,52 @@
 # -*- coding: utf-8 -*-
 """The main entry point of the web UI."""
+import re
 import json
+import traceback
+import tempfile
+import subprocess
 import os
+from typing import Optional, Tuple
 from datetime import datetime
 
-from flask import Flask, request, jsonify, render_template, Response, abort
+from flask import (
+    Flask,
+    request,
+    jsonify,
+    render_template,
+    Response,
+    abort,
+    make_response,
+)
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO, join_room, leave_room
-
+from flask_babel import Babel, refresh
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///agentscope.db"
+app.config["BABEL_DEFAULT_LOCALE"] = "en"
+
+babel = Babel(app)
+
+
+def get_locale() -> Optional[str]:
+    """
+    Determines the best match for the user's locale based on the "locale"
+    cookie or the Accept-Language header in the request.
+    """
+    cookie = request.cookies.get("locale")
+    if cookie in ["zh", "en"]:
+        return cookie
+    return request.accept_languages.best_match(
+        app.config.get("BABEL_DEFAULT_LOCALE"),
+    )
+
+
+babel.init_app(app, locale_selector=get_locale)
 db = SQLAlchemy(app)
 socketio = SocketIO(app)
 CORS(app)  # This will enable CORS for all routes
-
 
 PATH_SAVE = ""
 
@@ -76,6 +107,37 @@ def get_runs() -> list:
         }
         for run in runs
     ]
+
+
+def remove_file_paths(error_trace: str) -> str:
+    """
+    Remove the real traceback when exception happens.
+    """
+    path_regex = re.compile(r'File "(.*?)(?=agentscope|app\.py)')
+    cleaned_trace = re.sub(path_regex, 'File "[hidden]/', error_trace)
+
+    return cleaned_trace
+
+
+def convert_to_py(content: str) -> Tuple:
+    """
+    Convert json config to python code.
+    """
+    from agentscope.web.workstation.workflow_dag import build_dag
+
+    try:
+        cfg = json.loads(content)
+        return "True", build_dag(cfg).compile()
+    except Exception as e:
+        return "False", remove_file_paths(
+            f"Error: {e}\n\n" f"Traceback:\n" f"{traceback.format_exc()}",
+        )
+
+
+@app.route("/workstation")
+def workstation() -> str:
+    """Render the workstation page."""
+    return render_template("workstation.html")
 
 
 @app.route("/api/register/run", methods=["POST"])
@@ -212,6 +274,97 @@ def get_projects() -> Response:
     )
 
 
+@app.route("/convert-to-py", methods=["POST"])
+def convert_config_to_py() -> Response:
+    """
+    Convert json config to python code and send back.
+    """
+    content = request.json.get("data")
+    status, py_code = convert_to_py(content)
+    return jsonify(py_code=py_code, is_success=status)
+
+
+@app.route("/convert-to-py-and-run", methods=["POST"])
+def convert_config_to_py_and_run() -> Response:
+    """
+    Convert json config to python code and run.
+    """
+    content = request.json.get("data")
+    status, py_code = convert_to_py(content)
+    with tempfile.NamedTemporaryFile(
+        delete=False,
+        suffix=".py",
+        mode="w+t",
+    ) as tmp:
+        tmp.write(py_code)
+        tmp.flush()
+        # TODO: use the latest implementation
+        subprocess.Popen(
+            ["python", tmp.name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    return jsonify(py_code=py_code, is_success=status)
+
+
+@app.route("/read-examples", methods=["POST"])
+def read_examples() -> Response:
+    """
+    Read tutorial examples from local file.
+    """
+    lang = request.json.get("lang")
+    file_index = request.json.get("data")
+
+    # TODO: might need to fix path
+    if not os.path.exists(
+        os.path.join(
+            "workstation",
+            "tutorials",
+            f"{lang}{file_index}.json",
+        ),
+    ):
+        lang = "en"
+
+    with open(
+        os.path.join(
+            "workstation",
+            "tutorials",
+            f"{lang}{file_index}.json",
+        ),
+        "r",
+        encoding="utf-8",
+    ) as jf:
+        data = json.load(jf)
+    return jsonify(json=data)
+
+
+@app.route("/set_locale")
+def set_locale() -> Response:
+    """
+    Sets the user's preferred language in a cookie based on the query
+    parameter "language".
+
+    Supports setting the language preference to either English ("en") or
+    Chinese ("zh"). If a supported language is specified, it sets a
+    corresponding cookie and returns a JSON response with a success message.
+    For unsupported or missing language preferences, it returns a JSON
+    response indicating success without setting a language preference cookie.
+    """
+    lang = request.args.get("language")
+    response = make_response(jsonify(message=lang))
+    if lang == "en":
+        refresh()
+        response.set_cookie("locale", "en")
+        return response
+
+    if lang == "zh":
+        refresh()
+        response.set_cookie("locale", "zh")
+        return response
+
+    return jsonify({"data": "success"})
+
+
 @app.route("/")
 def home() -> str:
     """Render the home page."""
@@ -325,3 +478,7 @@ def init(
         debug=debug,
         allow_unsafe_werkzeug=True,
     )
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
