@@ -415,6 +415,8 @@
         disableButtons();
         makeNodeTop(id);
         setupNodeListeners(id);
+        setupNodeCopyListens(id);
+        addEventListenersToNumberInputs(id);
     })
 
     editor.on('nodeRemoved', function (id) {
@@ -1002,7 +1004,6 @@
                 if (nodeElement) {
                     nodeElement.textContent = DialogAgentID;
                 }
-                setupNodeCopyListens(DialogAgentID);
                 break;
 
             case 'UserAgent':
@@ -1030,7 +1031,6 @@
                 if (nodeElement) {
                     nodeElement.textContent = UserAgentID;
                 }
-                setupNodeCopyListens(UserAgentID);
                 break;
             case 'TextToImageAgent':
                 var placeholderId = "ID_PLACEHOLDER";
@@ -1064,7 +1064,6 @@
                 if (nodeElement) {
                     nodeElement.textContent = TextToImageAgentID;
                 }
-                setupNodeCopyListens(TextToImageAgentID);
                 break;
 
             case 'DictDialogAgent':
@@ -1110,8 +1109,6 @@
                 if (nodeElement) {
                     nodeElement.textContent = DictDialogAgentID;
                 }
-                setupNodeCopyListens(DictDialogAgentID);
-                addEventListenersToNumberInputs(DictDialogAgentID);
                 break;
 
             case 'ReActAgent':
@@ -1161,8 +1158,6 @@
                 if (nodeElement) {
                     nodeElement.textContent = ReActAgentID;
                 }
-                setupNodeCopyListens(ReActAgentID);
-                addEventListenersToNumberInputs(ReActAgentID);
                 break;
 
             // Workflow-Pipeline
