@@ -291,19 +291,26 @@ def convert_config_to_py_and_run() -> Response:
     """
     content = request.json.get("data")
     status, py_code = convert_to_py(content)
-    with tempfile.NamedTemporaryFile(
-        delete=False,
-        suffix=".py",
-        mode="w+t",
-    ) as tmp:
-        tmp.write(py_code)
-        tmp.flush()
-        # TODO: use the latest implementation
-        subprocess.Popen(
-            ["python", tmp.name],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
+
+    if status == "True":
+        try:
+            with tempfile.NamedTemporaryFile(
+                delete=False,
+                suffix=".py",
+                mode="w+t",
+            ) as tmp:
+                tmp.write(py_code)
+                tmp.flush()
+                # TODO: use the latest implementation
+                subprocess.Popen(
+                    ["python", tmp.name],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+        except Exception as e:
+            status, py_code = "False", remove_file_paths(
+                f"Error: {e}\n\n" f"Traceback:\n" f"{traceback.format_exc()}",
+            )
     return jsonify(py_code=py_code, is_success=status)
 
 
