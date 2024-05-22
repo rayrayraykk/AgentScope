@@ -8,7 +8,7 @@ from loguru import logger
 from agentscope.agents import AgentBase
 from agentscope._runtime import _runtime
 from agentscope.message import Msg
-from agentscope.web.studio.utils import user_input
+from agentscope.web.gradio.utils import user_input
 
 
 class UserAgent(AgentBase):
@@ -82,6 +82,8 @@ class UserAgent(AgentBase):
             )
             raw_input = self.input_client.get_user_input()
             content = raw_input["content"]
+            url = None
+            kwargs = {}
         else:
             time.sleep(0.5)
             content = user_input(timeout=timeout)
