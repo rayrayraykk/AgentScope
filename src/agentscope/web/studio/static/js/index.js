@@ -84,7 +84,7 @@ function loadTabPage(pageUrl, javascriptUrl) {
                 script.src = javascriptUrl;
                 script.onload = function () {
                     // The first time we must initialize the page within the onload function to ensure the script is loaded
-                    initializeTabPageByUrl(pageUrl);
+                    initializeTabPageByUrl(pageUrl, javascriptUrl);
                 }
                 document.head.appendChild(script);
             } else {
