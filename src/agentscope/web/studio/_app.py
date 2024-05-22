@@ -9,6 +9,7 @@ import os
 from typing import Optional, Tuple
 import uuid
 from datetime import datetime
+from importlib.metadata import distribution, PackageNotFoundError
 
 from flask import (
     Flask,
@@ -24,6 +25,16 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO, join_room, leave_room
 from flask_babel import Babel, refresh
+
+
+try:
+    distribution("gevent")
+    raise RuntimeError(
+        "Due to some compatibility issues, "
+        "please uninstall 'gevent' before proceeding agentscope studio.",
+    )
+except PackageNotFoundError:
+    pass
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///agentscope.db"
@@ -520,5 +531,4 @@ def init(
 
 
 if __name__ == "__main__":
-    # init(path_save=".", port=8080)
-    app.run(host="127.0.0.1", port=8080)
+    init(path_save=".", port=8080)

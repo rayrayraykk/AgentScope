@@ -13,10 +13,10 @@ let activeExpanded = false;
 let currentLang = getCookie('locale') || 'en';
 console.log(currentLang)
 
-// TODO: add button to switch language
 loadLang(currentLang);
 
 // Load the language file
+// TODO: fix language switch
 function loadLang(lang) {
     fetch(`static/json/language.json`)
         .then(response => response.json())
