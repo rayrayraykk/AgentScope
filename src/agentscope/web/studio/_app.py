@@ -346,11 +346,11 @@ def read_examples() -> Response:
     lang = request.json.get("lang")
     file_index = request.json.get("data")
 
-    # TODO: might need to fix path
     if not os.path.exists(
         os.path.join(
-            "workstation",
-            "tutorials",
+            app.root_path,
+            "static",
+            "workstation_templates",
             f"{lang}{file_index}.json",
         ),
     ):
@@ -358,8 +358,9 @@ def read_examples() -> Response:
 
     with open(
         os.path.join(
-            "workstation",
-            "tutorials",
+            app.root_path,
+            "static",
+            "workstation_templates",
             f"{lang}{file_index}.json",
         ),
         "r",
