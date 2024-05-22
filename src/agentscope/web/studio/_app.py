@@ -138,7 +138,10 @@ def remove_file_paths(error_trace: str) -> str:
     return cleaned_trace
 
 
-def convert_to_py(content: str) -> Tuple:
+def convert_to_py(  # type: ignore[no-untyped-def]
+    content: str,
+    **kwargs,
+) -> Tuple:
     """
     Convert json config to python code.
     """
@@ -146,7 +149,7 @@ def convert_to_py(content: str) -> Tuple:
 
     try:
         cfg = json.loads(content)
-        return "True", build_dag(cfg).compile()
+        return "True", build_dag(cfg).compile(**kwargs)
     except Exception as e:
         return "False", remove_file_paths(
             f"Error: {e}\n\n" f"Traceback:\n" f"{traceback.format_exc()}",
@@ -332,7 +335,13 @@ def convert_config_to_py_and_run() -> Response:
     Convert json config to python code and run.
     """
     content = request.json.get("data")
-    status, py_code = convert_to_py(content)
+    uid = json.loads(get_available_run_id().get_data())["run_id"]
+    studio_url = request.url_root.rstrip("/")
+    status, py_code = convert_to_py(
+        content,
+        runtime_id=uid,
+        studio_url=studio_url,
+    )
 
     if status == "True":
         try:
@@ -343,7 +352,6 @@ def convert_config_to_py_and_run() -> Response:
             ) as tmp:
                 tmp.write(py_code)
                 tmp.flush()
-                # TODO: use the latest implementation
                 subprocess.Popen(
                     ["python", tmp.name],
                     stdout=subprocess.PIPE,
@@ -353,7 +361,7 @@ def convert_config_to_py_and_run() -> Response:
             status, py_code = "False", remove_file_paths(
                 f"Error: {e}\n\n" f"Traceback:\n" f"{traceback.format_exc()}",
             )
-    return jsonify(py_code=py_code, is_success=status)
+    return jsonify(py_code=py_code, is_success=status, uid=uid)
 
 
 @app.route("/read-examples", methods=["POST"])
