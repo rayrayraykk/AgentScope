@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="ie=edge" http-equiv="X-UA-Compatible">
-    <title>AgentScope | {{_("WorkStation")}}</title>
+    <title>AgentScope | {{ _("WorkStation") }}</title>
     <meta content="AgentScope WorkStation for flow programming multi-agent Applications."
           name="description">
     <link href="https://img.alicdn.com/imgextra/i3/O1CN01BP6UV221Lr7crkYBo_!!6000000006969-2-tps-380-372.png"
@@ -28,9 +28,6 @@
       rel="stylesheet">
 <link href="{{ url_for('static', filename='css/workstation.css') }}"
       rel="stylesheet" type="text/css"/>
-<link href="{{ url_for('static', filename='css/common.css') }}"
-      rel="stylesheet"
-      type="text/css"/>
 <link crossorigin="anonymous"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"
       integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ="
@@ -43,11 +40,7 @@
 
 
 <header>
-    <h2><i class="fa fa-desktop"></i> AgentScope {{_("WorkStation")}}</h2>
-    <select id="language_switch">
-        <option value="en">English</option>
-        <option value="zh">中文</option>
-    </select>
+    <h2><i class="fa fa-desktop"></i> AgentScope {{ _("WorkStation") }}</h2>
     <div class="github-link"><a href="https://github.com/modelscope/agentscope"
                                 target="_blank"><i
             class="fab fa-github fa-3x"></i></a></div>
@@ -80,7 +73,7 @@
 <div class="wrapper">
     <div class="col">
         <h3 class="highlighted-title" onclick="toggleDraggable(this)">
-            {{_("Examples")}}
+            {{ _("Examples") }}
         </h3>
         <div class="draggable-content visible">
             <div class="example-wrapper">
@@ -89,7 +82,7 @@
                      230, 0.3); margin-bottom: 5px;">
                     <i class="fas fa-play-circle"></i>
                     <span>
-                        {{_("Two Agents")}}
+                        {{ _("Two Agents") }}
                     </span>
                 </div>
                 <div class="new-action" onclick="importExample_step(1)">
@@ -102,7 +95,7 @@
                      230, 0.3); margin-bottom: 5px;">
                     <i class="fas fa-play-circle"></i>
                     <span>
-                        {{_("Pipeline")}}
+                        {{ _("Pipeline") }}
                     </span>
                 </div>
                 <div class="new-action" onclick="importExample_step(2)">
@@ -115,7 +108,7 @@
                      230, 0.3); margin-bottom: 5px;">
                     <i class="fas fa-play-circle"></i>
                     <span>
-                        {{_("Conversation")}}
+                        {{ _("Conversation") }}
                     </span>
                 </div>
                 <div class="new-action" onclick="importExample_step(3)">
@@ -128,7 +121,7 @@
                      230, 0.3); margin-bottom: 5px;">
                     <i class="fas fa-play-circle"></i>
                     <span>
-                        {{_("Group Chat")}}
+                        {{ _("Group Chat") }}
                     </span>
                 </div>
                 <div class="new-action" onclick="importExample_step(4)">
@@ -137,10 +130,10 @@
             </div>
         </div>
         <h3 class="toggle-title" onclick="toggleDraggable(this)">
-            {{_("Workflow")}}</h3>
+            {{ _("Workflow") }}</h3>
         <div class="draggable-content visible">
             <h4 class="toggle-sub-title" onclick="toggleDraggable(this)">
-                {{_("Model")}}</h4>
+                {{ _("Model") }}</h4>
             <div class="draggable-content visible">
                 <div class="drag-drawflow" data-node="dashscope_chat"
                      draggable="true" ondragstart="drag(event)">
@@ -160,7 +153,7 @@
                 </div>
             </div>
             <h4 class="toggle-sub-title" onclick="toggleDraggable(this)">
-                {{_("Message")}}</h4>
+                {{ _("Message") }}</h4>
             <div class="draggable-content">
                 <div class="drag-drawflow" data-node="Message"
                      draggable="true" ondragstart="drag(event)">
@@ -168,7 +161,7 @@
                 </div>
             </div>
             <h4 class="toggle-sub-title" onclick="toggleDraggable(this)">
-                {{_("Agent")}}</h4>
+                {{ _("Agent") }}</h4>
             <div class="draggable-content">
                 <div class="drag-drawflow" data-node="DialogAgent"
                      draggable="true" ondragstart="drag(event)">
@@ -192,7 +185,7 @@
                 </div>
             </div>
             <h4 class="toggle-sub-title" onclick="toggleDraggable(this)">
-                {{_("Pipeline")}}</h4>
+                {{ _("Pipeline") }}</h4>
             <div class="draggable-content">
                 <div class="drag-drawflow" data-node="Placeholder"
                      draggable="true" ondragstart="drag(event)">
@@ -225,7 +218,7 @@
                 </div>
             </div>
             <h4 class="toggle-sub-title" onclick="toggleDraggable(this)">
-                {{_("Tool")}}</h4>
+                {{ _("Tool") }}</h4>
             <div class="draggable-content">
                 <div class="drag-drawflow" data-node="BingSearchService"
                      draggable="true" ondragstart="drag(event)">
@@ -262,7 +255,7 @@
             <ul>
                 <li class="selected"
                     onclick="editor.changeModule('Home'); changeModule(event);">
-                    &nbsp;{{_("Home")}}&nbsp;
+                    &nbsp;{{ _("Home") }}&nbsp;
                 </li>
                 <!--           Uncomment to add more tab-->
             </ul>
@@ -270,32 +263,32 @@
         <div id="drawflow" ondragover="allowDrop(event)" ondrop="drop(event)">
             <div class="buttons-container-html">
                 <div class="btn-export-html" onclick="showExportHTMLPopup()">
-                    {{_("Export HTML")}}
+                    {{ _("Export HTML") }}
                 </div>
                 <div class="btn-import-html" onclick="showImportHTMLPopup()">
-                    {{_("Import HTML")}}
+                    {{ _("Import HTML") }}
                 </div>
             </div>
 
             <div class="buttons-container">
                 <div class="btn-check" onclick="showCheckPopup()">
-                    {{_("Check")}}
+                    {{ _("Check") }}
                 </div>
                 <div class="btn-clear" onclick="clearModuleSelected()">
-                    {{_("Clear")}}
+                    {{ _("Clear") }}
                 </div>
                 <div class="btn-cover"
                      data-title="Please click the 'Check' button first.">
                     <div class="btn-export-py btn-disabled"
                          onclick="showExportPyPopup()">
-                        {{_("Export Python")}}
+                        {{ _("Export Python") }}
                     </div>
                 </div>
                 <div class="btn-cover"
                      data-title="Please click the 'Check' button first.">
                     <div class="btn-export-config btn-disabled"
                          onclick="showExportRunPopup()">
-                        {{_("Run")}}
+                        {{ _("Run") }}
                     </div>
                 </div>
 
@@ -319,9 +312,9 @@
 <div id="surveyModal">
     <div id="surveyContent">
         <span id="surveyClose">&times;</span>
-        <h3>{{_("We want to hear from you")}}</h3>
-        <button id="surveyButton">{{_("Participation in questionnaire
-            surveys")}}
+        <h3>{{ _("We want to hear from you") }}</h3>
+        <button id="surveyButton">{{ _("Participation in questionnaire
+            surveys") }}
         </button>
     </div>
 </div>
@@ -2630,29 +2623,6 @@
             blurDiv.remove();
         }
     }
-
-    $(document).ready(function () {
-        var currentLang = getCookie('locale') || 'en';
-        $('#language_switch').val(currentLang);
-
-        $('#language_switch').change(function () {
-            var selectedLang = $(this).val();
-            console.log("Attempting to change language to:", selectedLang);
-
-            $.ajax({
-                url: '/set_locale',
-                type: 'GET',
-                data: {'language': selectedLang},
-                success: function (ret) {
-                    console.log("Language changed to:", selectedLang);
-                    location.reload();
-                },
-                error: function (xhr, status, error) {
-                    console.error("Failed to change language:", error);
-                }
-            });
-        });
-    });
 
     function getCookie(name) {
         var matches = document.cookie.match(new RegExp(

@@ -10,7 +10,8 @@ let inGuidePage = true;
 let activeExpanded = false;
 
 // The current language of AgentScope Studio
-let currentLang = "en"
+let currentLang = getCookie('locale') || 'en';
+console.log(currentLang)
 
 // TODO: add button to switch language
 loadLang(currentLang);
@@ -150,3 +151,33 @@ navigationBar.addEventListener('mouseleave', function () {
         activeExpanded = true;
     }
 })
+
+$(document).ready(function () {
+    var currentLang = getCookie('locale') || 'en';
+    $('#language_switch').val(currentLang);
+
+    $('#language_switch').change(function () {
+        var selectedLang = $(this).val();
+        console.log("Attempting to change language to:", selectedLang);
+
+        $.ajax({
+            url: '/set_locale',
+            type: 'GET',
+            data: {'language': selectedLang},
+            success: function (ret) {
+                console.log("Language changed to:", selectedLang);
+                location.reload();
+            },
+            error: function (xhr, status, error) {
+                console.error("Failed to change language:", error);
+            }
+        });
+    });
+});
+
+function getCookie(name) {
+    var matches = document.cookie.match(new RegExp(
+        "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+}

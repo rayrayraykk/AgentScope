@@ -1010,3 +1010,60 @@ pre[class*="language-"] {
     background-color: #ccc;
     cursor: not-allowed;
 }
+
+#surveyModal {
+    display: none;
+    position: fixed;
+    bottom: 60px;
+    right: 20px;
+    background-color: white;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    border-radius: 10px;
+    overflow: hidden;
+    animation: fadeIn 0.3s;
+}
+
+#surveyContent {
+    position: relative;
+    padding: 20px;
+    text-align: center;
+}
+
+#surveyButton {
+    padding: 10px 20px;
+    background-color: #2ea44f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+#surveyButton:hover {
+    background-color: #258741;
+    transform: scale(1.05);
+}
+
+#surveyClose {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #aaaaaa;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+#surveyClose:hover {
+    color: #777;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
