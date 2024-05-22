@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-05-22 11:45+0800\n"
+"POT-Creation-Date: 2024-05-22 17:21+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,112 +17,140 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.15.0\n"
 
-#: templates/workstation.html:7 templates/workstation.html:46
+#: templates/index.html:55
+msgid "Dashboard"
+msgstr ""
+
+#: templates/index.html:65
+msgid "Workstation"
+msgstr ""
+
+#: templates/index.html:74
+msgid "Gallery"
+msgstr ""
+
+#: templates/index.html:83
+msgid "Server Management"
+msgstr ""
+
+#: templates/index.html:94
+msgid "Tutorial"
+msgstr ""
+
+#: templates/index.html:102
+msgid "Document"
+msgstr ""
+
+#: templates/index.html:123
+msgid "DingDing"
+msgstr ""
+
+#: templates/workstation.html:7 templates/workstation.html:43
 msgid "WorkStation"
 msgstr ""
 
-#: templates/workstation.html:83
+#: templates/workstation.html:76
 msgid "Examples"
 msgstr ""
 
-#: templates/workstation.html:92
+#: templates/workstation.html:85
 msgid "Two Agents"
 msgstr ""
 
-#: templates/workstation.html:105 templates/workstation.html:195
+#: templates/workstation.html:98 templates/workstation.html:188
 msgid "Pipeline"
 msgstr ""
 
-#: templates/workstation.html:118
+#: templates/workstation.html:111
 msgid "Conversation"
 msgstr ""
 
-#: templates/workstation.html:131
+#: templates/workstation.html:124
 msgid "Group Chat"
 msgstr ""
 
-#: templates/workstation.html:140
+#: templates/workstation.html:133
 msgid "Workflow"
 msgstr ""
 
-#: templates/workstation.html:143
+#: templates/workstation.html:136
 msgid "Model"
 msgstr ""
 
-#: templates/workstation.html:163
+#: templates/workstation.html:156
 msgid "Message"
 msgstr ""
 
-#: templates/workstation.html:171
+#: templates/workstation.html:164
 msgid "Agent"
 msgstr ""
 
-#: templates/workstation.html:228
+#: templates/workstation.html:221
 msgid "Tool"
 msgstr ""
 
-#: templates/workstation.html:265
+#: templates/workstation.html:258
 msgid "Home"
 msgstr ""
 
-#: templates/workstation.html:273
+#: templates/workstation.html:266
 msgid "Export HTML"
 msgstr ""
 
-#: templates/workstation.html:276
+#: templates/workstation.html:269
 msgid "Import HTML"
 msgstr ""
 
-#: templates/workstation.html:282
+#: templates/workstation.html:275
 msgid "Check"
 msgstr ""
 
-#: templates/workstation.html:285
+#: templates/workstation.html:278
 msgid "Clear"
 msgstr ""
 
-#: templates/workstation.html:291
+#: templates/workstation.html:284
 msgid "Export Python"
 msgstr ""
 
-#: templates/workstation.html:298
+#: templates/workstation.html:291
 msgid "Run"
 msgstr ""
 
-#: templates/workstation.html:322
+#: templates/workstation.html:315
 msgid "We want to hear from you"
 msgstr ""
 
-#: templates/workstation.html:323
+#: templates/workstation.html:316
 msgid ""
 "Participation in questionnaire\n"
 "            surveys"
 msgstr ""
 
-#: templates/workstation.html:2549
+#: templates/workstation.html:2542
 msgid "Previous"
 msgstr ""
 
-#: templates/workstation.html:2552
+#: templates/workstation.html:2545
 msgid "Next"
 msgstr ""
 
-#: templates/workstation.html:2555
+#: templates/workstation.html:2548
 msgid "Skip"
 msgstr ""
 
-#: templates/workstation.html:2558
+#: templates/workstation.html:2551
 msgid "Quit"
 msgstr ""
 
-#: templates/workstation.html:2561
+#: templates/workstation.html:2554
 msgid ""
 "Caution: You are currently in the tutorial mode where modifications are "
 "restricted.<br>Please click <strong>Quit</strong> to exit and start "
 "creating your custom multi-agent applications."
 msgstr ""
 
-#: templates/workstation.html:2609
+#: templates/workstation.html:2602
 msgid "Current Step"
 msgstr ""
 
