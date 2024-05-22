@@ -7,6 +7,7 @@ import tempfile
 import subprocess
 import os
 from typing import Optional, Tuple
+import uuid
 from datetime import datetime
 
 from flask import (
@@ -201,7 +202,7 @@ def register_server() -> Response:
         return jsonify(status="ok", msg="")
 
 
-@app.route("/api/message/put", methods=["POST"])
+@app.route("/api/messages/put", methods=["POST"])
 def put_message() -> Response:
     """
     Used by the application to speak a message to the Hub.
@@ -242,16 +243,22 @@ def put_message() -> Response:
     return jsonify(status="ok", msg="")
 
 
-@app.route("/api/messages/<run_id>", methods=["GET"])
+@app.route("/api/messages/run/<run_id>", methods=["GET"])
 def get_messages(run_id: str) -> list:
     """Get the history messages of specific run_id."""
     return get_history_messages(run_id=run_id)
 
 
-@app.route("/api/runs", methods=["GET"])
+@app.route("/api/runs/all", methods=["GET"])
 def get_all_runs() -> list:
     """Get all runs."""
     return get_runs()
+
+
+@app.route("/api/runs/new", methods=["GET"])
+def get_available_run_id() -> Response:
+    """Get an available run id."""
+    return jsonify({"run_id": uuid.uuid4().hex})
 
 
 @app.route("/file")
