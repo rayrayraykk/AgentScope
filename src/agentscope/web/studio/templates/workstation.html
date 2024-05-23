@@ -753,7 +753,7 @@
           </div>
         </div>
         `;
-                const dashscope_chatId = editor.addNode('dashscope_chat', 0, 0, pos_x,
+                editor.addNode('dashscope_chat', 0, 0, pos_x,
                     pos_y,
                     'dashscope_chat', {
                         "args":
@@ -768,7 +768,6 @@
                             }
                     },
                     dashscope_chat);
-                addEventListenersToNumberInputs(dashscope_chatId);
                 break;
 
             case 'openai_chat':
@@ -804,7 +803,7 @@
           </div>
         </div>
         `;
-                const openai_chatId = editor.addNode('openai_chat', 0, 0, pos_x,
+                editor.addNode('openai_chat', 0, 0, pos_x,
                     pos_y,
                     'openai_chat', {
                         "args":
@@ -819,7 +818,6 @@
                             }
                     },
                     openai_chat);
-                addEventListenersToNumberInputs(openai_chatId);
                 break;
 
             case 'post_api_chat':
@@ -848,7 +846,7 @@
           </div>
         </div>
         `;
-                const post_api_chatId = editor.addNode('post_api_chat', 0, 0, pos_x, pos_y,
+                editor.addNode('post_api_chat', 0, 0, pos_x, pos_y,
                     'post_api_chat', {
                         "args":
                             {
@@ -868,7 +866,6 @@
                             }
                     },
                     post_api_chat);
-                addEventListenersToNumberInputs(post_api_chatId);
                 break;
 
             case 'post_api_dall_e':
@@ -906,7 +903,7 @@
           </div>
         </div>
         `;
-                const post_api_dall_eId = editor.addNode('post_api_dall_e', 0,
+                editor.addNode('post_api_dall_e', 0,
                     0,
                     pos_x, pos_y,
                     'post_api_dall_e', {
@@ -930,7 +927,6 @@
                             }
                     },
                     post_api_dall_e);
-                addEventListenersToNumberInputs(post_api_dall_eId);
                 break;
 
             // Message
@@ -1225,16 +1221,14 @@
             </div>
           </div>
           `;
-                const ForLoopPipelineID =
-                    editor.addNode('ForLoopPipeline', 1, 1, pos_x, pos_y,
-                        'GROUP', {
-                            elements: [],
-                            "args": {
-                                "max_loop": 3,
-                                "break_func": ''
-                            }
-                        }, ForLoopPipeline);
-                addEventListenersToNumberInputs(ForLoopPipelineID);
+                editor.addNode('ForLoopPipeline', 1, 1, pos_x, pos_y,
+                    'GROUP', {
+                        elements: [],
+                        "args": {
+                            "max_loop": 3,
+                            "break_func": ''
+                        }
+                    }, ForLoopPipeline);
                 break;
 
             case 'WhileLoopPipeline':
