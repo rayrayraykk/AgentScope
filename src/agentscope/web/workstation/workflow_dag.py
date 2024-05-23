@@ -66,7 +66,7 @@ class ASDiGraph(nx.DiGraph):
         ]
 
         self.inits = [
-            """agentscope.init(logger_level="DEBUG")""",
+            'agentscope.init(logger_level="DEBUG")',
             f"{DEFAULT_FLOW_VAR} = None",
         ]
 
@@ -125,8 +125,7 @@ class ASDiGraph(nx.DiGraph):
 
         self.inits[
             0
-        ] = f"""agentscope.init(logger_level="DEBUG",
-         {kwarg_converter(kwargs)})"""
+        ] = f'agentscope.init(logger_level="DEBUG", {kwarg_converter(kwargs)})'
 
         sorted_nodes = list(nx.topological_sort(self))
         sorted_nodes = [
