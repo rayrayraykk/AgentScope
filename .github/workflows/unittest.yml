@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   test:
-    if: github.event_name != 'pull_request' || (github.event_name == 'pull_request' && !contains(github.event.pull_request.title, 'WIP'))
+    if: false == contains(github.event.pull_request.title, 'WIP')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -44,10 +44,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download all coverage artifacts
+        if: github.event_name == 'pull_request'
         uses: actions/download-artifact@v2
         with:
           path: coverage-reports
       - name: Combine coverage reports
+        if: github.event_name == 'pull_request'
         run: |
           report="## Python Test Coverage\n"
           for file in coverage-reports/*.txt; do
@@ -56,6 +58,7 @@ jobs:
           done
           echo "$report" > combined-coverage.txt
       - name: Comment PR with all code coverage reports
+        if: github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
