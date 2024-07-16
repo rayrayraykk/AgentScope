@@ -4,51 +4,61 @@ on: [push, pull_request]
 
 jobs:
   test:
-    if: false == contains(github.event.pull_request.title, 'WIP')
+    if: github.event_name != 'pull_request' || (github.event_name == 'pull_request' && !contains(github.event.pull_request.title, 'WIP'))
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13]
         python-version: ['3.9', '3.10', '3.11', '3.12']
-    env:
-      OS: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@master
-    - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@master
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install Minimal Dependencies
-      run: |
-        pip install -q -e .
-    - name: Run import tests
-      run: |
-        python -c "import agentscope; print(agentscope.__version__)"
-    - name: Install Full Dependencies
-      run: |
-        pip install -q -e .[full]
-        pip install coverage
-    - name: Run tests with coverage
-      run: |
-        coverage run tests/run.py
-    - name: Generate coverage report
-      run: |
-        coverage report -m > coverage.txt
-    - name: Upload Coverage Artifact
-      if: github.event_name == 'pull_request'
-      uses: actions/upload-artifact@v2
-      with:
-        name: coverage-report
-        path: coverage.txt
-    - name: Comment PR with code coverage
-      if: github.event_name == 'pull_request'
-      uses: peter-evans/create-or-update-comment@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        issue-number: ${{ github.event.pull_request.number }}
-        body: |
-          ## Python Test Coverage
-          ```plaintext
-          ${{ steps.coverage.outputs.report }}
-          ```
+      - uses: actions/checkout@v2
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-${{ matrix.python-version }}-
+      - name: Install Dependencies
+        run: |
+          pip install -q -e .[full] coverage
+      - name: Run tests with coverage
+        run: |
+          coverage run tests/run.py
+        env:
+          OS: ${{ matrix.os }}
+      - name: Generate and Upload Coverage Report
+        run: |
+          coverage report -m > "coverage-${{ matrix.os }}-py${{ matrix.python-version }}.txt"
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: "coverage-${{ matrix.os }}-py${{ matrix.python-version }}.txt"
 
+  comment-coverage:
+    if: github.event_name == 'pull_request'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: coverage-reports
+      - name: Combine coverage reports
+        run: |
+          report="## Python Test Coverage\n"
+          for file in coverage-reports/*.txt; do
+            report+="\n#### ${file}\n"
+            report+="$(cat $file)\n"
+          done
+          echo "$report" > combined-coverage.txt
+      - name: Comment PR with all code coverage reports
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ${{ readFile('combined-coverage.txt') }}
