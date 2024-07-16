@@ -37,7 +37,9 @@ jobs:
     - name: Read coverage report
       id: read_coverage
       run: |
-        echo "##vso[task.setvariable variable=COVERAGE_REPORT]$(cat coverage.txt)"
+        echo "COVERAGE_REPORT<<EOF" >> $GITHUB_ENV
+        cat coverage.txt >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
     - name: Comment PR with code coverage
       if: github.event_name == 'pull_request'
       uses: peter-evans/create-or-update-comment@v1
@@ -45,7 +47,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         issue-number: ${{ github.event.pull_request.number }}
         body: |
-          ## Python Test Coverage
+          ## Python Test Coverage on ${{ matrix.os }} ${{ matrix.python-version }}
           ```plaintext
           ${{ env.COVERAGE_REPORT }}
           ```
