@@ -12,7 +12,7 @@ from .model import ModelWrapperBase, ModelResponse
 from ..constants import _DEFAULT_MAX_RETRIES
 from ..constants import _DEFAULT_MESSAGES_KEY
 from ..constants import _DEFAULT_RETRY_INTERVAL
-from ..message import MessageBase
+from ..message import Msg
 from ..utils.tools import _convert_to_str
 
 
@@ -161,7 +161,7 @@ class PostAPIModelWrapperBase(ModelWrapperBase, ABC):
 
 
 class PostAPIChatWrapper(PostAPIModelWrapperBase):
-    """A post api model wrapper compatilble with openai chat, e.g., vLLM,
+    """A post api model wrapper compatible with openai chat, e.g., vLLM,
     FastChat."""
 
     model_type: str = "post_api_chat"
@@ -175,13 +175,13 @@ class PostAPIChatWrapper(PostAPIModelWrapperBase):
 
     def format(
         self,
-        *args: Union[MessageBase, Sequence[MessageBase]],
+        *args: Union[Msg, Sequence[Msg]],
     ) -> Union[List[dict]]:
         """Format the input messages into a list of dict, which is
         compatible to OpenAI Chat API.
 
         Args:
-            args (`Union[MessageBase, Sequence[MessageBase]]`):
+            args (`Union[Msg, Sequence[Msg]]`):
                 The input arguments to be formatted, where each argument
                 should be a `Msg` object, or a list of `Msg` objects.
                 In distribution, placeholder is also allowed.
@@ -194,7 +194,7 @@ class PostAPIChatWrapper(PostAPIModelWrapperBase):
         for arg in args:
             if arg is None:
                 continue
-            if isinstance(arg, MessageBase):
+            if isinstance(arg, Msg):
                 messages.append(
                     {
                         "role": arg.role,
@@ -233,7 +233,67 @@ class PostAPIDALLEWrapper(PostAPIModelWrapperBase):
 
     def format(
         self,
-        *args: Union[MessageBase, Sequence[MessageBase]],
+        *args: Union[Msg, Sequence[Msg]],
+    ) -> Union[List[dict], str]:
+        raise RuntimeError(
+            f"Model Wrapper [{type(self).__name__}] doesn't "
+            f"need to format the input. Please try to use the "
+            f"model wrapper directly.",
+        )
+
+
+class PostAPIEmbeddingWrapper(PostAPIModelWrapperBase):
+    """
+    A post api model wrapper for embedding model
+    """
+
+    model_type: str = "post_api_embedding"
+
+    def _parse_response(self, response: dict) -> ModelResponse:
+        """
+        Parse the response json data into ModelResponse with embedding.
+        Args:
+            response (`dict`):
+            The response obtained from the API. This parsing assume the
+            structure of the response is as following:
+        {
+            "code": 200,
+            "data": {
+                ...
+                "response": {
+                    "data": [
+                        {
+                            "embedding": [
+                                0.001,
+                                ...
+                            ],
+                            ...
+                        }
+                    ],
+                    "model": "xxxx",
+                    ...
+                },
+            },
+        }
+        """
+        if "data" not in response["data"]["response"]:
+            if "error" in response["data"]["response"]:
+                error_msg = response["data"]["response"]["error"]["message"]
+            else:
+                error_msg = response["data"]["response"]
+            logger.error(f"Error in embedding API call:\n{error_msg}")
+            raise ValueError(f"Error in embedding API call:\n{error_msg}")
+        embeddings = [
+            data["embedding"] for data in response["data"]["response"]["data"]
+        ]
+        return ModelResponse(
+            embedding=embeddings,
+            raw=response,
+        )
+
+    def format(
+        self,
+        *args: Union[Msg, Sequence[Msg]],
     ) -> Union[List[dict], str]:
         raise RuntimeError(
             f"Model Wrapper [{type(self).__name__}] doesn't "

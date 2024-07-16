@@ -7,11 +7,7 @@ from loguru import logger
 
 from .config import _ModelConfig
 from .model import ModelWrapperBase
-from .response import (
-    ModelResponse,
-    ResponseParsingError,
-    ResponseParser,
-)
+from .response import ModelResponse
 from .post_model import (
     PostAPIModelWrapperBase,
     PostAPIChatWrapper,
@@ -37,13 +33,18 @@ from .gemini_model import (
     GeminiChatWrapper,
     GeminiEmbeddingWrapper,
 )
+from .zhipu_model import (
+    ZhipuAIChatWrapper,
+    ZhipuAIEmbeddingWrapper,
+)
+from .litellm_model import (
+    LiteLLMChatWrapper,
+)
 
 
 __all__ = [
     "ModelWrapperBase",
     "ModelResponse",
-    "ResponseParser",
-    "ResponseParsingError",
     "PostAPIModelWrapperBase",
     "PostAPIChatWrapper",
     "OpenAIWrapperBase",
@@ -59,7 +60,11 @@ __all__ = [
     "OllamaGenerationWrapper",
     "GeminiChatWrapper",
     "GeminiEmbeddingWrapper",
+    "ZhipuAIChatWrapper",
+    "ZhipuAIEmbeddingWrapper",
+    "LiteLLMChatWrapper",
     "load_model_by_config_name",
+    "load_config_by_name",
     "read_model_configs",
     "clear_model_configs",
 ]
@@ -86,8 +91,13 @@ def _get_model_wrapper(model_type: str) -> Type[ModelWrapperBase]:
     return wrapper
 
 
+def load_config_by_name(config_name: str) -> Union[dict, None]:
+    """Load the model config by name, and return the config dict."""
+    return _MODEL_CONFIGS.get(config_name, None)
+
+
 def load_model_by_config_name(config_name: str) -> ModelWrapperBase:
-    """Load the model by config name."""
+    """Load the model by config name, and return the model wrapper."""
     if len(_MODEL_CONFIGS) == 0:
         raise ValueError(
             "No model configs loaded, please call "
@@ -99,7 +109,7 @@ def load_model_by_config_name(config_name: str) -> ModelWrapperBase:
         raise ValueError(
             f"Cannot find [{config_name}] in loaded configurations.",
         )
-    config = _MODEL_CONFIGS[config_name]
+    config = _MODEL_CONFIGS.get(config_name, None)
 
     if config is None:
         raise ValueError(
@@ -138,6 +148,8 @@ def read_model_configs(
     if clear_existing:
         clear_model_configs()
 
+    cfgs = None
+
     if isinstance(configs, str):
         with open(configs, "r", encoding="utf-8") as f:
             cfgs = json.load(f)
@@ -151,6 +163,13 @@ def read_model_configs(
                 "The model config unit should be a dict.",
             )
         cfgs = configs
+
+    if cfgs is None:
+        raise TypeError(
+            f"Invalid type of model_configs, it could be a dict, a list of "
+            f"dicts, or a path to a json file (containing a dict or a list "
+            f"of dicts), but got {type(configs)}",
+        )
 
     format_configs = _ModelConfig.format_configs(configs=cfgs)
 

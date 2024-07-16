@@ -21,8 +21,28 @@ from .sql_query.sqlite import query_sqlite
 from .sql_query.mongodb import query_mongodb
 from .web.search import bing_search, google_search
 from .web.arxiv import arxiv_search
+from .web.dblp import (
+    dblp_search_publications,
+    dblp_search_authors,
+    dblp_search_venues,
+)
+from .multi_modality.dashscope_services import (
+    dashscope_image_to_text,
+    dashscope_text_to_image,
+    dashscope_text_to_audio,
+)
+from .multi_modality.openai_services import (
+    openai_audio_to_text,
+    openai_text_to_audio,
+    openai_text_to_image,
+    openai_image_to_text,
+    openai_edit_image,
+    openai_create_image_variation,
+)
+
 from .service_response import ServiceResponse
-from .service_factory import ServiceFactory
+from .service_toolkit import ServiceToolkit
+from .service_toolkit import ServiceFactory
 from .retrieval.similarity import cos_sim
 from .text_processing.summarization import summarization
 from .retrieval.retrieval_from_list import retrieve_from_list
@@ -40,7 +60,7 @@ def get_help() -> None:
 __all__ = [
     "ServiceResponse",
     "ServiceExecStatus",
-    "ServiceFactory",
+    "ServiceToolkit",
     "get_help",
     "execute_python_code",
     "execute_shell_command",
@@ -69,4 +89,18 @@ __all__ = [
     "load_web",
     "parse_html_to_text",
     "download_from_url",
+    "dblp_search_publications",
+    "dblp_search_authors",
+    "dblp_search_venues",
+    "dashscope_image_to_text",
+    "dashscope_text_to_image",
+    "dashscope_text_to_audio",
+    "openai_audio_to_text",
+    "openai_text_to_audio",
+    "openai_text_to_image",
+    "openai_image_to_text",
+    "openai_edit_image",
+    "openai_create_image_variation",
+    # to be deprecated
+    "ServiceFactory",
 ]
