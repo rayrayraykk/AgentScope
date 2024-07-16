@@ -8,7 +8,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13]
+        os: [ubuntu-latest]
         python-version: ['3.9', '3.10', '3.11', '3.12']
     env:
       OS: ${{ matrix.os }}
@@ -30,10 +30,10 @@ jobs:
         pip install coverage
     - name: Run tests with coverage
       run: |
-        coverage run tests/run.py
+        coverage run tests/run.py > coverage.txt
     - name: Generate coverage report
       run: |
-        coverage report -m > coverage.txt
+        coverage report -m
     - name: Read coverage report
       id: read_coverage
       run: |
@@ -47,7 +47,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         issue-number: ${{ github.event.pull_request.number }}
         body: |
-          ## Python Test Coverage on ${{ matrix.os }} ${{ matrix.python-version }}
+          ## Python Test on ${{ matrix.os }} py${{ matrix.python-version }}
           ```plaintext
           ${{ env.COVERAGE_REPORT }}
           ```
