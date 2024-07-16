@@ -47,4 +47,4 @@ jobs:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
           ## Python Test on ${{ matrix.os }} py${{ matrix.python-version }}
-          Coverage report: [Download coverage.txt](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts)
+          Coverage report: [Download coverage.txt](https://github.com/${{ github.repository }}/suites/${{ github.workflow_run.id }}/artifacts/${{ needs.upload.outputs.artifact_id }})
