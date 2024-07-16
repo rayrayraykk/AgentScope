@@ -498,8 +498,6 @@ class ExampleTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             model.format(*self.wrong_inputs)
 
-        raise ValueError("Error!!!")
-
 
 if __name__ == "__main__":
     unittest.main()
