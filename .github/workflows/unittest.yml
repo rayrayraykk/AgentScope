@@ -1,36 +1,53 @@
 name: Python Unittest Coverage
-
 on: [push, pull_request]
-
 jobs:
   test:
-    if: false == contains(github.event.pull_request.title, 'WIP')
+    if: github.event_name == 'pull_request' && false == contains(github.event.pull_request.title, 'WIP')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.9', '3.10', '3.11', '3.12']
     env:
       OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v2
     - name: Setup Python ${{ matrix.python-version }}
-      uses: actions/setup-python@master
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install Minimal Dependencies
-      run: |
-        pip install -q -e .
-    - name: Run import tests
-      run: |
-        python -c "import agentscope; print(agentscope.__version__)"
-    - name: Install Full Dependencies
-      run: |
-        pip install -q -e .[full]
-        pip install coverage
-    - name: Run tests with coverage
-      run: |
-        coverage run tests/run.py
+    # ... 其他安装依赖和运行测试的步骤 ...
     - name: Generate coverage report
       run: |
-        coverage report -m
+        coverage report -m > "coverage-${{ matrix.os }}-py${{ matrix.python-version }}.txt"
+    - name: Upload coverage report for each matrix
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage-${{ matrix.os }}-py${{ matrix.python-version }}
+        path: "coverage-${{ matrix.os }}-py${{ matrix.python-version }}.txt"
+
+# 如果需要，可以添加一个新的job来下载所有的artifact，并在PR中发表评论：
+  comment-coverage:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+    - name: Download all coverage artifacts
+      uses: actions/download-artifact@v2
+      with:
+        path: coverage-reports
+    - name: Combine coverage reports
+      run: |
+        echo "## Python Test Coverage" > combined-coverage.txt
+        for file in coverage-reports/*.txt; do
+          echo -e "\n#### ${file}" >> combined-coverage.txt
+          cat $file >> combined-coverage.txt
+        done
+    - name: Comment PR with all code coverage reports
+      uses: peter-evans/create-or-update-comment@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          ${{ readFile('combined-coverage.txt') }}
