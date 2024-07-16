@@ -33,14 +33,13 @@ jobs:
         coverage run tests/run.py > coverage.txt
     - name: Generate coverage report
       run: |
-        coverage report -m
-    - name: Read coverage report
-      id: read_coverage
-      run: |
-        echo "COVERAGE_REPORT<<EOF" >> $GITHUB_ENV
-        cat coverage.txt >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
-    - name: Comment PR with code coverage
+        coverage report -m > coverage.txt
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage-report
+        path: coverage.txt
+    - name: Comment PR with code coverage link
       if: github.event_name == 'pull_request'
       uses: peter-evans/create-or-update-comment@v1
       with:
@@ -48,6 +47,4 @@ jobs:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
           ## Python Test on ${{ matrix.os }} py${{ matrix.python-version }}
-          ```plaintext
-          ${{ env.COVERAGE_REPORT }}
-          ```
+          Coverage report: [Download coverage.txt](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts)
