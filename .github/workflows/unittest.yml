@@ -33,4 +33,19 @@ jobs:
         coverage run tests/run.py
     - name: Generate coverage report
       run: |
-        coverage report -m
+        coverage report -m > coverage.txt
+    - name: Read coverage report
+      id: read_coverage
+      run: |
+        echo "##vso[task.setvariable variable=COVERAGE_REPORT]$(cat coverage.txt)"
+    - name: Comment PR with code coverage
+      if: github.event_name == 'pull_request'
+      uses: peter-evans/create-or-update-comment@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          ## Python Test Coverage
+          ```plaintext
+          ${{ env.COVERAGE_REPORT }}
+          ```
