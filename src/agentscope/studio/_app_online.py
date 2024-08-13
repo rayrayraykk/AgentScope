@@ -26,7 +26,7 @@ from flask_babel import Babel, refresh
 from dotenv import load_dotenv
 
 from agentscope.constants import EXPIRATION_SECONDS, FILE_SIZE_LIMIT
-from agentscope.studio.utils import _require_auth, generate_jwt
+from agentscope.studio.utils.auth_utils import _require_auth, generate_jwt
 from agentscope.studio._app import (
     _convert_config_to_py,
     _read_examples,
