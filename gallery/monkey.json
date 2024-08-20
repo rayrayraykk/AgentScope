@@ -31,8 +31,33 @@
           "typenode": false,
           "inputs": {},
           "outputs": {},
-          "pos_x": -15,
-          "pos_y": -5
+          "pos_x": 29.11111111111111,
+          "pos_y": 28
+        },
+        "4": {
+          "id": 4,
+          "name": "dashscope_image_synthesis",
+          "data": {
+            "args": {
+              "config_name": "wanx-v1",
+              "model_name": "wanx-v1",
+              "generate_args": {
+                "n": 1,
+                "size": "1024*1024",
+                "temperature": 0,
+                "seed": 0
+              },
+              "model_type": "dashscope_image_synthesis",
+              "messages_key": "prompt",
+              "api_key": ""
+            }
+          },
+          "class": "dashscope_image_synthesis",
+          "typenode": false,
+          "inputs": {},
+          "outputs": {},
+          "pos_x": 25,
+          "pos_y": 682
         },
         "6": {
           "id": 6,
@@ -215,8 +240,8 @@
               ]
             }
           },
-          "pos_x": 409,
-          "pos_y": 292
+          "pos_x": 410,
+          "pos_y": 248.88888888888889
         }
       }
     }
