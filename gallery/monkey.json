@@ -1,0 +1,225 @@
+{
+  "meta": {
+    "index": 0,
+    "title": "Adventure of Monkey",
+    "author": "AgentScopeTeam",
+    "keywords": [
+      "game",
+      "multi-modal"
+    ],
+    "category": "game",
+    "time": "2024-08-20",
+    "thumbnail": ""
+  },
+  "drawflow": {
+    "Home": {
+      "data": {
+        "3": {
+          "id": 3,
+          "name": "dashscope_chat",
+          "data": {
+            "args": {
+              "config_name": "qwen-max",
+              "model_name": "qwen-max",
+              "api_key": "123123",
+              "temperature": 0,
+              "seed": 0,
+              "model_type": "dashscope_chat",
+              "messages_key": "input"
+            }
+          },
+          "class": "dashscope_chat",
+          "typenode": false,
+          "inputs": {},
+          "outputs": {},
+          "pos_x": -15,
+          "pos_y": -5
+        },
+        "6": {
+          "id": 6,
+          "name": "DialogAgent",
+          "data": {
+            "args": {
+              "name": "",
+              "sys_prompt": "",
+              "model_config_name": ""
+            }
+          },
+          "class": "DialogAgent",
+          "typenode": false,
+          "inputs": {
+            "input_1": {
+              "connections": []
+            }
+          },
+          "outputs": {
+            "output_1": {
+              "connections": []
+            }
+          },
+          "pos_x": 958.555555555556,
+          "pos_y": 368.11111111111103
+        },
+        "8": {
+          "id": 8,
+          "name": "UserAgent",
+          "data": {
+            "args": {
+              "name": "User"
+            }
+          },
+          "class": "UserAgent",
+          "typenode": false,
+          "inputs": {
+            "input_1": {
+              "connections": []
+            }
+          },
+          "outputs": {
+            "output_1": {
+              "connections": []
+            }
+          },
+          "pos_x": 963.1111111111114,
+          "pos_y": 648.5555555555553
+        },
+        "9": {
+          "id": 9,
+          "name": "TextToImageAgent",
+          "data": {
+            "args": {
+              "name": "",
+              "model_config_name": ""
+            }
+          },
+          "class": "TextToImageAgent",
+          "typenode": false,
+          "inputs": {
+            "input_1": {
+              "connections": []
+            }
+          },
+          "outputs": {
+            "output_1": {
+              "connections": []
+            }
+          },
+          "pos_x": 967.2222222222225,
+          "pos_y": 553.4444444444442
+        },
+        "11": {
+          "id": 11,
+          "name": "DialogAgent",
+          "data": {
+            "args": {
+              "name": "",
+              "sys_prompt": "",
+              "model_config_name": ""
+            }
+          },
+          "class": "DialogAgent",
+          "typenode": false,
+          "inputs": {
+            "input_1": {
+              "connections": []
+            }
+          },
+          "outputs": {
+            "output_1": {
+              "connections": []
+            }
+          },
+          "pos_x": 960.555555555556,
+          "pos_y": 458.99999999999994
+        },
+        "12": {
+          "id": 12,
+          "name": "WhileLoopPipeline",
+          "data": {
+            "elements": [
+              "13"
+            ],
+            "args": {
+              "condition_func": ""
+            }
+          },
+          "class": "GROUP",
+          "typenode": false,
+          "inputs": {
+            "input_1": {
+              "connections": [
+                {
+                  "node": "20",
+                  "input": "output_1"
+                }
+              ]
+            }
+          },
+          "outputs": {
+            "output_1": {
+              "connections": []
+            }
+          },
+          "pos_x": 851,
+          "pos_y": 60
+        },
+        "13": {
+          "id": 13,
+          "name": "SequentialPipeline",
+          "data": {
+            "elements": [
+              "6",
+              "11",
+              "9",
+              "8"
+            ]
+          },
+          "class": "GROUP",
+          "typenode": false,
+          "inputs": {
+            "input_1": {
+              "connections": []
+            }
+          },
+          "outputs": {
+            "output_1": {
+              "connections": []
+            }
+          },
+          "pos_x": 907.777777777778,
+          "pos_y": 206.77777777777783
+        },
+        "20": {
+          "id": 20,
+          "name": "Message",
+          "data": {
+            "args": {
+              "name": "Hint",
+              "content": "Game starts",
+              "url": ""
+            }
+          },
+          "class": "Message",
+          "typenode": false,
+          "inputs": {
+            "input_1": {
+              "connections": []
+            }
+          },
+          "outputs": {
+            "output_1": {
+              "connections": [
+                {
+                  "node": "12",
+                  "output": "input_1"
+                }
+              ]
+            }
+          },
+          "pos_x": 416,
+          "pos_y": 284
+        }
+      }
+    }
+  }
+}
