@@ -307,7 +307,8 @@ class ReActAgentNode(WorkflowNode):
         super()._execute_init()
         self.service_toolkit = ServiceToolkit()
         for tool in self.dep_opts:
-            tool._execute_init()
+            if not tool._has_init:
+                tool._execute_init()
             if not hasattr(tool, "service_func"):
                 raise TypeError(f"{tool} must be tool!")
             self.service_toolkit.add(tool.service_func)
