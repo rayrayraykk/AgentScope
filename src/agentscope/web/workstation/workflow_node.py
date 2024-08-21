@@ -36,6 +36,7 @@ from agentscope.service import (
     read_text_file,
     write_text_file,
     execute_python_code,
+    dashscope_text_to_audio,
     ServiceToolkit,
 )
 
@@ -306,6 +307,7 @@ class ReActAgentNode(WorkflowNode):
         super()._execute_init()
         self.service_toolkit = ServiceToolkit()
         for tool in self.dep_opts:
+            tool._execute_init()
             if not hasattr(tool, "service_func"):
                 raise TypeError(f"{tool} must be tool!")
             self.service_toolkit.add(tool.service_func)
@@ -766,7 +768,7 @@ class BingSearchServiceNode(WorkflowNode):
 
     def compile(self) -> dict:
         return {
-            "imports": "from agentscope.service import ServiceFactory\n"
+            "imports": "from agentscope.service import ServiceToolkit\n"
             "from functools import partial\n"
             "from agentscope.service import bing_search",
             "inits": f"{self.var_name} = partial(bing_search,"
@@ -791,7 +793,7 @@ class GoogleSearchServiceNode(WorkflowNode):
 
     def compile(self) -> dict:
         return {
-            "imports": "from agentscope.service import ServiceFactory\n"
+            "imports": "from agentscope.service import ServiceToolkit\n"
             "from functools import partial\n"
             "from agentscope.service import google_search",
             "inits": f"{self.var_name} = partial(google_search,"
@@ -816,7 +818,7 @@ class PythonServiceNode(WorkflowNode):
 
     def compile(self) -> dict:
         return {
-            "imports": "from agentscope.service import ServiceFactory\n"
+            "imports": "from agentscope.service import ServiceToolkit\n"
             "from agentscope.service import execute_python_code",
             "inits": f"{self.var_name} = execute_python_code",
             "execs": "",
@@ -839,7 +841,7 @@ class ReadTextServiceNode(WorkflowNode):
 
     def compile(self) -> dict:
         return {
-            "imports": "from agentscope.service import ServiceFactory\n"
+            "imports": "from agentscope.service import ServiceToolkit\n"
             "from agentscope.service import read_text_file",
             "inits": f"{self.var_name} = read_text_file",
             "execs": "",
@@ -862,12 +864,35 @@ class WriteTextServiceNode(WorkflowNode):
 
     def compile(self) -> dict:
         return {
-            "imports": "from agentscope.service import ServiceFactory\n"
+            "imports": "from agentscope.service import ServiceToolkit\n"
             "from agentscope.service import write_text_file",
             "inits": f"{self.var_name} = write_text_file",
             "execs": "",
         }
 
+class TextToAudioServiceNode(WorkflowNode):
+    """
+    Text to Audio Service Node
+    """
+
+    node_type = WorkflowNodeType.SERVICE
+
+    def _execute_init(self) -> None:
+        """
+        Init before running.
+        """
+        super()._execute_init()
+        self.service_func = partial(dashscope_text_to_audio, **self.opt_kwargs)
+
+    def compile(self) -> dict:
+        return {
+            "imports": "from agentscope.service import ServiceToolkit\n"
+            "from functools import partial\n"
+            "from agentscope.service import dashscope_text_to_audio",
+            "inits": f"{self.var_name} = partial(dashscope_text_to_audio,"
+            f" {kwarg_converter(self.opt_kwargs)})",
+            "execs": "",
+        }
 
 NODE_NAME_MAPPING = {
     "dashscope_chat": ModelNode,
@@ -893,6 +918,7 @@ NODE_NAME_MAPPING = {
     "PythonService": PythonServiceNode,
     "ReadTextService": ReadTextServiceNode,
     "WriteTextService": WriteTextServiceNode,
+    "TextToAudioService": TextToAudioServiceNode,
 }
 
 
