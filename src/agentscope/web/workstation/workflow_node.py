@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from enum import IntEnum
 from functools import partial
-from typing import List, Optional
+from typing import List, Optional, Set
 
 from agentscope import msghub
 from agentscope.agents import (
@@ -355,10 +355,15 @@ class MsgHubNode(WorkflowNode):
         super().__init__(node_id, opt_kwargs, source_kwargs, dep_opts)
         assert len(self.dep_opts) == 1 and hasattr(
             self.dep_opts[0],
-            "pipeline",
+            "operators",
         ), (
             "MsgHub members must be a list of length 1, with the first "
             "element being an instance of PipelineBaseNode"
+        )
+
+        self.participants_var = get_all_agents(
+            self.dep_opts[0],
+            compile_mode=True,
         )
 
     def _execute_init(self) -> None:
@@ -372,9 +377,16 @@ class MsgHubNode(WorkflowNode):
             role="system",
         )
 
+        assert len(self.dep_opts) == 1 and hasattr(
+            self.dep_opts[0],
+            "pipeline",
+        ), (
+            "MsgHub members must be a list of length 1, with the first "
+            "element being an instance of PipelineBaseNode"
+        )
+
         self.pipeline = self.dep_opts[0]
         self.participants = get_all_agents(self.pipeline)
-        self.participants_var = get_all_agents(self.pipeline, return_var=True)
 
     def _execute(self, x: dict = None) -> dict:
         with msghub(self.participants, announcement=self.announcement):
@@ -441,6 +453,16 @@ class SequentialPipelineNode(WorkflowNode):
 
     node_type = WorkflowNodeType.PIPELINE
 
+    def __init__(
+        self,
+        node_id: str,
+        opt_kwargs: dict,
+        source_kwargs: dict,
+        dep_opts: list,
+    ) -> None:
+        super().__init__(node_id, opt_kwargs, source_kwargs, dep_opts)
+        self.operators = list(self.dep_opts)
+
     def _execute_init(self) -> None:
         """
         Init before running.
@@ -482,6 +504,8 @@ class ForLoopPipelineNode(WorkflowNode):
         assert (
             len(self.dep_opts) == 1
         ), "ForLoopPipelineNode can only contain one PipelineNode."
+
+        self.operators = self.dep_opts[0].operators
 
     def _execute_init(self) -> None:
         """
@@ -530,6 +554,8 @@ class WhileLoopPipelineNode(WorkflowNode):
             len(self.dep_opts) == 1
         ), "WhileLoopPipelineNode can only contain one PipelineNode."
 
+        self.operators = self.dep_opts[0].operators
+
     def _execute_init(self) -> None:
         """
         Init before running.
@@ -576,6 +602,12 @@ class IfElsePipelineNode(WorkflowNode):
         assert (
             0 < len(self.dep_opts) <= 2
         ), "IfElsePipelineNode must contain one or two PipelineNode."
+
+        self.operators = (
+            list(self.dep_opts[0])
+            if len(self.dep_opts) == 1
+            else [self.dep_opts[0]] + [self.dep_opts[1]]
+        )
 
     def _execute_init(self) -> None:
         """
@@ -652,6 +684,8 @@ class SwitchPipelineNode(WorkflowNode):
                 f"SwitchPipelineNode deps {self.dep_opts} not matches "
                 f"cases {self.opt_kwargs['cases']}.",
             )
+
+        self.operators = list(self.dep_opts)
 
         for key, var in zip(
             self.opt_kwargs["cases"],
@@ -898,9 +932,10 @@ NODE_NAME_MAPPING = {
 
 def get_all_agents(
     node: WorkflowNode,
-    seen_agents: Optional[set] = None,
+    seen_agents: Optional[Set[str]] = None,
     return_var: bool = False,
-) -> List:
+    compile_mode: bool = False,
+) -> List[str]:
     """
     Retrieve all unique agent objects from a pipeline.
 
@@ -911,6 +946,8 @@ def get_all_agents(
         node (WorkflowNode): The WorkflowNode from which to extract agents.
         seen_agents (set, optional): A set of agents that have already been
             seen to avoid duplication. Defaults to None.
+        compile_mode (bool): Whether to operate in compile mode, affecting how
+            agents or operators are processed and added.
 
     Returns:
         list: A list of unique agent objects found in the pipeline.
@@ -920,22 +957,42 @@ def get_all_agents(
 
     all_agents = []
 
-    for participant in node.pipeline.participants:
-        if participant.node_type == WorkflowNodeType.AGENT:
-            if participant not in seen_agents:
-                if return_var:
-                    all_agents.append(participant.var_name)
-                else:
-                    all_agents.append(participant.pipeline)
-                seen_agents.add(participant.pipeline)
-        elif participant.node_type == WorkflowNodeType.PIPELINE:
-            nested_agents = get_all_agents(
-                participant,
-                seen_agents,
-                return_var=return_var,
-            )
-            all_agents.extend(nested_agents)
-        else:
-            raise TypeError(type(participant))
-
+    if compile_mode:
+        # Handling for compile mode
+        for operator in node.operators:
+            if operator.node_type == WorkflowNodeType.AGENT:
+                identifier = operator.var_name
+            elif operator.node_type == WorkflowNodeType.PIPELINE:
+                nested_agents = get_all_agents(
+                    operator,
+                    seen_agents,
+                    return_var,
+                    compile_mode,
+                )
+                all_agents.extend(nested_agents)
+            else:
+                raise TypeError(type(operator))
+    else:
+        # Handling for non-compile mode
+        for participant in node.pipeline.participants:
+            if participant.node_type == WorkflowNodeType.AGENT:
+                identifier = (
+                    participant.pipeline
+                    if return_var
+                    else participant.var_name
+                )
+            elif participant.node_type == WorkflowNodeType.PIPELINE:
+                nested_agents = get_all_agents(
+                    participant,
+                    seen_agents,
+                    return_var,
+                    compile_mode,
+                )
+                all_agents.extend(nested_agents)
+            else:
+                raise TypeError(type(participant))
+    # Common handling for adding identifiers
+    if identifier not in seen_agents:
+        all_agents.append(identifier)
+        seen_agents.add(identifier)
     return all_agents
