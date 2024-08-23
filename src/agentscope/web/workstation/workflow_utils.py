@@ -2,6 +2,7 @@
 """Workflow node utils."""
 import ast
 import builtins
+import re
 
 from typing import Any
 
@@ -63,3 +64,31 @@ def dict_converter(dictionary: dict) -> str:
     for key, value in dictionary.items():
         result_parts.append(f'"{key}": {value}')
     return "{" + ", ".join(result_parts) + "}"
+
+
+def replace_flow_name(
+    string: str,
+    output_value: str,
+    input_value: str,
+) -> str:
+    """replace flow name"""
+
+    def format_replace_value(value: str) -> str:
+        """concentrate value behind flow"""
+        return f"flow_{value}" if value else "flow"
+
+    output_value, input_value = map(
+        format_replace_value,
+        [output_value, input_value],
+    )
+
+    if "(flow)" in string:
+        return re.sub(
+            r"^flow",
+            output_value,
+            string.replace("(flow)", f"({input_value})"),
+            count=1,
+        )
+    if "flow = " in string:
+        return re.sub(r"^flow", output_value, string, count=1)
+    return string

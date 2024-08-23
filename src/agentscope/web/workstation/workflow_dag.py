@@ -16,7 +16,10 @@ from agentscope.web.workstation.workflow_node import (
     WorkflowNodeType,
     DEFAULT_FLOW_VAR,
 )
-from agentscope.web.workstation.workflow_utils import kwarg_converter
+from agentscope.web.workstation.workflow_utils import (
+    kwarg_converter,
+    replace_flow_name,
+)
 
 try:
     import networkx as nx
@@ -123,6 +126,8 @@ class ASDiGraph(nx.DiGraph):
         self.inits[
             0
         ] = f'agentscope.init(logger_level="DEBUG", {kwarg_converter(kwargs)})'
+
+        self.update_flow_name()
 
         sorted_nodes = list(nx.topological_sort(self))
         sorted_nodes = [
@@ -253,6 +258,56 @@ class ASDiGraph(nx.DiGraph):
             f"\nnode_id: {node_id}\nout_values:{out_values}",
         )
         return out_values
+
+    def update_flow_name(self) -> None:
+        """update flow name"""
+
+        node_mapping = self.get_labels_for_node()
+
+        for node_id in list(nx.topological_sort(self)):
+            node = self.nodes[node_id]
+            node["compile_dict"]["inits"] = replace_flow_name(
+                node["compile_dict"]["inits"],
+                node_mapping[node_id][1],
+                node_mapping[node_id][0],
+            )
+            node["compile_dict"]["execs"] = replace_flow_name(
+                node["compile_dict"]["execs"],
+                node_mapping[node_id][1],
+                node_mapping[node_id][0],
+            )
+
+    def get_labels_for_node(self) -> dict:
+        """get input and output labels for each node"""
+        roots = [node for node in self.nodes() if self.in_degree(node) == 0]
+
+        labels = {}
+
+        for idx, root in enumerate(roots):
+            self.label_nodes(root, labels, level=idx)
+
+        return labels
+
+    def label_nodes(
+        self,
+        root: str,
+        labels: dict,
+        level: int = 0,
+        parent_label: str = "",
+        parent_node: str = "",
+    ) -> None:
+        """recursively label nodes"""
+        label = f"{parent_label}_{level}" if parent_label else f"{level}"
+        labels[root] = (parent_node, label)
+
+        for i, successor in enumerate(self.successors(root)):
+            self.label_nodes(
+                successor,
+                labels,
+                level=i,
+                parent_label=label,
+                parent_node=labels[root][1],
+            )
 
 
 def sanitize_node_data(raw_info: dict) -> dict:
