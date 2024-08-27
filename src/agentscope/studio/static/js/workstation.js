@@ -37,6 +37,7 @@ let nameToHtmlFile = {
     'ReadTextService': 'service-read-text.html',
     'WriteTextService': 'service-write-text.html',
     'TextToAudioService': 'service-text-to-audio.html',
+    'TextToImageService': 'service-text-to-image.html',
 }
 
 const ModelNames48k = [
@@ -812,6 +813,17 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                     }
                 }, htmlSourceCode);
                 updateSampleRate(TextToAudioServiceID)
+            break;
+        case 'TextToImageService':
+            editor.addNode('TextToImageService', 0, 0,
+                pos_x, pos_y, 'TextToImageService', {
+                    "args": {
+                        "model": "",
+                        "api_key": "",
+                        "n": 1,
+                        "size":""
+                    }
+                }, htmlSourceCode);
             break;
 
         default:

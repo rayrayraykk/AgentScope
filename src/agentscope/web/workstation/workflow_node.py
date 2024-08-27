@@ -37,6 +37,7 @@ from agentscope.service import (
     write_text_file,
     execute_python_code,
     dashscope_text_to_audio,
+    dashscope_text_to_image,
     ServiceToolkit,
 )
 
@@ -894,6 +895,30 @@ class TextToAudioServiceNode(WorkflowNode):
             f" {kwarg_converter(self.opt_kwargs)})",
             "execs": "",
         }
+    
+class TextToImageServiceNode(WorkflowNode):
+    """
+    Text to Image Service Node
+    """
+
+    node_type = WorkflowNodeType.SERVICE
+
+    def _execute_init(self) -> None:
+        """
+        Init before running.
+        """
+        super()._execute_init()
+        self.service_func = partial(dashscope_text_to_image, **self.opt_kwargs)
+
+    def compile(self) -> dict:
+        return {
+            "imports": "from agentscope.service import ServiceToolkit\n"
+            "from functools import partial\n"
+            "from agentscope.service import dashscope_text_to_image",
+            "inits": f"{self.var_name} = partial(dashscope_text_to_image,"
+            f" {kwarg_converter(self.opt_kwargs)})",
+            "execs": "",
+        }
 
 NODE_NAME_MAPPING = {
     "dashscope_chat": ModelNode,
@@ -921,6 +946,7 @@ NODE_NAME_MAPPING = {
     "ReadTextService": ReadTextServiceNode,
     "WriteTextService": WriteTextServiceNode,
     "TextToAudioService": TextToAudioServiceNode,
+    "TextToImageService": TextToImageServiceNode,
 }
 
 
