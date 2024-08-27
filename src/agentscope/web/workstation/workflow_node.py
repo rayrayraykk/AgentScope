@@ -872,6 +872,7 @@ class WriteTextServiceNode(WorkflowNode):
             "execs": "",
         }
 
+
 class TextToAudioServiceNode(WorkflowNode):
     """
     Text to Audio Service Node
@@ -895,7 +896,8 @@ class TextToAudioServiceNode(WorkflowNode):
             f" {kwarg_converter(self.opt_kwargs)})",
             "execs": "",
         }
-    
+
+
 class TextToImageServiceNode(WorkflowNode):
     """
     Text to Image Service Node
@@ -920,12 +922,13 @@ class TextToImageServiceNode(WorkflowNode):
             "execs": "",
         }
 
+
 NODE_NAME_MAPPING = {
     "dashscope_chat": ModelNode,
     "openai_chat": ModelNode,
     "post_api_chat": ModelNode,
     "post_api_dall_e": ModelNode,
-    'dashscope_image_synthesis': ModelNode,
+    "dashscope_image_synthesis": ModelNode,
     "Message": MsgNode,
     "DialogAgent": DialogAgentNode,
     "UserAgent": UserAgentNode,
