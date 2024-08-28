@@ -69,26 +69,46 @@ def dict_converter(dictionary: dict) -> str:
 def replace_flow_name(
     string: str,
     output_value: str,
-    input_value: str,
+    input_values: list,
 ) -> str:
-    """replace flow name"""
+    """Replaces 'flow' based on its position relative to an equals sign,
+    treating occurrences on both sides independently."""
 
     def format_replace_value(value: str) -> str:
-        """concentrate value behind flow"""
+        """Concatenates 'flow_' prefix with value, or 'flow' for empty
+        value."""
         return f"flow_{value}" if value else "flow"
 
-    output_value, input_value = map(
-        format_replace_value,
-        [output_value, input_value],
+    # Prepare the replacement values
+    output_value_formatted = format_replace_value(output_value)
+    formatted_input_values = [
+        format_replace_value(value) for value in input_values
+    ]
+
+    # Split the string by the first equals sign, if present
+    parts = string.split("=", 1)
+    left_part = parts[0] if parts else ""
+    right_part = parts[1] if len(parts) > 1 else ""
+
+    # Replace 'flow' on the left side of '=' with the output_value_formatted
+    left_part = re.sub(
+        r"\bflow\b",
+        output_value_formatted,
+        left_part,
+        count=1,
     )
 
-    if "(flow)" in string:
-        return re.sub(
-            r"^flow",
-            output_value,
-            string.replace("(flow)", f"({input_value})"),
-            count=1,
-        )
-    if "flow = " in string:
-        return re.sub(r"^flow", output_value, string, count=1)
+    # Replace 'flow' on the right side of '=' with the formatted input
+    # values string
+    if "flow" in right_part:
+        input_values_str = ", ".join(formatted_input_values)
+        # Here we replace all occurrences of 'flow' on the right side
+        right_part = re.sub(r"\bflow\b", input_values_str, right_part)
+
+    # Reassemble the string
+    if len(parts) > 1:
+        string = "=".join([left_part, right_part])
+    else:
+        string = left_part  # In case there was no '=' in the original string
+
     return string

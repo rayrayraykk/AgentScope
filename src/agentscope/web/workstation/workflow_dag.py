@@ -7,7 +7,7 @@ a computational DAG. Each node represents a step in the DAG and
 can perform certain actions when called.
 """
 import copy
-from typing import Any
+from typing import Any, Optional
 from loguru import logger
 
 import agentscope
@@ -127,7 +127,7 @@ class ASDiGraph(nx.DiGraph):
             0
         ] = f'agentscope.init(logger_level="DEBUG", {kwarg_converter(kwargs)})'
 
-        self.update_flow_name()
+        self.update_flow_name(place="execs")
 
         sorted_nodes = list(nx.topological_sort(self))
         sorted_nodes = [
@@ -191,6 +191,7 @@ class ASDiGraph(nx.DiGraph):
             WorkflowNodeType.PIPELINE,
             WorkflowNodeType.COPY,
             WorkflowNodeType.SERVICE,
+            WorkflowNodeType.TOOL,
         ]:
             raise NotImplementedError(node_cls)
 
@@ -231,6 +232,8 @@ class ASDiGraph(nx.DiGraph):
         # Insert compile information to imports and inits
         self.imports.append(compile_dict["imports"])
 
+        self.update_flow_name(place="inits")
+
         if node_cls.node_type == WorkflowNodeType.MODEL:
             self.inits.insert(1, compile_dict["inits"])
         else:
@@ -259,55 +262,59 @@ class ASDiGraph(nx.DiGraph):
         )
         return out_values
 
-    def update_flow_name(self) -> None:
+    def update_flow_name(self, place: str = "") -> None:
         """update flow name"""
-
         node_mapping = self.get_labels_for_node()
 
-        for node_id in list(nx.topological_sort(self)):
-            node = self.nodes[node_id]
-            node["compile_dict"]["inits"] = replace_flow_name(
-                node["compile_dict"]["inits"],
-                node_mapping[node_id][1],
-                node_mapping[node_id][0],
-            )
-            node["compile_dict"]["execs"] = replace_flow_name(
-                node["compile_dict"]["execs"],
-                node_mapping[node_id][1],
-                node_mapping[node_id][0],
-            )
+        if place:
+            for node_id in list(nx.topological_sort(self)):
+                node = self.nodes[node_id]
+                node["compile_dict"][place] = replace_flow_name(
+                    node["compile_dict"][place],
+                    node_mapping[node_id][1],
+                    node_mapping[node_id][0],
+                )
 
     def get_labels_for_node(self) -> dict:
         """get input and output labels for each node"""
         roots = [node for node in self.nodes() if self.in_degree(node) == 0]
 
-        labels = {}
+        # Initialize labels dict with empty sets for parent labels
+        labels = {node: (set(), "") for node in self.nodes()}
 
         for idx, root in enumerate(roots):
-            self.label_nodes(root, labels, level=idx)
+            # Each root node gets a label starting with its index
+            self.label_nodes(root, f"{idx}", labels)
 
+        # Convert parent label sets to sorted lists
+        labels = {
+            node: (set(sorted(parents)), label)
+            for node, (parents, label) in labels.items()
+        }
         return labels
 
     def label_nodes(
         self,
-        root: str,
+        current: str,
+        label: str,
         labels: dict,
-        level: int = 0,
-        parent_label: str = "",
-        parent_node: str = "",
+        parent: Optional[str] = None,
     ) -> None:
-        """recursively label nodes"""
-        label = f"{parent_label}_{level}" if parent_label else f"{level}"
-        labels[root] = (parent_node, label)
+        """recursively label nodes allowing for multiple parents"""
+        if parent:
+            # Add the parent label to the current node
+            labels[current][0].add(parent)
 
-        for i, successor in enumerate(self.successors(root)):
-            self.label_nodes(
-                successor,
-                labels,
-                level=i,
-                parent_label=label,
-                parent_node=labels[root][1],
-            )
+        # If the current node already has a label, it's from a shorter
+        # path, so we don't overwrite it
+        if not labels[current][1]:
+            labels[current] = (labels[current][0], label)
+
+        # Iterate over successors and recursively assign labels
+        for i, successor in enumerate(self.successors(current)):
+            # Append the index of the successor to the label for branching
+            succ_label = f"{label}_{i}"
+            self.label_nodes(successor, succ_label, labels, parent=label)
 
 
 def sanitize_node_data(raw_info: dict) -> dict:
