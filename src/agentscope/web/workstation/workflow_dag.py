@@ -232,8 +232,6 @@ class ASDiGraph(nx.DiGraph):
         # Insert compile information to imports and inits
         self.imports.append(compile_dict["imports"])
 
-        self.update_flow_name(place="inits")
-
         if node_cls.node_type == WorkflowNodeType.MODEL:
             self.inits.insert(1, compile_dict["inits"])
         else:
