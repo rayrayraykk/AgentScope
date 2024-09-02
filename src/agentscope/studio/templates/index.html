@@ -4,42 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AgentScope Studio</title>
+    <script>
+        var STUDIO_ROOT_PATH = "{{ studio_root_path }}";
+    </script>
 
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/font.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css/font.css') }}">
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/base.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/index.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css/index.css') }}">
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/dashboard.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css/dashboard.css') }}">
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/server.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css/server.css') }}">
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css_third_party/tabulator.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css_third_party/highlight.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css_third_party/katex.min.css') }}">
-    <script src="{{ url_for('static', filename='js_third_party/tabulator.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js_third_party/highlight.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js_third_party/katex.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js_third_party/marked.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js_third_party/marked-katex-extension.umd.js') }}"></script>
-    <script src="{{ url_for('static', filename='js_third_party/socket.io.js') }}"></script>
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css_third_party/tabulator.min.css') }}">
+    <link rel="stylesheet" href="
+            {{ studio_root_path }}{{ url_for('static', filename='css_third_party/highlight.min.css') }}">
+    <link rel="stylesheet" href="
+            {{ studio_root_path }}{{ url_for('static', filename='css_third_party/katex.min.css') }}">
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/tabulator.min.js') }}"></script>
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/highlight.min.js') }}"></script>
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/katex.min.js') }}"></script>
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/marked.min.js') }}"></script>
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/marked-katex-extension.umd.js') }}"></script>
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/socket.io.js') }}"></script>
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/dashboard-runs.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css/dashboard-runs.css') }}">
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/dashboard-detail.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css/dashboard-detail.css') }}">
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/dashboard-detail-dialogue.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css/dashboard-detail-dialogue.css') }}">
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/dashboard-detail-code.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css/dashboard-detail-code.css') }}">
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/dashboard-detail-invocation.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css/dashboard-detail-invocation.css') }}">
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css_third_party/clusterize.css') }}">
-    <script src="{{ url_for('static', filename='js_third_party/clusterize.min.js') }}"></script>
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css_third_party/clusterize.css') }}">
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/clusterize.min.js') }}"></script>
 
-    <script src="{{ url_for('static', filename='js_third_party/monaco-editor.loader.js') }}"></script>
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/monaco-editor.loader.js') }}"></script>
 </head>
 <body>
 

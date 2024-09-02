@@ -4,40 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AgentScope Studio</title>
+    <script>
+        var STUDIO_ROOT_PATH = "{{ studio_root_path }}";
+    </script>
 
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/font.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css/font.css') }}">
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/base.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css/base.css') }}">
 
     {#  For workstation#}
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css_third_party/drawflow.min.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css_third_party/drawflow.min.css') }}">
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css_third_party/prism.min.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css_third_party/prism.min.css') }}">
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css_third_party/prism-line-numbers.min.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css_third_party/prism-line-numbers.min.css') }}">
 
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/workstation.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css/workstation.css') }}">
     <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static', filename='css/workstation-drag-components.css') }}">
+          href="
+                  {{ studio_root_path }}{{ url_for('static', filename='css/workstation-drag-components.css') }}">
 
-    <script src="{{ url_for('static', filename='js_third_party/jquery.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js_third_party/prism.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js_third_party/prism-python.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js_third_party/prism-line-numbers.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js_third_party/drawflow.min.js') }}"></script>
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/jquery.min.js') }}"></script>
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/prism.min.js') }}"></script>
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/prism-python.min.js') }}"></script>
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/prism-line-numbers.min.js') }}"></script>
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/drawflow.min.js') }}"></script>
 
     {#    TODO: remove#}
     <script crossorigin="anonymous"
             integrity="sha256-KzZiKy0DWYsnwMF+X1DvQngQ2/FxF7MF3Ff72XcpuPs="
             src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js"></script>
 
-    <script src="{{ url_for('static', filename='js_third_party/sweetalert2@11') }}"></script>
-    <script src="{{ url_for('static', filename='js_third_party/micromodal.min.js') }}"></script>
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/sweetalert2@11') }}"></script>
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js_third_party/micromodal.min.js') }}"></script>
 
-    <script src="{{ url_for('static', filename='js/workstation.js') }}"></script>
+    <script src="
+            {{ studio_root_path }}{{ url_for('static', filename='js/workstation.js') }}"></script>
 </head>
 <body>
 <div id="workstation-panel">

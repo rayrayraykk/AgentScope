@@ -199,6 +199,7 @@ def _home() -> str:
         port=PORT,
         studio_root_path=os.getenv(
             "STUDIO_ROOT_PATH",
+            "",
         ),
     )
 

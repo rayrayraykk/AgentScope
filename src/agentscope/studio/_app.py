@@ -221,7 +221,13 @@ def _convert_to_py(  # type: ignore[no-untyped-def]
 @_app.route("/workstation")
 def _workstation() -> str:
     """Render the workstation page."""
-    return render_template("workstation.html")
+    return render_template(
+        "workstation.html",
+        studio_root_path=os.getenv(
+            "STUDIO_ROOT_PATH",
+            "",
+        ),
+    )
 
 
 @_app.route("/api/runs/register", methods=["POST"])
@@ -808,7 +814,13 @@ def _load_workflow() -> Response:
 @_app.route("/")
 def _home() -> str:
     """Render the home page."""
-    return render_template("index.html")
+    return render_template(
+        "index.html",
+        studio_root_path=os.getenv(
+            "STUDIO_ROOT_PATH",
+            "",
+        ),
+    )
 
 
 @_socketio.on("request_user_input")
