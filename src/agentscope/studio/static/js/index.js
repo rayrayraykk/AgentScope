@@ -56,7 +56,7 @@ function loadTabPage(pageUrl, javascriptUrl) {
             currentPageUrl = pageUrl;
 
             // Hide the sidebar for other pages except the guide page
-            if (pageUrl === "static/html/index-guide.html") {
+            if (pageUrl === STUDIO_ROOT_PATH + "static/html/index-guide.html") {
                 navigationBar.classList.remove("collapsed");
                 inGuidePage = true;
             } else {
@@ -64,6 +64,9 @@ function loadTabPage(pageUrl, javascriptUrl) {
                 inGuidePage = false;
                 activeExpanded = false;
             }
+
+            // Inject STUDIO_ROOT_PATH into the HTML content
+            html = html.replace('</head>', `<script>var STUDIO_ROOT_PATH = "${STUDIO_ROOT_PATH}";</script></head>`);
 
             // Load the page content
             document.getElementById("content").innerHTML = html;
@@ -85,28 +88,28 @@ function loadTabPage(pageUrl, javascriptUrl) {
 
             // switch selected status of the tab buttons
             switch (pageUrl) {
-                case "static/html/dashboard.html":
+                case STUDIO_ROOT_PATH + "static/html/dashboard.html":
                     dashboardTabBtn.classList.add("selected");
                     workstationTabBtn.classList.remove("selected");
                     marketTabBtn.classList.remove("selected");
                     serverTabBtn.classList.remove("selected");
                     break;
 
-                case "static/html/workstation_iframe.html":
+                case STUDIO_ROOT_PATH + "static/html/workstation_iframe.html":
                     dashboardTabBtn.classList.remove("selected");
                     workstationTabBtn.classList.add("selected");
                     marketTabBtn.classList.remove("selected");
                     serverTabBtn.classList.remove("selected");
                     break;
 
-                case "static/html/market.html":
+                case STUDIO_ROOT_PATH + "static/html/market.html":
                     dashboardTabBtn.classList.remove("selected");
                     workstationTabBtn.classList.remove("selected");
                     marketTabBtn.classList.add("selected");
                     serverTabBtn.classList.remove("selected");
                     break;
 
-                case "static/html/server.html":
+                case STUDIO_ROOT_PATH + "static/html/server.html":
                     dashboardTabBtn.classList.remove("selected");
                     workstationTabBtn.classList.remove("selected");
                     marketTabBtn.classList.remove("selected");
