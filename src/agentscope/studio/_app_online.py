@@ -192,7 +192,15 @@ def _home() -> str:
             secret_key=SECRET_KEY,
             version="online",
         )
-    return render_template("login.html", client_id=CLIENT_ID, ip=IP, port=PORT)
+    return render_template(
+        "login.html",
+        client_id=CLIENT_ID,
+        ip=IP,
+        port=PORT,
+        studio_root_path=os.getenv(
+            "STUDIO_ROOT_PATH",
+        ),
+    )
 
 
 @_app.route("/oauth/callback")
