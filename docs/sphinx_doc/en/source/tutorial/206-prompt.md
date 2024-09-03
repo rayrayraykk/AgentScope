@@ -8,7 +8,7 @@ especially with different requirements from various model APIs.
 
 To ease the process of adapting prompt to different model APIs, AgentScope
 provides a structured way to organize different data types (e.g. instruction,
-hints, dialogue history) into the desired format.
+hints, conversation history) into the desired format.
 
 Note there is no **one-size-fits-all** solution for prompt crafting.
 **The goal of built-in strategies is to enable beginners to smoothly invoke
@@ -44,6 +44,7 @@ generation model APIs.
 - [OllamaChatWrapper](#ollamachatwrapper)
 - [OllamaGenerationWrapper](#ollamagenerationwrapper)
 - [GeminiChatWrapper](#geminichatwrapper)
+- [ZhipuAIChatWrapper](#zhipuaichatwrapper)
 
 These strategies are implemented in the `format` functions of the model
 wrapper classes.
@@ -62,6 +63,8 @@ dictionaries as input, where the dictionary must obey the following rules
 - The `role` field must be either `"system"`, `"user"`, or `"assistant"`.
 
 #### Prompt Strategy
+
+##### Non-Vision Models
 
 In OpenAI Chat API, the `name` field enables the model to distinguish
 different speakers in the conversation. Therefore, the strategy of `format`
@@ -99,6 +102,75 @@ print(prompt)
 ]
 ```
 
+##### Vision Models
+
+For vision models (gpt-4-turbo, gpt-4o, ...), if the input message contains image urls, the generated `content` field will be a list of dicts, which contains text and image urls.
+
+Specifically, the web image urls will be pass to OpenAI Chat API directly, while the local image urls will be converted to base64 format. More details please refer to the [official guidance](https://platform.openai.com/docs/guides/vision).
+
+Note the invalid image urls (e.g. `/Users/xxx/test.mp3`) will be ignored.
+
+```python
+from agentscope.models import OpenAIChatWrapper
+from agentscope.message import Msg
+
+model = OpenAIChatWrapper(
+    config_name="", # empty since we directly initialize the model wrapper
+    model_name="gpt-4o",
+)
+
+prompt = model.format(
+   Msg("system", "You're a helpful assistant", role="system"),   # Msg object
+   [                                                             # a list of Msg objects
+      Msg(name="user", content="Describe this image", role="user", url="https://xxx.png"),
+      Msg(name="user", content="And these images", role="user", url=["/Users/xxx/test.png", "/Users/xxx/test.mp3"]),
+   ],
+)
+print(prompt)
+```
+
+```python
+[
+    {
+        "role": "system",
+        "name": "system",
+        "content": "You are a helpful assistant"
+    },
+    {
+        "role": "user",
+        "name": "user",
+        "content": [
+            {
+                "type": "text",
+                "text": "Describe this image"
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": "https://xxx.png"
+                }
+            },
+        ]
+    },
+    {
+        "role": "user",
+        "name": "user",
+        "content": [
+            {
+                "type": "text",
+                "text": "And these images"
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": "data:image/png;base64,YWJjZGVm..." # for /Users/xxx/test.png
+                }
+            },
+        ]
+    },
+]
+```
+
 ### DashScopeChatWrapper
 
 `DashScopeChatWrapper` encapsulates the DashScope chat API, which takes a list of messages as input. The message must obey the following rules (updated in 2024/03/22):
@@ -112,7 +184,7 @@ print(prompt)
 
 #### Prompt Strategy
 
-If the role field of the first message is `"system"`, it will be converted into a single message with the `role` field as `"system"` and the `content` field as the system message. The rest of the messages will be converted into a message with the `role` field as `"user"` and the `content` field as the dialogue history.
+If the role field of the first message is `"system"`, it will be converted into a single message with the `role` field as `"system"` and the `content` field as the system message. The rest of the messages will be converted into a message with the `role` field as `"user"` and the `content` field as the conversation history.
 
 An example is shown below:
 
@@ -135,10 +207,18 @@ prompt = model.format(
 print(prompt)
 ```
 
-```bash
-[
-  {"role": "system", "content": "You are a helpful assistant"},
-  {"role": "user", "content": "## Dialogue History\nBob: Hi!\nAlice: Nice to meet you!"},
+```python
+prompt = [
+    {
+        "role": "user",
+        "content": (
+            "You are a helpful assistant\n"
+            "\n"
+            "## Conversation History\n"
+            "Bob: Hi!\n"
+            "Alice: Nice to meet you!"
+        )
+   },
 ]
 ```
 
@@ -185,7 +265,7 @@ print(prompt)
 Based on the above rules, the `format` function in `DashScopeMultiModalWrapper` will parse the input messages as follows:
 
 - If the first message in the input message list has a `role` field with the value `"system"`, it will be converted into a system message with the `role` field as `"system"` and the `content` field as the system message. If the `url` field in the input `Msg` object is not `None`, a dictionary with the key `"image"` or `"audio"` will be added to the `content` based on its type.
-- The rest of the messages will be converted into a message with the `role` field as `"user"` and the `content` field as the dialogue history. For each message, if their `url` field is not `None`, it will add a dictionary with the key `"image"` or `"audio"` to the `content` based on the file type that the `url` points to.
+- The rest of the messages will be converted into a message with the `role` field as `"user"` and the `content` field as the conversation history. For each message, if their `url` field is not `None`, it will add a dictionary with the key `"image"` or `"audio"` to the `content` based on the file type that the `url` points to.
 
 An example:
 
@@ -220,11 +300,64 @@ print(prompt)
   {
     "role": "user",
     "content": [
-      {"text": "## Dialogue History\nBob: Hi!\nAlice: Nice to meet you!"},
+      {"text": "## Conversation History\nBob: Hi!\nAlice: Nice to meet you!"},
       {"image": "url_to_png2"},
       {"image": "url_to_png3"},
     ]
   }
+]
+```
+
+
+### LiteLLMChatWrapper
+
+`LiteLLMChatWrapper` encapsulates the litellm chat API, which takes a list of
+messages as input. The litellm supports different types of models, and each model
+might need to obey different formats. To simplify the usage, we provide a format
+that could be compatible with most models. If more specific formats are needed,
+you can refer to the specific model you use as well as the
+[litellm](https://github.com/BerriAI/litellm) documentation to customize your
+own format function for your model.
+
+
+- format all the messages in the chat history, into a single message with `"user"` as `role`
+
+#### Prompt Strategy
+
+- Messages will consist conversation history in the `user` message prefixed by the system message and "## Conversation History".
+
+```python
+from agentscope.models import LiteLLMChatWrapper
+from agentscope.message import Msg
+
+model = LiteLLMChatWrapper(
+    config_name="", # empty since we directly initialize the model wrapper
+    model_name="gpt-3.5-turbo",
+)
+
+prompt = model.format(
+  Msg("system", "You are a helpful assistant", role="system"),
+  [
+      Msg("user", "What is the weather today?", role="user"),
+      Msg("assistant", "It is sunny today", role="assistant"),
+  ],
+)
+
+print(prompt)
+```
+
+```bash
+[
+    {
+        "role": "user",
+        "content": (
+            "You are a helpful assistant\n"
+            "\n"
+            "## Conversation History\n"
+            "user: What is the weather today?\n"
+            "assistant: It is sunny today"
+        ),
+    },
 ]
 ```
 
@@ -240,14 +373,15 @@ messages as input. The message must obey the following rules (updated in
 
 #### Prompt Strategy
 
-Given a list of messages, we will parse each message as follows:
-
-- `Msg`:  Fill the `role` and `content` fields directly. If it has an `url`
-  field, which refers to an image, we will add it to the message.
-- `List`: Parse each element in the list according to the above rules.
+- If the role field of the first input message is `"system"`,
+it will be treated as system prompt and the other messages will consist
+conversation history in the system message prefixed by "## Conversation History".
+- If the `url` attribute of messages is not `None`, we will gather all urls in
+the `"images"` field in the returned dictionary.
 
 ```python
 from agentscope.models import OllamaChatWrapper
+from agentscope.message import Msg
 
 model = OllamaChatWrapper(
     config_name="", # empty since we directly initialize the model wrapper
@@ -265,11 +399,19 @@ prompt = model.format(
 print(prompt)
 ```
 
-```bash
+```python
 [
-  {"role": "system", "content": "You are a helpful assistant"},
-  {"role": "assistant", "content": "Hi."},
-  {"role": "assistant", "content": "Nice to meet you!", "images": ["https://example.com/image.jpg"]},
+    {
+        "role": "system",
+        "content": (
+            "You are a helpful assistant\n"
+            "\n"
+            "## Conversation History\n"
+            "Bob: Hi.\n"
+            "Alice: Nice to meet you!",
+        ),
+        "images": ["https://example.com/image.jpg"]
+    },
 ]
 ```
 
@@ -280,7 +422,7 @@ takes a string prompt as input without any constraints (updated to 2024/03/22).
 
 #### Prompt Strategy
 
-If the role field of the first message is `"system"`, a system prompt will be created. The rest of the messages will be combined into dialogue history in string format.
+If the role field of the first message is `"system"`, a system prompt will be created. The rest of the messages will be combined into conversation history in string format.
 
 ```python
 from agentscope.models import OllamaGenerationWrapper
@@ -305,7 +447,7 @@ print(prompt)
 ```bash
 You are a helpful assistant
 
-## Dialogue History
+## Conversation History
 Bob: Hi.
 Alice: Nice to meet you!
 ```
@@ -328,7 +470,7 @@ in our built-in `format` function.
 
 #### Prompt Strategy
 
-If the role field of the first message is `"system"`, a system prompt will be added in the beginning. The other messages will be combined into dialogue history.
+If the role field of the first message is `"system"`, a system prompt will be added in the beginning. The other messages will be combined into conversation history.
 
 **Note** sometimes the `parts` field may contain image urls, which is not
 supported in `format` function. We recommend developers to customize the
@@ -354,78 +496,59 @@ prompt = model.format(
 print(prompt)
 ```
 
-```bash
+```python
 [
-  {
-    "role": "user",
-    "parts": [
-      "You are a helpful assistant\n## Dialogue History\nBob: Hi!\nAlice: Nice to meet you!"
-    ]
-  }
+    {
+        "role": "user",
+        "parts": [
+            "You are a helpful assistant\n"
+            "## Conversation History\n"
+            "Bob: Hi!\n"
+            "Alice: Nice to meet you!"
+        ]
+    }
 ]
 ```
 
-## Prompt Engine (Will be deprecated in the future)
+### `ZhipuAIChatWrapper`
 
-AgentScope provides the `PromptEngine` class to simplify the process of crafting
-prompts for large language models (LLMs).
+`ZhipuAIChatWrapper` encapsulates the ZhipuAI chat API, which takes a list of messages as input. The message must obey the following rules:
 
-## About `PromptEngine` Class
+- Require `role` and `content` fields, and `role` must be either `"user"`
+  `"system"` or `"assistant"`.
+- There must be at least one `user` message.
 
-The `PromptEngine` class provides a structured way to combine different components of a prompt, such as instructions, hints, dialogue history, and user inputs, into a format that is suitable for the underlying language model.
+#### Prompt Strategy
 
-### Key Features of PromptEngine
+If the role field of the first message is `"system"`, it will be converted into a single message with the `role` field as `"system"` and the `content` field as the system message. The rest of the messages will be converted into a message with the `role` field as `"user"` and the `content` field as the conversation history.
 
-- **Model Compatibility**: It works with any `ModelWrapperBase` subclass.
-- **Prompt Type**: It supports both string and list-style prompts, aligning with the model's preferred input format.
-
-### Initialization
-
-When creating an instance of `PromptEngine`, you can specify the target model and, optionally, the shrinking policy, the maximum length of the prompt, the prompt type, and a summarization model (could be the same as the target model).
+An example is shown below:
 
 ```python
-model = OpenAIChatWrapper(...)
-engine = PromptEngine(model)
+from agentscope.models import ZhipuAIChatWrapper
+from agentscope.message import Msg
+
+model = ZhipuAIChatWrapper(
+    config_name="", # empty since we directly initialize the model wrapper
+    model_name="glm-4",
+    api_key="your api key",
+)
+
+prompt = model.format(
+   Msg("system", "You're a helpful assistant", role="system"),   # Msg object
+   [                                                             # a list of Msg objects
+      Msg(name="Bob", content="Hi!", role="assistant"),
+      Msg(name="Alice", content="Nice to meet you!", role="assistant"),
+   ],
+)
+print(prompt)
 ```
 
-### Joining Prompt Components
-
-The `join` method of `PromptEngine` provides a unified interface to handle an arbitrary number of components for constructing the final prompt.
-
-#### Output String Type Prompt
-
-If the model expects a string-type prompt, components are joined with a newline character:
-
-```python
-system_prompt = "You're a helpful assistant."
-memory = ... # can be dict, list, or string
-hint_prompt = "Please respond in JSON format."
-
-prompt = engine.join(system_prompt, memory, hint_prompt)
-# the result will be [ "You're a helpful assistant.", {"name": "user", "content": "What's the weather like today?"}]
-```
-
-#### Output List Type Prompt
-
-For models that work with list-type prompts,e.g., OpenAI and Huggingface chat models, the components can be converted to Message objects, whose type is list of dict:
-
-```python
-system_prompt = "You're a helpful assistant."
-user_messages = [{"name": "user", "content": "What's the weather like today?"}]
-
-prompt = engine.join(system_prompt, user_messages)
-# the result should be: [{"role": "assistant", "content": "You're a helpful assistant."}, {"name": "user", "content": "What's the weather like today?"}]
-```
-
-#### Formatting Prompts in Dynamic Way
-
-The `PromptEngine` supports dynamic prompts using the `format_map` parameter, allowing you to flexibly inject various variables into the prompt components for different scenarios:
-
-```python
-variables = {"location": "London"}
-hint_prompt = "Find the weather in {location}."
-
-prompt = engine.join(system_prompt, user_input, hint_prompt, format_map=variables)
+```bash
+[
+  {"role": "system", "content": "You are a helpful assistant"},
+  {"role": "user", "content": "## Conversation History\nBob: Hi!\nAlice: Nice to meet you!"},
+]
 ```
 
 [[Return to the top]](#206-prompt-en)

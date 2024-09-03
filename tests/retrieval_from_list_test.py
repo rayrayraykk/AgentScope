@@ -6,7 +6,7 @@ from typing import Any
 
 from agentscope.service import retrieve_from_list, cos_sim
 from agentscope.service.service_status import ServiceExecStatus
-from agentscope.message import MessageBase, Msg, Tht
+from agentscope.message import Msg
 from agentscope.memory.temporary_memory import TemporaryMemory
 from agentscope.models import OpenAIEmbeddingWrapper, ModelResponse
 
@@ -40,15 +40,11 @@ class TestRetrieval(unittest.TestCase):
         m2 = Msg(name="env", content="test2", role="assistant")
         m2.embedding = [0.5, 0.5]
         m2.timestamp = "2023-12-18 21:50:59"
-        m3 = Tht(content="test3")
-        m3.embedding = [0.2, 0.8]
-        m3.timestamp = "2023-12-18 21:42:59"
-        memory = TemporaryMemory(config={}, embedding_model=dummy_model)
+        memory = TemporaryMemory(embedding_model=dummy_model)
         memory.add(m1)
         memory.add(m2)
-        memory.add(m3)
 
-        def score_func(m1: MessageBase, m2: MessageBase) -> float:
+        def score_func(m1: Msg, m2: Msg) -> float:
             relevance = cos_sim(m1.embedding, m2.embedding).content
             time_gap = (
                 datetime.strptime(m1.timestamp, "%Y-%m-%d %H:%M:%S")
@@ -65,9 +61,8 @@ class TestRetrieval(unittest.TestCase):
             preserve_order=False,
         )
         self.assertEqual(retrieved.status, ServiceExecStatus.SUCCESS)
-        self.assertEqual(retrieved.content[0][2], m3)
-        self.assertEqual(retrieved.content[1][2], m2)
-        self.assertEqual(retrieved.content[2][2], m1)
+        self.assertEqual(retrieved.content[0][2], m2)
+        self.assertEqual(retrieved.content[1][2], m1)
 
         retrieved = retrieve_from_list(
             query,
@@ -78,8 +73,7 @@ class TestRetrieval(unittest.TestCase):
             preserve_order=True,
         )
         self.assertEqual(retrieved.status, ServiceExecStatus.SUCCESS)
-        self.assertEqual(retrieved.content[0][2], m2)
-        self.assertEqual(retrieved.content[1][2], m3)
+        self.assertEqual(retrieved.content[0][2], m1)
 
 
 # This allows the tests to be run from the command line

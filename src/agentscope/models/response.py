@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 """Parser for model response."""
-import inspect
 import json
-from typing import Optional, Sequence, Any, Callable
+from typing import Optional, Sequence, Any, Generator, Union, Tuple
 
-from loguru import logger
-
-from agentscope.utils.tools import _is_json_serializable
+from ..utils.common import _is_json_serializable
 
 
 class ModelResponse:
@@ -16,18 +13,14 @@ class ModelResponse:
     models and act as a bridge between models and agents.
     """
 
-    text: Optional[str] = None
-    embedding: Optional[Sequence] = None
-    raw: Optional[Any] = None
-    image_urls: Optional[Sequence[str]] = None
-    json: Optional[Any] = None
-
     def __init__(
         self,
         text: str = None,
         embedding: Sequence = None,
         image_urls: Sequence[str] = None,
         raw: Any = None,
+        parsed: Any = None,
+        stream: Optional[Generator[str, None, None]] = None,
     ) -> None:
         """Initialize the model response.
 
@@ -40,11 +33,75 @@ class ModelResponse:
                 The image URLs returned by the model.
             raw (`Any`, optional):
                 The raw data returned by the model.
+            parsed (`Any`, optional):
+                The parsed data returned by the model.
+            stream (`Generator`, optional):
+                The stream data returned by the model.
         """
-        self.text = text
+        self._text = text
         self.embedding = embedding
         self.image_urls = image_urls
         self.raw = raw
+        self.parsed = parsed
+        self._stream = stream
+        self._is_stream_exhausted = False
+
+    @property
+    def text(self) -> str:
+        """Return the text field. If the stream field is available, the text
+        field will be updated accordingly."""
+        if self._text is None:
+            if self.stream is not None:
+                for chunk in self.stream:
+                    self._text += chunk
+        return self._text
+
+    @text.setter
+    def text(self, value: str) -> None:
+        """Set the text field."""
+        self._text = value
+
+    @property
+    def stream(self) -> Union[None, Generator[Tuple[bool, str], None, None]]:
+        """Return the stream generator if it exists."""
+        if self._stream is None:
+            return self._stream
+        else:
+            return self._stream_generator_wrapper()
+
+    @property
+    def is_stream_exhausted(self) -> bool:
+        """Whether the stream has been processed already."""
+        return self._is_stream_exhausted
+
+    def _stream_generator_wrapper(
+        self,
+    ) -> Generator[Tuple[bool, str], None, None]:
+        """During processing the stream generator, the text field is updated
+        accordingly."""
+        if self._is_stream_exhausted:
+            raise RuntimeError(
+                "The stream has been processed already. Try to obtain the "
+                "result from the text field.",
+            )
+
+        # These two lines are used to avoid mypy checking error
+        if self._stream is None:
+            return
+
+        try:
+            last_text = next(self._stream)
+
+            for text in self._stream:
+                self._text = last_text
+                yield False, last_text
+                last_text = text
+            self._text = last_text
+            yield True, last_text
+
+            return
+        except StopIteration:
+            return
 
     def __str__(self) -> str:
         if _is_json_serializable(self.raw):
@@ -56,107 +113,7 @@ class ModelResponse:
             "text": self.text,
             "embedding": self.embedding,
             "image_urls": self.image_urls,
-            "json": self.json,
+            "parsed": self.parsed,
             "raw": raw,
         }
         return json.dumps(serialized_fields, indent=4, ensure_ascii=False)
-
-
-class ResponseParser:
-    """A class that contains several static methods to parse the response."""
-
-    @classmethod
-    def to_dict(cls, response: ModelResponse) -> ModelResponse:
-        """Parse the response text to a dict, and feed it into the `json`
-        field."""
-        text = response.text
-        if text is not None:
-            logger.debug("Text before parsing", text)
-
-            # extract from the first '{' to the last '}'
-            index_start = max(text.find("{"), 0)
-            index_end = min(text.rfind("}") + 1, len(text))
-
-            text = text[index_start:index_end]
-            logger.debug("Text after parsing", text)
-
-            response.text = text
-            response.json = json.loads(text)
-            return response
-        else:
-            raise ValueError(
-                f"The text field of the model response is None: {response}",
-            )
-
-    @classmethod
-    def to_list(cls, response: ModelResponse) -> ModelResponse:
-        """Parse the response text to a list, and feed it into the `json`
-        field."""
-        text = response.text
-        if text is not None:
-            logger.debug("Text before parsing", text)
-
-            # extract from the first '{' to the last '}'
-            index_start = max(text.find("["), 0)
-            index_end = min(text.rfind("]") + 1, len(text))
-
-            text = text[index_start:index_end]
-            logger.debug("Text after parsing", text)
-
-            response.text = text
-            response.json = json.loads(text)
-            return response
-        else:
-            raise ValueError(
-                f"The text field of the model response is None: {response}",
-            )
-
-
-class ResponseParsingError(Exception):
-    """Exception raised when parsing the response fails."""
-
-    parse_func: str
-    """The source code of the parsing function."""
-
-    error_info: str
-    """The detail information of the error."""
-
-    response: ModelResponse
-    """The response that fails to be parsed."""
-
-    def __init__(
-        self,
-        *args: Any,
-        parse_func: Callable,
-        error_info: str,
-        response: ModelResponse,
-        **kwargs: Any,
-    ) -> None:
-        """Initialize the exception.
-
-        Args:
-            parse_func (`str`):
-                The source code of the parsing function.
-            error_info (`str`):
-                The detail information of the error.
-            response (`ModelResponse`):
-                The response that fails to be parsed.
-        """
-        super().__init__(*args, **kwargs)
-
-        self.parse_func_code = inspect.getsource(parse_func)
-        self.error_info = error_info
-        self.response = response
-
-    def __str__(self) -> str:
-        return (
-            f"Fail to parse response with the following parsing function:\n"
-            f"## PARSE FUNCTION: \n"
-            f"```python\n"
-            f"{self.parse_func_code}"
-            f"```\n\n"
-            f"## ERROR INFO: \n"
-            f"{self.error_info}\n\n"
-            f"## INPUT RESPONSE: \n"
-            f"{self.response}"
-        )

@@ -2,16 +2,17 @@
 """ An example of distributed debate """
 
 import argparse
-import json
 
 from user_proxy_agent import UserProxyAgent
 
+from loguru import logger
+
 import agentscope
+from agentscope.agents import DialogAgent
 from agentscope.msghub import msghub
-from agentscope.agents.dialog_agent import DialogAgent
-from agentscope.agents.rpc_agent import RpcAgentServerLauncher
+from agentscope.server import RpcAgentServerLauncher
 from agentscope.message import Msg
-from agentscope.utils.logging_utils import logger
+
 
 FIRST_ROUND = """
 Welcome to the debate on whether Artificial General Intelligence (AGI) can be achieved using the GPT model framework. This debate will consist of three rounds. In each round, the affirmative side will present their argument first, followed by the negative side. After both sides have presented, the adjudicator will summarize the key points and analyze the strengths of the arguments.
@@ -73,32 +74,14 @@ def setup_server(parsed_args: argparse.Namespace) -> None:
     """Setup rpc server for participant agent"""
     agentscope.init(
         model_configs="configs/model_configs.json",
+        project="Distributed Conversation",
     )
     host = getattr(parsed_args, f"{parsed_args.role}_host")
     port = getattr(parsed_args, f"{parsed_args.role}_port")
-    if parsed_args.is_human:
-        agent_class = UserProxyAgent
-        config = {"name": parsed_args.role}
-    else:
-        with open(
-            "configs/debate_agent_configs.json",
-            "r",
-            encoding="utf-8",
-        ) as f:
-            configs = json.load(f)
-            configs = {
-                "pro": configs[0]["args"],
-                "con": configs[1]["args"],
-                "judge": configs[2]["args"],
-            }
-            config = configs[parsed_args.role]
-            agent_class = DialogAgent
-
     server_launcher = RpcAgentServerLauncher(
-        agent_class=agent_class,
-        agent_kwargs=config,
         host=host,
         port=port,
+        custom_agent_classes=[UserProxyAgent, DialogAgent],
     )
     server_launcher.launch(in_subprocess=False)
     server_launcher.wait_until_terminate()
@@ -109,16 +92,15 @@ def run_main_process(parsed_args: argparse.Namespace) -> None:
     pro_agent, con_agent, judge_agent = agentscope.init(
         model_configs="configs/model_configs.json",
         agent_configs="configs/debate_agent_configs.json",
+        project="Distributed Conversation",
     )
     pro_agent = pro_agent.to_dist(
         host=parsed_args.pro_host,
         port=parsed_args.pro_port,
-        launch_server=False,
     )
     con_agent = con_agent.to_dist(
         host=parsed_args.con_host,
         port=parsed_args.con_port,
-        launch_server=False,
     )
     participants = [pro_agent, con_agent, judge_agent]
     announcements = [

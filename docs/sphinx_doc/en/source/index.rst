@@ -18,8 +18,26 @@ AgentScope Documentation
    :hidden:
    :caption: AgentScope Tutorial
 
-   tutorial/quick_start.rst
-   tutorial/advance.rst
+   tutorial/101-agentscope.md
+   tutorial/102-installation.md
+   tutorial/103-example.md
+
+   tutorial/203-model.md
+   tutorial/203-stream.md
+   tutorial/206-prompt.md
+   tutorial/201-agent.md
+   tutorial/205-memory.md
+   tutorial/203-parser.md
+   tutorial/209-prompt_opt.md
+   tutorial/204-service.md
+   tutorial/202-pipeline.md
+   tutorial/208-distribute.md
+   tutorial/209-gui.md
+   tutorial/210-rag.md
+   tutorial/105-logging.md
+   tutorial/207-monitor.md
+   tutorial/104-usecase.md
+
    tutorial/contribute.rst
 
 
@@ -28,19 +46,17 @@ AgentScope Documentation
    :glob:
    :caption: AgentScope API Reference
 
+   agentscope
+   agentscope.message
+   agentscope.models
    agentscope.agents
    agentscope.memory
-   agentscope.models
+   agentscope.parsers
+   agentscope.exception
    agentscope.pipelines
    agentscope.service
    agentscope.rpc
-   agentscope.utils
+   agentscope.server
    agentscope.web
-   agentscope
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   agentscope.prompt
+   agentscope.utils

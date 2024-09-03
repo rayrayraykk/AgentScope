@@ -39,14 +39,22 @@ def update_alive_players(
 
 def majority_vote(votes: list) -> Any:
     """majority_vote function"""
-    unit, counts = np.unique(votes, return_counts=True)
+    votes_valid = [item for item in votes if item != "Abstain"]
+    # Count the votes excluding abstentions.
+    unit, counts = np.unique(votes_valid, return_counts=True)
     return unit[np.argmax(counts)]
 
 
 def extract_name_and_id(name: str) -> tuple[str, int]:
     """extract player name and id from a string"""
-    name = re.search(r"\bPlayer\d+\b", name).group(0)
-    idx = int(re.search(r"Player(\d+)", name).group(1)) - 1
+    try:
+        name = re.search(r"\b[Pp]layer\d+\b", name).group(0)
+        idx = int(re.search(r"[Pp]layer(\d+)", name).group(1)) - 1
+    except AttributeError:
+        # In case Player remains silent or speaks to abstain.
+        logger.warning(f"vote: invalid name {name}, set to Abstain")
+        name = "Abstain"
+        idx = -1
     return name, idx
 
 
@@ -65,3 +73,14 @@ def n2s(agents: Sequence[Union[AgentBase, str]]) -> str:
         + " and "
         + _get_name(agents[-1])
     )
+
+
+def set_parsers(
+    agents: Union[AgentBase, list[AgentBase]],
+    parser_name: str,
+) -> None:
+    """Add parser to agents"""
+    if not isinstance(agents, list):
+        agents = [agents]
+    for agent in agents:
+        agent.set_parser(parser_name)

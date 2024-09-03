@@ -1,6 +1,6 @@
 (201-agent-zh)=
 
-# 定制你自己的Agent
+# Agent
 
 本教程帮助你更深入地理解Agent，并引导你通过使用AgentScope定制自己的自定义agent。
 我们首先介绍一个称为AgentBase的基本抽象概念，它作为基类维护所有agent的通用行为。然后，我们将探讨AgentPool，这是一个由预构建的、专门化的agent组成的集合，每个agent都设计有特定的目的。最后，我们将演示如何定制你自己的agent，确保它符合你项目的需求。
@@ -16,6 +16,8 @@
 * `model`（模型）：模型是agent的计算引擎，负责根据现有的记忆和输入做出响应。关于model的更多细节，我们在[使用模型API与不同模型源部分](203-model)讨论
 
 * `sys_prompt`（系统提示）和`engine`（引擎）：系统提示作为预定义的指令，指导agent在其互动中的行为；而engine用于动态生成合适的提示。关于它们的更多细节，我们会在[提示引擎部分](206-prompt)讨论。
+
+* `to_dist`（分布式）：用于创建 agent 的分布式版本，以支持多 agent 的高效协作。请注意`to_dist`是一个保留字段，将自动添加到`AgentBase`所有子类的初始化函数中。关于 `to_dist` 的更多细节，请见[分布式部分](208-distribute)。
 
 除了这些属性，`AgentBase` 还为agent提供了一些关键方法，如 `observe` 和 `reply`：
 
@@ -34,7 +36,6 @@ class AgentBase(Operator):
             sys_prompt: Optional[str] = None,
             model_config_name: str = None,
             use_memory: bool = True,
-            memory_config: Optional[dict] = None,
     ) -> None:
 
     # ... [code omitted for brevity]
@@ -46,7 +47,7 @@ class AgentBase(Operator):
         if self.memory:
             self.memory.add(x)
 
-    def reply(self, x: dict = None) -> dict:
+    def reply(self, x: Optional[Union[Msg, Sequence[Msg]]] = None) -> Msg:
         # The core method to be implemented by custom agents. It defines the
         # logic for processing an input message and generating a suitable
         # response.
@@ -70,7 +71,6 @@ class AgentBase(Operator):
 | `DialogAgent`      | 通过理解上下文和生成连贯的响应来管理对话。                                  | 客户服务机器人，虚拟助手。  |
 | `DictDialogAgent`  | 通过理解上下文和生成连贯的响应来管理对话，返回的消息为 Json 格式。          | 客户服务机器人，虚拟助手。  |
 | `UserAgent`        | 与用户互动以收集输入，生成可能包括URL或基于所需键的额外具体信息的消息。     | 为agent收集用户输入         |
-| `TextToImageAgent` | 将用户输入的文本转化为图片                                                  | 提供文生图功能              |
 | `ReActAgent`       | 实现了 ReAct 算法的 Agent，能够自动调用工具处理较为复杂的任务。             | 借助工具解决复杂任务        |
 | *更多agent*        | AgentScope 正在不断扩大agent池，加入更多专门化的agent，以适应多样化的应用。 |                             |
 
@@ -85,7 +85,7 @@ class AgentBase(Operator):
 * **回复方法**：`reply` 方法是处理输入消息和生成响应的主要逻辑所在
 
 ```python
-def reply(self, x: dict = None) -> dict:
+def reply(self, x: Optional[Union[Msg, Sequence[Msg]]] = None) -> Msg:
     # Additional processing steps can occur here
 
     # Record the input if needed
@@ -141,9 +141,9 @@ service_bot = DialogAgent(**dialog_agent_config)
 ```python
 def reply(
     self,
-    x: dict = None,
+    x: Optional[Union[Msg, Sequence[Msg]]] = None,
     required_keys: Optional[Union[list[str], str]] = None,
-) -> dict:
+) -> Msg:
     # Check if there is initial data to be added to memory
     if self.memory:
         self.memory.add(x)

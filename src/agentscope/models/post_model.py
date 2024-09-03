@@ -8,12 +8,13 @@ from typing import Any, Union, Sequence, List
 import requests
 from loguru import logger
 
+from .gemini_model import GeminiChatWrapper
+from .openai_model import OpenAIChatWrapper
 from .model import ModelWrapperBase, ModelResponse
 from ..constants import _DEFAULT_MAX_RETRIES
 from ..constants import _DEFAULT_MESSAGES_KEY
 from ..constants import _DEFAULT_RETRY_INTERVAL
-from ..message import MessageBase
-from ..utils.tools import _convert_to_str
+from ..message import Msg
 
 
 class PostAPIModelWrapperBase(ModelWrapperBase, ABC):
@@ -76,7 +77,15 @@ class PostAPIModelWrapperBase(ModelWrapperBase, ABC):
                     **post_args
                 )
         """
-        super().__init__(config_name=config_name)
+        if json_args is not None:
+            model_name = json_args.get(
+                "model",
+                json_args.get("model_name", None),
+            )
+        else:
+            model_name = None
+
+        super().__init__(config_name=config_name, model_name=model_name)
 
         self.api_url = api_url
         self.headers = headers
@@ -161,7 +170,7 @@ class PostAPIModelWrapperBase(ModelWrapperBase, ABC):
 
 
 class PostAPIChatWrapper(PostAPIModelWrapperBase):
-    """A post api model wrapper compatilble with openai chat, e.g., vLLM,
+    """A post api model wrapper compatible with openai chat, e.g., vLLM,
     FastChat."""
 
     model_type: str = "post_api_chat"
@@ -175,13 +184,13 @@ class PostAPIChatWrapper(PostAPIModelWrapperBase):
 
     def format(
         self,
-        *args: Union[MessageBase, Sequence[MessageBase]],
+        *args: Union[Msg, Sequence[Msg]],
     ) -> Union[List[dict]]:
         """Format the input messages into a list of dict, which is
         compatible to OpenAI Chat API.
 
         Args:
-            args (`Union[MessageBase, Sequence[MessageBase]]`):
+            args (`Union[Msg, Sequence[Msg]]`):
                 The input arguments to be formatted, where each argument
                 should be a `Msg` object, or a list of `Msg` objects.
                 In distribution, placeholder is also allowed.
@@ -190,27 +199,27 @@ class PostAPIChatWrapper(PostAPIModelWrapperBase):
             `Union[List[dict]]`:
                 The formatted messages.
         """
-        messages = []
-        for arg in args:
-            if arg is None:
-                continue
-            if isinstance(arg, MessageBase):
-                messages.append(
-                    {
-                        "role": arg.role,
-                        "name": arg.name,
-                        "content": _convert_to_str(arg.content),
-                    },
-                )
-            elif isinstance(arg, list):
-                messages.extend(self.format(*arg))
-            else:
-                raise TypeError(
-                    f"The input should be a Msg object or a list "
-                    f"of Msg objects, got {type(arg)}.",
-                )
+        # Format according to the potential model field in the json_args
+        model_name = self.json_args.get(
+            "model",
+            self.json_args.get("model_name", None),
+        )
 
-        return messages
+        # OpenAI
+        if model_name and model_name.startswith("gpt-"):
+            return OpenAIChatWrapper.static_format(
+                *args,
+                model_name=model_name,
+            )
+
+        # Gemini
+        elif model_name and model_name.startswith("gemini"):
+            return GeminiChatWrapper.format(*args)
+
+        # Include DashScope, ZhipuAI, Ollama, the other models supported by
+        # litellm and unknown models
+        else:
+            return ModelWrapperBase.format_for_common_chat_models(*args)
 
 
 class PostAPIDALLEWrapper(PostAPIModelWrapperBase):
@@ -233,7 +242,67 @@ class PostAPIDALLEWrapper(PostAPIModelWrapperBase):
 
     def format(
         self,
-        *args: Union[MessageBase, Sequence[MessageBase]],
+        *args: Union[Msg, Sequence[Msg]],
+    ) -> Union[List[dict], str]:
+        raise RuntimeError(
+            f"Model Wrapper [{type(self).__name__}] doesn't "
+            f"need to format the input. Please try to use the "
+            f"model wrapper directly.",
+        )
+
+
+class PostAPIEmbeddingWrapper(PostAPIModelWrapperBase):
+    """
+    A post api model wrapper for embedding model
+    """
+
+    model_type: str = "post_api_embedding"
+
+    def _parse_response(self, response: dict) -> ModelResponse:
+        """
+        Parse the response json data into ModelResponse with embedding.
+        Args:
+            response (`dict`):
+            The response obtained from the API. This parsing assume the
+            structure of the response is as following:
+        {
+            "code": 200,
+            "data": {
+                ...
+                "response": {
+                    "data": [
+                        {
+                            "embedding": [
+                                0.001,
+                                ...
+                            ],
+                            ...
+                        }
+                    ],
+                    "model": "xxxx",
+                    ...
+                },
+            },
+        }
+        """
+        if "data" not in response["data"]["response"]:
+            if "error" in response["data"]["response"]:
+                error_msg = response["data"]["response"]["error"]["message"]
+            else:
+                error_msg = response["data"]["response"]
+            logger.error(f"Error in embedding API call:\n{error_msg}")
+            raise ValueError(f"Error in embedding API call:\n{error_msg}")
+        embeddings = [
+            data["embedding"] for data in response["data"]["response"]["data"]
+        ]
+        return ModelResponse(
+            embedding=embeddings,
+            raw=response,
+        )
+
+    def format(
+        self,
+        *args: Union[Msg, Sequence[Msg]],
     ) -> Union[List[dict], str]:
         raise RuntimeError(
             f"Model Wrapper [{type(self).__name__}] doesn't "

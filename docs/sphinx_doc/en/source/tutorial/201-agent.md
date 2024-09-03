@@ -1,6 +1,6 @@
 (201-agent-en)=
 
-# Customizing Your Own Agent
+# Agent
 
 This tutorial helps you to understand the `Agent` in more depth and navigate through the process of crafting your own custom agent with AgentScope. We start by introducing the fundamental abstraction called `AgentBase`, which serves as the base class to maintain the general behaviors of all agents. Then, we will go through the *AgentPool*, an ensemble of pre-built, specialized agents, each designed with a specific purpose in mind. Finally, we will demonstrate how to customize your own agent, ensuring it fits the needs of your project.
 
@@ -15,6 +15,8 @@ Each AgentBase derivative is composed of several key characteristics:
 * `model`: The model is the computational engine of the agent, responsible for making a response given existing memory and input. For more details about `model`, we defer to [Using Different Model Sources with Model API](#203-model).
 
 * `sys_prompt` & `engine`: The system prompt acts as predefined instructions that guide the agent in its interactions; and the `engine` is used to dynamically generate a suitable prompt. For more details about them, we defer to [Prompt Engine](206-prompt).
+
+* `to_dist`: Used to create a distributed version of the agent, to support efficient collaboration among multiple agents. Note that `to_dist` is a reserved field and will be automatically added to the initialization function of any subclass of `AgentBase`. For more details about `to_dist`, please refer to [Distribution](208-distribute).
 
 In addition to these attributes, `AgentBase` endows agents with pivotal methods such as `observe` and `reply`:
 
@@ -33,11 +35,10 @@ class AgentBase(Operator):
             sys_prompt: Optional[str] = None,
             model_config_name: str = None,
             use_memory: bool = True,
-            memory_config: Optional[dict] = None,
     ) -> None:
 
     # ... [code omitted for brevity]
-    def observe(self, x: Union[dict, Sequence[dict]]) -> None:
+    def observe(self, x: Union[Msg, Sequence[Msg]]) -> None:
         # An optional method for updating the agent's internal state based on
         # messages it has observed. This method can be used to enrich the
         # agent's understanding and memory without producing an immediate
@@ -45,7 +46,7 @@ class AgentBase(Operator):
         if self.memory:
             self.memory.add(x)
 
-    def reply(self, x: dict = None) -> dict:
+    def reply(self, x: Optional[Union[Msg, Sequence[Msg]]] = None) -> Msg:
         # The core method to be implemented by custom agents. It defines the
         # logic for processing an input message and generating a suitable
         # response.
@@ -69,7 +70,6 @@ Below is a table summarizing the functionality of some of the key agents availab
 | `DialogAgent`      | Manages dialogues by understanding context and generating coherent responses.                                                       | Customer service bots, virtual assistants.    |
 | `DictDialogAgent`  | Manages dialogues by understanding context and generating coherent responses, and the responses are in json format.                 | Customer service bots, virtual assistants.    |
 | `UserAgent`        | Interacts with the user to collect input, generating messages that may include URLs or additional specifics based on required keys. | Collecting user input for agents              |
-| `TextToImageAgent` | An agent that convert user input text to image.                                                                                     | Converting text to image                      |
 | `ReActAgent`       | An agent class that implements the ReAct algorithm.                                                                                 | Solving complex tasks                         |
 | *More to Come*     | AgentScope is continuously expanding its pool with more specialized agents for diverse applications.                                |                                               |
 
@@ -84,7 +84,7 @@ Below, we provide usages of how to configure various agents from the AgentPool:
 * **Reply Method**: The `reply` method is where the main logic for processing input *message* and generating responses.
 
 ```python
-def reply(self, x: dict = None) -> dict:
+def reply(self, x: Optional[Union[Msg, Sequence[Msg]]] = None) -> Msg:
     # Additional processing steps can occur here
 
     # Record the input if needed
@@ -140,9 +140,9 @@ service_bot = DialogAgent(**dialog_agent_config)
 ```python
 def reply(
     self,
-    x: dict = None,
+    x: Optional[Union[Msg, Sequence[Msg]]] = None,
     required_keys: Optional[Union[list[str], str]] = None,
-) -> dict:
+) -> Msg:
     # Check if there is initial data to be added to memory
     if self.memory:
         self.memory.add(x)

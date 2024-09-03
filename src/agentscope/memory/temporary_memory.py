@@ -13,9 +13,12 @@ from typing import Callable
 from loguru import logger
 
 from .memory import MemoryBase
-from ..models import load_model_by_config_name
+from ..manager import ModelManager
+from ..serialize import serialize, deserialize
 from ..service.retrieval.retrieval_from_list import retrieve_from_list
 from ..service.retrieval.similarity import Embedding
+from ..message import Msg
+from ..message import PlaceholderMessage
 
 
 class TemporaryMemory(MemoryBase):
@@ -25,40 +28,70 @@ class TemporaryMemory(MemoryBase):
 
     def __init__(
         self,
-        config: Optional[dict] = None,
         embedding_model: Union[str, Callable] = None,
     ) -> None:
-        super().__init__(config)
+        """
+        Temporary memory module for conversation.
+
+        Args:
+            embedding_model (Union[str, Callable])
+                if the temporary memory needs to be embedded,
+                then either pass the name of embedding model or
+                the embedding model itself.
+        """
+        super().__init__()
 
         self._content = []
 
         # prepare embedding model if needed
         if isinstance(embedding_model, str):
-            self.embedding_model = load_model_by_config_name(embedding_model)
+            model_manager = ModelManager.get_instance()
+            self.embedding_model = model_manager.get_model_by_config_name(
+                embedding_model,
+            )
         else:
             self.embedding_model = embedding_model
 
     def add(
         self,
-        memories: Union[Sequence[dict], dict, None],
+        memories: Union[Sequence[Msg], Msg, None],
         embed: bool = False,
     ) -> None:
+        """
+        Adding new memory fragment, depending on how the memory are stored
+        Args:
+            memories (`Union[Sequence[Msg], Msg, None]`):
+                Memories to be added.
+            embed (`bool`):
+                Whether to generate embedding for the new added memories
+        """
         if memories is None:
             return
 
-        if not isinstance(memories, list):
+        if not isinstance(memories, Sequence):
             record_memories = [memories]
         else:
             record_memories = memories
 
-        # if memory doesn't have id attribute, we skip the checking
+        # Assert the message types
         memories_idx = set(_.id for _ in self._content if hasattr(_, "id"))
         for memory_unit in record_memories:
-            # add to memory if it's new
-            if (
-                not hasattr(memory_unit, "id")
-                or memory_unit.id not in memories_idx
-            ):
+            # in case this is a PlaceholderMessage, try to update
+            # the values first
+            # TODO: Unify PlaceholderMessage and Msg into one class to avoid
+            #  type error
+            if isinstance(memory_unit, PlaceholderMessage):
+                memory_unit.update_value()
+                memory_unit = Msg.from_dict(memory_unit.to_dict())
+
+            if not isinstance(memory_unit, Msg):
+                raise ValueError(
+                    f"Cannot add {type(memory_unit)} to memory, "
+                    f"must be a Msg object.",
+                )
+
+            # Add to memory if it's new
+            if memory_unit.id not in memories_idx:
                 if embed:
                     if self.embedding_model:
                         # TODO: embed only content or its string representation
@@ -71,6 +104,13 @@ class TemporaryMemory(MemoryBase):
                 self._content.append(memory_unit)
 
     def delete(self, index: Union[Iterable, int]) -> None:
+        """
+        Delete memory fragment, depending on how the memory are stored
+        and matched
+        Args:
+            index (Union[Iterable, int]):
+                indices of the memory fragments to delete
+        """
         if self.size() == 0:
             logger.warning(
                 "The memory is empty, and the delete operation is "
@@ -101,16 +141,26 @@ class TemporaryMemory(MemoryBase):
 
     def export(
         self,
-        to_mem: bool = False,
         file_path: Optional[str] = None,
+        to_mem: bool = False,
     ) -> Optional[list]:
-        """Export memory to json file"""
+        """
+        Export memory, depending on how the memory are stored
+        Args:
+            file_path (Optional[str]):
+                file path to save the memory to. The messages will
+                be serialized and written to the file.
+            to_mem (Optional[str]):
+                if True, just return the list of messages in memory
+        Notice: this method prevents file_path is None when to_mem
+        is False.
+        """
         if to_mem:
             return self._content
 
         if to_mem is False and file_path is not None:
             with open(file_path, "w", encoding="utf-8") as f:
-                json.dump(self._content, f, indent=4)
+                f.write(serialize(self._content))
         else:
             raise NotImplementedError(
                 "file type only supports "
@@ -120,16 +170,30 @@ class TemporaryMemory(MemoryBase):
 
     def load(
         self,
-        memories: Union[str, dict, list],
+        memories: Union[str, list[Msg], Msg],
         overwrite: bool = False,
     ) -> None:
+        """
+        Load memory, depending on how the memory are passed, design to load
+        from both file or dict
+        Args:
+            memories (Union[str, list[Msg], Msg]):
+                memories to be loaded.
+                If it is in str type, it will be first checked if it is a
+                file; otherwise it will be deserialized as messages.
+                Otherwise, memories must be either in message type or list
+                 of messages.
+            overwrite (bool):
+                if True, clear the current memory before loading the new ones;
+                if False, memories will be appended to the old one at the end.
+        """
         if isinstance(memories, str):
             if os.path.isfile(memories):
                 with open(memories, "r", encoding="utf-8") as f:
-                    self.add(json.load(f))
+                    load_memories = deserialize(f.read())
             else:
                 try:
-                    load_memories = json.loads(memories)
+                    load_memories = deserialize(memories)
                     if not isinstance(load_memories, dict) and not isinstance(
                         load_memories,
                         list,
@@ -145,8 +209,21 @@ class TemporaryMemory(MemoryBase):
                         e.doc,
                         e.pos,
                     )
-        else:
+        elif isinstance(memories, list):
+            for unit in memories:
+                if not isinstance(unit, Msg):
+                    raise TypeError(
+                        f"Expect a list of Msg objects, but get {type(unit)} "
+                        f"instead.",
+                    )
             load_memories = memories
+        elif isinstance(memories, Msg):
+            load_memories = [memories]
+        else:
+            raise TypeError(
+                f"The type of memories to be loaded is not supported. "
+                f"Expect str, list[Msg], or Msg, but get {type(memories)}.",
+            )
 
         # overwrite the original memories after loading the new ones
         if overwrite:
