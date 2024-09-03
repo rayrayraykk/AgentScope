@@ -55,10 +55,9 @@
                     </div>
                 </div>
                 <div class="dropdown">
-                    <!-- <a href="{{ url_for('logout') }}">log out</a> -->
                     <a onclick="createNotification({
                         title: 'Notification',
-                        content: `You've been logout`,
+                        content: `You will be logged out`,
                         position: 'top-right',
                         closeBtn: true,
                         intervalTime: 3000,
@@ -66,7 +65,7 @@
                         confirmBtn: 'Yes',
                         cancelBtn: 'No',
                         onConfirm: () => {
-                            window.location.href = '/logout';
+                            window.location.href = '/';
                         },
                         onCancel: () => {
 
@@ -191,6 +190,11 @@
                                 data-node="UserAgent"
                                 draggable="true" ondragstart="drag(event)">
                                 UserAgent
+                            </li>
+                            <li class="workstation-sidebar-dragitem unselectable-text"
+                                data-node="TextToImageAgent"
+                                draggable="true" ondragstart="drag(event)">
+                                TextToImageAgent
                             </li>
                             <li class="workstation-sidebar-dragitem unselectable-text"
                                 data-node="DictDialogAgent"

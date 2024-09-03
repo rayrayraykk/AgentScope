@@ -253,15 +253,6 @@ def _workstation_online(**kwargs: Any) -> str:
     return render_template("workstation.html", **kwargs)
 
 
-@_app.route("/logout")
-def logout() -> str:
-    """
-    Logout the user by clearing the session and redirecting to the login page.
-    """
-    session.clear()
-    return redirect(url_for(_home))
-
-
 @_app.route("/upload-to-oss", methods=["POST"])
 @_require_auth(fail_with_exception=True, secret_key=SECRET_KEY)
 def _upload_file_to_oss_online(**kwargs: Any) -> Response:
