@@ -498,8 +498,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                             "api_key": '',
                             "temperature": 0.0,
                             "seed": 0,
-                            "model_type": 'dashscope_chat',
-                            "messages_key": 'input'
+                            "model_type": 'dashscope_chat'
                         }
                 },
                 htmlSourceCode);
@@ -517,8 +516,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                             "api_key": '',
                             "temperature": 0.0,
                             "seed": 0,
-                            "model_type": 'openai_chat',
-                            "messages_key": 'messages'
+                            "model_type": 'openai_chat'
                         }
                 },
                 htmlSourceCode);
@@ -592,8 +590,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                                 "temperature": 0.0,
                                 "seed": 0,
                             },
-                            "model_type": 'dashscope_image_synthesis',
-                            "messages_key": 'prompt'
+                            "model_type": 'dashscope_image_synthesis'
                         }
                 }, htmlSourceCode);
             addEventListenersToNumberInputs(dashscope_image_synthesisId);
