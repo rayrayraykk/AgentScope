@@ -997,12 +997,25 @@ class ImageCompositionNode(WorkflowNode):
 
     node_type = WorkflowNodeType.TOOL
 
-    def _execute_init(self) -> None:
-        """
-        Init before running.
-        """
-        super()._execute_init()
+    def __init__(
+        self,
+        node_id: str,
+        opt_kwargs: dict,
+        source_kwargs: dict,
+        dep_opts: list,
+        only_compile: bool = True,
+    ) -> None:
+        super().__init__(
+            node_id,
+            opt_kwargs,
+            source_kwargs,
+            dep_opts,
+            only_compile,
+        )
         self.pipeline = partial(stitch_images_with_grid, **self.opt_kwargs)
+
+    def __call__(self, x: dict = None) -> dict:
+        return self.pipeline(x)
 
     def compile(self) -> dict:
         return {

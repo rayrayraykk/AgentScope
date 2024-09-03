@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """Image composition"""
-import json
-
 from typing import List, Optional, Union
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 import requests
+import json5
 
 
 def stitch_images_with_grid(
@@ -16,7 +15,7 @@ def stitch_images_with_grid(
     column: int = 1,
     spacing: int = 10,
     title_height: int = 100,
-    font_path: Optional[str] = None,
+    font_name: Optional[str] = None,
 ) -> str:
     """
     Stitch multiple images and titles into a single image, supporting
@@ -31,12 +30,12 @@ def stitch_images_with_grid(
     - column: Number of columns in the grid.
     - spacing: The size of the gap between images.
     - title_height: The height of the title area.
-    - font_path: Path to the font file used for rendering the titles. If
-    None, the default font is used.
+    - font_name: font_name for rendering the titles. If None, the default
+    font is used.
     """
 
     if isinstance(titles, str):
-        titles = json.loads(titles)
+        titles = json5.loads(titles)
     images = []
     for path in image_paths:
         if isinstance(path, str):
@@ -65,13 +64,8 @@ def stitch_images_with_grid(
     font_size = title_height // 2
     font = (
         ImageFont.load_default(size=font_size)
-        if font_path is None
-        else (
-            ImageFont.truetype(
-                font_path,
-                font_size,
-            )
-        )
+        if font_name is None
+        else (ImageFont.truetype(font_name, font_size))
     )
 
     for idx, image in enumerate(images):
