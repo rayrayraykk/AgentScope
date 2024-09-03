@@ -808,6 +808,7 @@ class CopyNode(WorkflowNode):
         )
         assert len(self.dep_opts) == 1, "CopyNode can only have one parent!"
         self.pipeline = self.dep_opts[0]
+        self.var_name = self.pipeline.var_name
 
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
@@ -1129,6 +1130,8 @@ def get_all_agents(
                 return_var=return_var,
             )
             all_agents.extend(nested_agents)
+        elif participant.node_type == WorkflowNodeType.COPY:
+            continue
         else:
             raise TypeError(type(participant))
 
