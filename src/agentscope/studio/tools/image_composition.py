@@ -1,12 +1,46 @@
 # -*- coding: utf-8 -*-
 """Image composition"""
+import os
+
 from typing import List, Optional, Union
 from io import BytesIO
+from urllib.parse import urlparse
 from PIL import Image, ImageDraw, ImageFont
 import requests
 import json5
 
 
+def is_url(path: str) -> bool:
+    """
+    Check if the provided path is a URL.
+
+    Parameters:
+    - path: The path to be checked.
+
+    Returns:
+    - bool: True if the path is a valid URL, False otherwise.
+    """
+    try:
+        result = urlparse(path)
+        return all([result.scheme, result.netloc])
+    except ValueError:
+        return False
+
+
+def is_local_file(path: str) -> bool:
+    """
+    Check if the provided path is a local file.
+
+    Parameters:
+    - path: The path to be checked.
+
+    Returns:
+    - bool: True if the path exists and is a file, False otherwise.
+    """
+    return os.path.isfile(path)
+
+
+# pylint: disable=R0912
 def stitch_images_with_grid(
     image_paths: List[str],
     titles: Union[List[str], str],
@@ -33,17 +67,38 @@ def stitch_images_with_grid(
     - font_name: font_name for rendering the titles. If None, the default
     font is used.
     """
-
     if isinstance(titles, str):
         titles = json5.loads(titles)
     images = []
     for path in image_paths:
         if isinstance(path, str):
-            img = Image.open(path)
-
+            if is_local_file(path):
+                img = Image.open(path)
+            elif is_url(path):
+                response = requests.get(path)
+                img = Image.open(BytesIO(response.content))
+            else:
+                print(f"Invalid path: {path}")
+                continue
         else:
-            response = requests.get(path.url[0])
-            img = Image.open(BytesIO(response.content))
+            # Assuming path has a url attribute (Msg)
+            url = getattr(path, "url", None)
+            if isinstance(url, list) and url:
+                url = url[0]
+
+            if isinstance(url, str):
+                if is_local_file(url):
+                    img = Image.open(url)
+                elif is_url(url):
+                    response = requests.get(url)
+                    img = Image.open(BytesIO(response.content))
+                else:
+                    print(f"Invalid url path: {url}")
+                    continue
+            else:
+                print(f"Invalid path object: {path}")
+                continue
+
         images.append(img)
 
     widths, heights = zip(*(i.size for i in images))
