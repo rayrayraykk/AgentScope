@@ -1116,8 +1116,11 @@ def get_all_agents(
     all_agents = []
 
     for participant in node.pipeline.participants:
+        if participant.node_type == WorkflowNodeType.COPY:
+            participant = participant.pipeline
+
         if participant.node_type == WorkflowNodeType.AGENT:
-            if participant not in seen_agents:
+            if participant.pipeline not in seen_agents:
                 if return_var:
                     all_agents.append(participant.var_name)
                 else:
