@@ -36,6 +36,7 @@ let nameToHtmlFile = {
     'PythonService': 'service-execute-python.html',
     'ReadTextService': 'service-read-text.html',
     'WriteTextService': 'service-write-text.html',
+    'Post': 'tool-post.html'
 }
 
 // Cache the loaded html files
@@ -789,6 +790,21 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                 pos_x, pos_y, 'WriteTextService', {}, htmlSourceCode);
             break;
 
+        case 'Post':
+            editor.addNode('Post', 1, 1,
+                pos_x, pos_y, 'Post', {
+                    "args": {
+                        "url": "https://api.remove.bg/v1.0/removebg",
+                        "image_path_or_url": "",
+                        "headers": '{"X-Api-Key": "xxxxx"}',
+                        "data": '{"size": "auto"}',
+                        "json": '{}',
+                        "kwargs": '{}',
+                        "output_path": ""
+                    }
+                }, htmlSourceCode);
+            break;
+
         default:
     }
 }
@@ -1290,8 +1306,8 @@ function sortElementsByPosition(inputData) {
 
 
 function checkConditions() {
-    let hasModelTypeError = true;
-    let hasAgentError = true;
+    let hasModelTypeError = false;
+    let hasAgentError = false;
     let agentModelConfigNames = new Set();
     let modelConfigNames = new Set();
     let isApiKeyEmpty = false;

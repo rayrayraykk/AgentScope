@@ -196,6 +196,7 @@ class ASDiGraph(nx.DiGraph):
             WorkflowNodeType.PIPELINE,
             WorkflowNodeType.COPY,
             WorkflowNodeType.SERVICE,
+            WorkflowNodeType.TOOL,
         ]:
             raise NotImplementedError(node_cls)
 
