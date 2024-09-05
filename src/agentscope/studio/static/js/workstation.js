@@ -801,7 +801,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                         "column": 1,
                         "spacing": 10,
                         "title_height": 100,
-                        "font_name": "",
+                        "font_name": "SimHei",
                     }
                 }, htmlSourceCode);
             break;
