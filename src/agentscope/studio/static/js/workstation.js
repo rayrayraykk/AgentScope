@@ -36,7 +36,7 @@ let nameToHtmlFile = {
     'PythonService': 'service-execute-python.html',
     'ReadTextService': 'service-read-text.html',
     'WriteTextService': 'service-write-text.html',
-    'Post': 'tool-post.html'
+    'Post': 'tool-post.html',
     'ImageComposition': 'tool-image-composition.html'
 }
 
@@ -795,14 +795,14 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             editor.addNode('Post', 1, 1,
                 pos_x, pos_y, 'Post', {
                     "args": {
-                        "url": "https://api.remove.bg/v1.0/removebg",
+                        "url": "",
                         "image_path_or_url": "",
-                        "headers": '{"X-Api-Key": "xxxxx"}',
+                        "headers": '{"xxx": "yyy"}',
                         "data": '{"size": "auto"}',
                         "json": '{}',
                         "kwargs": '{}',
                         "output_path": "",
-                        "output_type": "image",
+                        "output_type": "",
                     }
                 }, htmlSourceCode);
             break;

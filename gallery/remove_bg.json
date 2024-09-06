@@ -29,15 +29,15 @@
               },
               "model_type": "dashscope_image_synthesis",
               "messages_key": "prompt",
-              "api_key": "*****"
+              "api_key": ""
             }
           },
           "class": "dashscope_image_synthesis",
           "typenode": false,
           "inputs": {},
           "outputs": {},
-          "pos_x": 37.111111111111114,
-          "pos_y": -9.88888888888889
+          "pos_x": 24.88888888888889,
+          "pos_y": -12
         },
         "3": {
           "id": 3,
@@ -100,7 +100,7 @@
               ]
             }
           },
-          "pos_x": 216,
+          "pos_x": 245.11111111111111,
           "pos_y": 164
         },
         "5": {
@@ -110,7 +110,7 @@
             "args": {
               "url": "https://api.remove.bg/v1.0/removebg",
               "image_path_or_url": "",
-              "headers": "{\"X-Api-Key\": \"****\"}",
+              "headers": "{\"X-Api-Key\": \"\"}",
               "data": "{\"size\": \"auto\"}",
               "json": "{}",
               "kwargs": "{}",
@@ -134,8 +134,8 @@
               "connections": []
             }
           },
-          "pos_x": 919.1111111111111,
-          "pos_y": -56.888888888888886
+          "pos_x": 948,
+          "pos_y": -60
         }
       }
     }
