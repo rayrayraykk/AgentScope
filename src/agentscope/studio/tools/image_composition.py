@@ -99,10 +99,16 @@ def get_min_font_size(
             break
         font_size = 10  # Start with a small font size
         while True:
-            font = ImageFont.truetype(
-                font_path,
-                font_size if font_path else 20,
-            )
+            try:
+                font = ImageFont.truetype(
+                    font_path,
+                    font_size if font_path else 20,
+                )
+            except OSError as exc:
+                raise FileNotFoundError(
+                    f"Font file not found: {font_path}",
+                ) from exc
+
             sample_width, _ = text_size(text, font=font)
             avg_char_width = sample_width / len(text)
             chars_per_line = max(1, int(target_width / avg_char_width))
