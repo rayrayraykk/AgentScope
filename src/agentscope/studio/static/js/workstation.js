@@ -800,7 +800,8 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                         "data": '{"size": "auto"}',
                         "json": '{}',
                         "kwargs": '{}',
-                        "output_path": ""
+                        "output_path": "",
+                        "output_type": "image",
                     }
                 }, htmlSourceCode);
             break;

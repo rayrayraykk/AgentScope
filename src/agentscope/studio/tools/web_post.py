@@ -16,6 +16,7 @@ from agentscope.message import Msg
 def web_post(
     url: str,
     output_path: str = "",
+    output_type: str = "image",
     msg: Msg = None,
     image_path_or_url: str = None,
     data: Union[str, dict] = None,
@@ -26,6 +27,8 @@ def web_post(
 
     :param url: URL to send the request to
     :param output_path: Path to save the output image
+    :param output_type: Type of the output, can be "image" or "text" or
+        "audio" or "video"
     :param msg: Msg object containing the image URL
     :param image_path_or_url: Local path or URL of the image
     :param data: Data to send, can be a string or a dictionary
@@ -35,22 +38,22 @@ def web_post(
     # Parse image source
     image_url, image_path = parse_image_source(msg, image_path_or_url)
 
-    # Raise an exception if no image information is provided
-    if not image_url and not image_path:
-        raise ValueError("No image provided")
-
     # Update the data or kwargs parameters
     if image_url:
         if isinstance(data, dict):
             data["image_url"] = image_url
     elif image_path:
         with open(image_path, "rb") as image_file:
-            kwargs["files"] = {"image": image_file}
-            response = requests.post(url, data=data, **kwargs)
-            return process_response(response, output_path)
+            image_data = image_file.read()
+        kwargs["files"] = {
+            "image_file": (
+                os.path.basename(image_path),
+                image_data,
+            ),
+        }
 
     response = requests.post(url, data=data, **kwargs)
-    return process_response(response, output_path)
+    return process_response(response, output_path, output_type)
 
 
 def parse_image_source(msg: Msg, image_path_or_url: str) -> Tuple[str, str]:
@@ -75,24 +78,31 @@ def parse_image_source(msg: Msg, image_path_or_url: str) -> Tuple[str, str]:
     return image_url, image_path
 
 
-def process_response(response: requests.Response, output_path: str) -> str:
+def process_response(
+    response: requests.Response,
+    output_path: str,
+    output_type: str = "image",
+) -> str:
     """
     Process the HTTP response and save the image if successful.
 
     :param response: HTTP response object
     :param output_path: Path to save the output image
+    :param output_type: Type of the output, can be "image" or "text" or
+        "audio" or "video"
     :return: Path to the saved output image
     """
     if response.status_code == requests.codes.ok:
-        # Read the response content into a BytesIO object
-        img = Image.open(BytesIO(response.content))
+        if output_type == "image":
+            # Read the response content into a BytesIO object
+            img = Image.open(BytesIO(response.content))
 
-        # Display the image
-        img.show()
+            # Display the image
+            img.show()
 
-        # Save the image
-        if output_path:
-            img.save(output_path)
+            # Save the image
+            if output_path:
+                img.save(output_path)
     else:
         # Print the error message
         print("Error:", response.status_code, response.text)
