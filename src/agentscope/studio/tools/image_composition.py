@@ -270,7 +270,7 @@ def stitch_images_with_grid(
         titles,
         font_name,
         max_width - spacing * 2,
-        title_height,
+        title_height - spacing,
     )
 
     wrapped_texts = wrap_texts_with_font(titles, font, max_width - spacing * 2)
@@ -279,11 +279,11 @@ def stitch_images_with_grid(
         row_idx = idx // column
         col_idx = idx % column
         x = col_idx * max_width
-        y = row_idx * max_height + title_height
+        y = row_idx * max_height + title_height + spacing * 3
 
         title_x = x + spacing // 2  # Add some left padding to the title
         title_y = (
-            row_idx * max_height
+            row_idx * max_height + spacing
         )  # Title starts at the top of its section
 
         # Create draw object
@@ -293,7 +293,7 @@ def stitch_images_with_grid(
         current_y = title_y
         for line in wrapped_texts[idx].split("\n"):
             draw.text((title_x, current_y), line, fill="black", font=font)
-            current_y += text_size(line, font=font)[1]
+            current_y += text_size(line, font=font)[1] + spacing
 
         combined.paste(image, (x, y))
 
