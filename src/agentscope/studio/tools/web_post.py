@@ -103,6 +103,19 @@ def process_response(
             # Save the image
             if output_path:
                 img.save(output_path)
+        # TODO: Handle other output types
+        elif output_type == "text":
+            # Save the text content to a file
+            if output_path:
+                with open(output_path, "w", encoding="utf-8") as text_file:
+                    text_file.write(response.text)
+        elif output_type in ["audio", "video"]:
+            # Save the audio or video content to a file
+            if output_path:
+                with open(output_path, "wb") as media_file:
+                    media_file.write(response.content)
+        else:
+            raise ValueError(f"Unsupported output type: {output_type}")
     else:
         # Print the error message
         print("Error:", response.status_code, response.text)
