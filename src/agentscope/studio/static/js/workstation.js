@@ -2606,19 +2606,6 @@ class Notification {
             }
         }
     }
-    // addConfirmListener() {
-    //     this.confirmBtn.addEventListener('click', () => {
-    //         this.onConfirm();
-    //         this.destroy();
-    //     });
-    // }
-
-    // addCancelListener() {
-    //     this.cancelBtn.addEventListener('click', () => {
-    //         this.onCancel();
-    //         this.destroy();
-    //     });
-    // }
 }
 
 function createNotification({
