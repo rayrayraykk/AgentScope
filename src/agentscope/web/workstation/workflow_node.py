@@ -1175,8 +1175,6 @@ def get_all_agents(
                 return_var=return_var,
             )
             all_agents.extend(nested_agents)
-        elif participant.node_type == WorkflowNodeType.COPY:
-            continue
         else:
             raise TypeError(type(participant))
 
