@@ -1087,7 +1087,9 @@ class ImageCompositionNode(WorkflowNode):
         )
         self.pipeline = partial(stitch_images_with_grid, **self.opt_kwargs)
 
-    def __call__(self, x: dict = None) -> dict:
+    def __call__(self, x: list = None) -> dict:
+        if isinstance(x, dict):
+            x = [x]
         return self.pipeline(x)
 
     def compile(self) -> dict:
