@@ -7,6 +7,8 @@ import os
 from typing import Union, Tuple
 from urllib.parse import urlparse
 from io import BytesIO
+
+import json5
 from PIL import Image
 import requests
 
@@ -20,6 +22,8 @@ def web_post(
     msg: Msg = None,
     image_path_or_url: str = None,
     data: Union[str, dict] = None,
+    headers: dict = None,
+    json: dict = False,
     **kwargs: dict,
 ) -> str:
     """
@@ -32,11 +36,22 @@ def web_post(
     :param msg: Msg object containing the image URL
     :param image_path_or_url: Local path or URL of the image
     :param data: Data to send, can be a string or a dictionary
+    :param headers: Headers to send with the request
+    :param json: JSON data to send
     :param kwargs: Additional request parameters
     :return: Path to the saved output image
     """
     # Parse image source
     image_url, image_path = parse_image_source(msg, image_path_or_url)
+
+    if data and isinstance(data, str):
+        data = json5.loads(data)
+
+    if json and isinstance(json, str):
+        json = json5.loads(json)
+
+    if headers and isinstance(headers, str):
+        headers = json5.loads(headers)
 
     # Update the data or kwargs parameters
     if image_url:
@@ -52,7 +67,13 @@ def web_post(
             ),
         }
 
-    response = requests.post(url, data=data, **kwargs)
+    response = requests.post(
+        url,
+        data=data,
+        json=json,
+        headers=headers,
+        **kwargs,
+    )
     return process_response(response, output_path, output_type)
 
 

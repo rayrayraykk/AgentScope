@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Workflow node opt."""
 import ast
-import json
 from abc import ABC, abstractmethod
 from enum import IntEnum
 from functools import partial
@@ -1022,16 +1021,6 @@ class PostNode(WorkflowNode):
             kwargs = ast.literal_eval(self.opt_kwargs["kwargs"].strip())
             del self.opt_kwargs["kwargs"]
             self.opt_kwargs.update(**kwargs)
-        for k, v in self.opt_kwargs.items():
-            if v and isinstance(v, str):
-                v = v.strip()
-                if v.startswith("{") and v.endswith("}"):
-                    try:
-                        # Use json.loads instead of ast.literal_eval
-                        self.opt_kwargs[k] = json.loads(v)
-                    except json.JSONDecodeError:
-                        # Fallback to ast.literal_eval if json fails
-                        self.opt_kwargs[k] = ast.literal_eval(v)
 
         self.pipeline = partial(web_post, **self.opt_kwargs)
 
