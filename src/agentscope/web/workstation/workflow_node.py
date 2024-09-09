@@ -42,6 +42,7 @@ from agentscope.service import (
     ServiceToolkit,
 )
 from agentscope.studio.tools.image_composition import stitch_images_with_grid
+from agentscope.studio.tools.video_composition import merge_videos
 
 from agentscope.studio.tools.web_post import web_post
 
@@ -1148,6 +1149,45 @@ class ImageCompositionNode(WorkflowNode):
         }
 
 
+class VideoCompositionNode(WorkflowNode):
+    """
+    Video Composition Node
+    """
+
+    node_type = WorkflowNodeType.TOOL
+
+    def __init__(
+        self,
+        node_id: str,
+        opt_kwargs: dict,
+        source_kwargs: dict,
+        dep_opts: list,
+        only_compile: bool = True,
+    ) -> None:
+        super().__init__(
+            node_id,
+            opt_kwargs,
+            source_kwargs,
+            dep_opts,
+            only_compile,
+        )
+        self.pipeline = partial(merge_videos, **self.opt_kwargs)
+
+    def __call__(self, x: dict = None) -> dict:
+        return self.pipeline(x)
+
+    def compile(self) -> dict:
+        return {
+            "imports": "from agentscope.studio.tools.video_composition import "
+            "merge_videos\n"
+            "from functools import partial\n",
+            "inits": f"{self.var_name} = partial(merge_videos"
+            f", {kwarg_converter(self.opt_kwargs)})",
+            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
+            f"([{DEFAULT_FLOW_VAR}])",
+        }
+
+
 NODE_NAME_MAPPING = {
     "dashscope_chat": ModelNode,
     "openai_chat": ModelNode,
@@ -1177,6 +1217,7 @@ NODE_NAME_MAPPING = {
     "TextToAudioService": TextToAudioServiceNode,
     "TextToImageService": TextToImageServiceNode,
     "ImageComposition": ImageCompositionNode,
+    "VideoComposition": VideoCompositionNode,
 }
 
 

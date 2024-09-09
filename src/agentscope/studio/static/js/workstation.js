@@ -39,7 +39,8 @@ let nameToHtmlFile = {
     'Post': 'tool-post.html',
     'TextToAudioService': 'service-text-to-audio.html',
     'TextToImageService': 'service-text-to-image.html',
-    'ImageComposition': 'tool-image-composition.html'
+    'ImageComposition': 'tool-image-composition.html',
+    'VideoComposition': 'tool-video-composition.html'
 }
 
 const ModelNames48k = [
@@ -860,6 +861,17 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                     }
                 }, htmlSourceCode);
             break;
+        case 'VideoComposition':
+            editor.addNode('VideoComposition', 1, 1,
+                pos_x, pos_y, 'VideoComposition', {
+                    "args": {
+                        "video_files": "",
+                        "output_path": "",
+                        "target_width": "",
+                        "target_height": "",
+                        "fps": "",
+                    }
+               }, htmlSourceCode);
 
         default:
     }
@@ -1414,6 +1426,7 @@ function checkConditions() {
         if (node.inputs) {
             for (let inputKey in node.inputs) {
                 if (node.class !== "ImageComposition" &&
+                    node.class !== "VideoComposition" &&
                     node.inputs[inputKey].connections &&
                     node.inputs[inputKey].connections.length > 1) {
                     Swal.fire({
