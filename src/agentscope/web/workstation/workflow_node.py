@@ -4,7 +4,7 @@ import ast
 from abc import ABC, abstractmethod
 from enum import IntEnum
 from functools import partial
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from agentscope import msghub
 from agentscope.agents import (
@@ -99,7 +99,7 @@ class WorkflowNode(ABC):
                 if is_callable_expression(value):
                     self.opt_kwargs[key] = convert_str_to_callable(value)
 
-    def __call__(self, x: dict = None):  # type: ignore[no-untyped-def]
+    def __call__(self, x: Any = None):  # type: ignore[no-untyped-def]
         """
         Invokes the node's operations with the provided input.
 
@@ -1134,7 +1134,9 @@ class ImageCompositionNode(WorkflowNode):
         )
         self.pipeline = partial(stitch_images_with_grid, **self.opt_kwargs)
 
-    def __call__(self, x: dict = None) -> dict:
+    def __call__(self, x: list = None) -> dict:
+        if isinstance(x, dict):
+            x = [x]
         return self.pipeline(x)
 
     def compile(self) -> dict:
