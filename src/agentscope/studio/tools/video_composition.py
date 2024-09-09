@@ -86,9 +86,8 @@ def rescale_video(
 
 
 def merge_videos(
-    video_msgs: list[Msg] = None,
+    video_files: List[Union[str, Msg]] = None,
     output_path: str = None,
-    video_files: List[str] = None,
     target_width: Optional[int] = None,
     target_height: Optional[int] = None,
     target_fps: Optional[int] = None,
@@ -97,7 +96,6 @@ def merge_videos(
     Concatenate multiple video files into a single video file.
 
     Args:
-        video_msgs: A list of Msg objects containing video urls.
         video_files: A list of paths to the video files to be merged. Can
             also be a JSON string representing a list of video file paths.
         output_path: Path to save the merged video file.
@@ -111,20 +109,14 @@ def merge_videos(
     Raises:
         AssertionError: If no video files are provided.
     """
-    assert (
-        len(video_msgs) > 0 or len(video_files) > 0
-    ), "No video files to append"
-
-    videos = []
-    if video_msgs:
-        videos = load_videos_from_string(video_msgs)
+    assert len(video_files) > 0, "No video files to append"
 
     # If video_files is a JSON string, parse it to a list
     if video_files and isinstance(video_files, str):
         video_files = json5.loads(video_files)
 
         # Extract string paths for the videos
-        videos.extend(load_videos_from_string(video_files))
+    videos = load_videos_from_string(video_files)
 
     # If target properties are not provided, use properties of the first video
     if not all([target_width, target_height, target_fps]):

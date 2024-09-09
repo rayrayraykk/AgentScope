@@ -807,22 +807,6 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                 pos_x, pos_y, 'WriteTextService', {}, htmlSourceCode);
             break;
 
-        case 'Post':
-            editor.addNode('Post', 1, 1,
-                pos_x, pos_y, 'Post', {
-                    "args": {
-                        "url": "",
-                        "image_path_or_url": "",
-                        "headers": '{"xxx": "yyy"}',
-                        "data": '{"size": "auto"}',
-                        "json": '{}',
-                        "kwargs": '{}',
-                        "output_path": "",
-                        "output_type": "",
-                    }
-                }, htmlSourceCode);
-            break;
-
         case 'TextToAudioService':
             const TextToAudioServiceID = editor.addNode('TextToAudioService', 0, 0,
                 pos_x, pos_y, 'TextToAudioService', {
@@ -850,7 +834,6 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             editor.addNode('ImageComposition', 1, 1,
                 pos_x, pos_y, 'ImageComposition', {
                     "args": {
-                        "image_urls": [],
                         "titles": "",
                         "output_path": "",
                         "row": 1,
@@ -865,13 +848,28 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             editor.addNode('VideoComposition', 1, 1,
                 pos_x, pos_y, 'VideoComposition', {
                     "args": {
-                        "video_files": "",
                         "output_path": "",
                         "target_width": "",
                         "target_height": "",
                         "fps": "",
                     }
                }, htmlSourceCode);
+            break;
+
+        case 'Post':
+            editor.addNode('Post', 1, 1,
+                pos_x, pos_y, 'Post', {
+                    "args": {
+                        "url": "",
+                        "headers": '{"xxx": "yyy"}',
+                        "data": '{"size": "auto"}',
+                        "json": '{}',
+                        "kwargs": '{}',
+                        "output_path": "",
+                        "output_type": "",
+                    }
+                }, htmlSourceCode);
+            break;
 
         default:
     }
