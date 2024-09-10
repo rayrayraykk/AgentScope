@@ -25,7 +25,7 @@ def web_post(
     headers: dict = None,
     json: dict = False,
     **kwargs: dict,
-) -> str:
+) -> Msg:
     """
     Send an HTTP POST request, upload an image and process the response.
 
@@ -103,7 +103,7 @@ def process_response(
     response: requests.Response,
     output_path: str,
     output_type: str = "image",
-) -> str:
+) -> Msg:
     """
     Process the HTTP response and save the image if successful.
 
@@ -141,7 +141,13 @@ def process_response(
         # Print the error message
         print("Error:", response.status_code, response.text)
 
-    return output_path
+    return Msg(
+        name="Post",
+        role="assistant",
+        content=output_path,
+        url=output_path,
+        echo=True,
+    )
 
 
 def is_url(path: str) -> bool:

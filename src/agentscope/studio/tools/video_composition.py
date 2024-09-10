@@ -91,7 +91,7 @@ def merge_videos(
     target_width: Optional[int] = None,
     target_height: Optional[int] = None,
     target_fps: Optional[int] = None,
-) -> None:
+) -> Msg:
     """
     Concatenate multiple video files into a single video file.
 
@@ -171,3 +171,11 @@ def merge_videos(
         for temp_file in temp_files:
             os.remove(temp_file)
         os.rmdir(temp_dir)
+
+    return Msg(
+        "VideoComposition",
+        role="assistant",
+        content=output_path,
+        url=output_path,
+        echo=True,
+    )

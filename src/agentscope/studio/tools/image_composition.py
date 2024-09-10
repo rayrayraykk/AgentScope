@@ -10,6 +10,8 @@ from PIL import Image, ImageDraw, ImageFont
 import requests
 import json5
 
+from agentscope.message import Msg
+
 
 def is_url(path: str) -> bool:
     """
@@ -235,7 +237,7 @@ def stitch_images_with_grid(
     spacing: int = 10,
     title_height: int = 100,
     font_name: Optional[str] = None,
-) -> str:
+) -> Msg:
     """
     Stitch multiple images and titles into a single image, supporting
     custom grid layouts.
@@ -307,4 +309,10 @@ def stitch_images_with_grid(
         combined.save(output_path)
     combined.show()
 
-    return output_path
+    return Msg(
+        name="ImageComposition",
+        role="assistant",
+        content=output_path,
+        url=output_path,
+        echo=True,
+    )
