@@ -38,7 +38,8 @@ let nameToHtmlFile = {
     'WriteTextService': 'service-write-text.html',
     'TextToAudioService': 'service-text-to-audio.html',
     'TextToImageService': 'service-text-to-image.html',
-    'ImageComposition': 'tool-image-composition.html'
+    'ImageComposition': 'tool-image-composition.html',
+    'Code': 'tool-code.html'
 }
 
 const ModelNames48k = [
@@ -841,10 +842,75 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                     }
                 }, htmlSourceCode);
             break;
+            case 'Code':
+                const CodeID = editor.addNode('Code', 1, 1,
+                    pos_x, pos_y, 'Code', {
+                        "args": {
+                            "code": "\ndef main():\n    pass\n",
+                        }
+                    }, htmlSourceCode);
+                    initializeMonacoEditor(CodeID)
+                break;
 
         default:
     }
 }
+
+function initializeMonacoEditor(nodeId) {
+    require.config({
+        paths: {
+            vs: "https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs",
+        },
+    });
+
+    require(["vs/editor/editor.main"], function () {
+        const parentSelector = `#node-${nodeId}`;
+        const parentNode = document.querySelector(parentSelector);
+
+        if (!parentNode) {
+            console.error(`Parent node with selector ${parentSelector} not found.`);
+            return;
+        }
+
+        const codeContentElement = parentNode.querySelector(`#code-content`);
+        if (!codeContentElement) {
+            console.error(`Code content element not found within parent node ${parentSelector}.`);
+            return;
+        }
+
+        const node = editor.getNodeFromId(nodeId);
+        if (!node) {
+            console.error(`Node with ID ${nodeId} not found.`);
+            return;
+        }
+
+        const editorInstance = monaco.editor.create(codeContentElement, {
+            value: node.data.args.code,
+            language: "python",
+            theme: "vs-light",
+            minimap: {
+                enabled: false,
+            },
+            wordWrap: "on",
+            lineNumbersMinChars: 1,
+            scrollBeyondLastLine: false,
+            readOnly: false,
+        });
+
+        editorInstance.onDidChangeModelContent(function () {
+            const updatedNode = editor.getNodeFromId(nodeId);
+            if (updatedNode) {
+                updatedNode.data.args.code = editorInstance.getValue();
+                editor.updateNodeDataFromId(nodeId, updatedNode.data);
+            }
+        });
+
+    }, function (error) {
+        console.error("Error encountered while loading monaco editor: ", error);
+    });
+}
+
+
 
 function updateSampleRate(nodeId) {
     const newNode = document.getElementById(`node-${nodeId}`);
@@ -891,7 +957,7 @@ function setupTextInputListeners(nodeId) {
         };
         newNode.addEventListener('mousedown', function (event) {
             const target = event.target;
-            if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') {
+            if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.closest('.code-block-border')) {
                 stopPropagation(event);
             }
         }, false);
