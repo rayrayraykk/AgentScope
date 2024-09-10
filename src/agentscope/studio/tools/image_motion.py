@@ -1,21 +1,45 @@
 # -*- coding: utf-8 -*-
 """Image motion"""
-
+import shutil
+import tempfile
+import urllib.request
 from random import choice
 import cv2
 import numpy as np
 from PIL import Image
 from agentscope.message import Msg
+from agentscope.studio.tools.utils import is_url
 
 
 def get_image_path_or_url(image_msg: Msg) -> str:
     """Get image path or url from image message"""
     if image_msg.url:
-        return image_msg.url
+        if isinstance(image_msg.url, list):
+            return image_msg.url[0]
+        else:
+            return image_msg.url
     elif image_msg.content:
         return image_msg.content
     else:
         raise ValueError("Image message must have content or url")
+
+
+def load_image(image_path: str) -> np.ndarray:
+    """Load an image from a local path or URL."""
+    if is_url(image_path):
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(delete=False) as temp:
+            # Download the image from the URL and save it to the temp file
+            with urllib.request.urlopen(image_path) as response:
+                temp.write(response.read())
+            # Load the image using OpenCV
+            img = cv2.imread(temp.name)
+        # Delete the temp file
+        shutil.rmtree(temp.name, ignore_errors=True)
+    else:
+        # Load the image from a local path
+        img = cv2.imread(image_path)
+    return img
 
 
 def create_video_or_gif_from_image(
@@ -127,7 +151,7 @@ def create_video_or_gif_from_image(
     camera_moves = ["left", "right", "zoom_out", "zoom_in"]
 
     image_path = get_image_path_or_url(msg)
-    img = cv2.imread(image_path)
+    img = load_image(image_path)
     height, width, _ = img.shape
     size = (width, height)
 

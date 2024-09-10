@@ -1,46 +1,15 @@
 # -*- coding: utf-8 -*-
 """Image composition"""
-import os
 import textwrap
 
 from typing import List, Optional, Union, Tuple, Sequence
 from io import BytesIO
-from urllib.parse import urlparse
 from PIL import Image, ImageDraw, ImageFont
 import requests
 import json5
 
 from agentscope.message import Msg
-
-
-def is_url(path: str) -> bool:
-    """
-    Check if the provided path is a URL.
-
-    Parameters:
-    - path: The path to be checked.
-
-    Returns:
-    - bool: True if the path is a valid URL, False otherwise.
-    """
-    try:
-        result = urlparse(path)
-        return all([result.scheme, result.netloc])
-    except ValueError:
-        return False
-
-
-def is_local_file(path: str) -> bool:
-    """
-    Check if the provided path is a local file.
-
-    Parameters:
-    - path: The path to be checked.
-
-    Returns:
-    - bool: True if the path exists and is a file, False otherwise.
-    """
-    return os.path.isfile(path)
+from agentscope.studio.tools.utils import is_local_file, is_url
 
 
 def text_size(text: str, font: ImageFont) -> Tuple[int, int]:

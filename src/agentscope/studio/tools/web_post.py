@@ -5,7 +5,6 @@ Post for removing background from images using a web API.
 
 import os
 from typing import Union, Tuple
-from urllib.parse import urlparse
 from io import BytesIO
 
 import json5
@@ -13,6 +12,7 @@ from PIL import Image
 import requests
 
 from agentscope.message import Msg
+from agentscope.studio.tools.utils import is_url, is_local_file
 
 
 def web_post(
@@ -89,7 +89,10 @@ def parse_image_source(msg: Msg, image_path_or_url: str) -> Tuple[str, str]:
     image_path = ""
 
     if msg and msg.url:
-        image_url = msg.url
+        if isinstance(msg.url, list):
+            image_url = msg.url[0]
+        else:
+            image_url = msg.url
     if image_path_or_url:
         if is_url(image_path_or_url):
             image_url = image_path_or_url
@@ -148,27 +151,3 @@ def process_response(
         url=output_path,
         echo=True,
     )
-
-
-def is_url(path: str) -> bool:
-    """
-    Check if the provided path is a URL.
-
-    :param path: The path to be checked.
-    :return: True if the path is a valid URL, False otherwise.
-    """
-    try:
-        result = urlparse(path)
-        return all([result.scheme, result.netloc])
-    except ValueError:
-        return False
-
-
-def is_local_file(path: str) -> bool:
-    """
-    Check if the provided path is a local file.
-
-    :param path: The path to be checked.
-    :return: True if the path exists and is a file, False otherwise.
-    """
-    return os.path.isfile(path)
