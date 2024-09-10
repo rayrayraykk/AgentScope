@@ -1186,11 +1186,10 @@ class CodeNode(WorkflowNode):
             out = self.pipeline(code)
             if out.status == ServiceExecStatus.SUCCESS:
                 content = self.extract_result(out.content)
-                res = json.loads(content)
-                return res
+                return json.loads(content)
             return out
         except Exception as e:
-            raise e
+            raise RuntimeError('Code id: {self.node_id},error executing :{e}')
 
     def compile(self) -> dict:
         code = self.opt_kwargs.get("code", "").replace(
