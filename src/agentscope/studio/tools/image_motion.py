@@ -3,7 +3,7 @@
 import shutil
 import tempfile
 import urllib.request
-from random import choice
+import random
 import cv2
 import numpy as np
 from PIL import Image
@@ -60,8 +60,8 @@ def create_video_or_gif_from_image(
         output_path: The file path where the resulting video or GIF
              will be saved.
         motion_style: The type of camera movement to apply. Valid
-            options are 'left', 'right', 'zoom_in', and 'zoom_out'. If
-            left empty, a random movement will be chosen.
+            options are 'ramdom', 'left', 'right', 'zoom_in',
+            and 'zoom_out'. If left empty, a random movement will be chosen.
         duration: Duration of the video/GIF in seconds.
         fps: Frames per second of the output video/GIF.
         output_format: The format of the output file. Can be either
@@ -156,8 +156,8 @@ def create_video_or_gif_from_image(
     size = (width, height)
 
     frames_count = duration * fps
-    if not motion_style:
-        move = choice(camera_moves)
+    if not motion_style or motion_style == "random":
+        move = random.choice(camera_moves)
     else:
         move = motion_style
     frames = []
