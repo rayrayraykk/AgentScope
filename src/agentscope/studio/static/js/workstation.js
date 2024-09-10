@@ -861,10 +861,10 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                 pos_x, pos_y, 'Post', {
                     "args": {
                         "url": "",
-                        "headers": '{"xxx": "yyy"}',
-                        "data": '{"size": "auto"}',
-                        "json": '{}',
-                        "kwargs": '{}',
+                        "headers": '',
+                        "data": '',
+                        "json": '',
+                        "kwargs": '',
                         "output_path": "",
                         "output_type": "",
                     }
