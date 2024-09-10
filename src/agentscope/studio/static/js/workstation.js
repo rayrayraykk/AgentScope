@@ -905,6 +905,23 @@ function initializeMonacoEditor(nodeId) {
             }
         });
 
+        editorInstance.onDidChangeModelContent(function () {
+            const updatedNode = editor.getNodeFromId(nodeId);
+            if (updatedNode) {
+                updatedNode.data.args.code = editorInstance.getValue();
+                editor.updateNodeDataFromId(nodeId, updatedNode.data);
+            }
+        });
+
+        const resizeObserver = new ResizeObserver(() => {
+            editorInstance.layout();
+        });
+        resizeObserver.observe(parentNode);
+
+        parentNode.addEventListener('DOMNodeRemoved', function () {
+            resizeObserver.disconnect();
+        });
+
     }, function (error) {
         console.error("Error encountered while loading monaco editor: ", error);
     });
