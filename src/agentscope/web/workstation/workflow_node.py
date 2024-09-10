@@ -1189,7 +1189,9 @@ class CodeNode(WorkflowNode):
                 return json.loads(content)
             return out
         except Exception as e:
-            raise RuntimeError('Code id: {self.node_id},error executing :{e}')
+            raise RuntimeError(
+                f"Code id: {self.node_id},error executing :{e}",
+            ) from e
 
     def compile(self) -> dict:
         code = self.opt_kwargs.get("code", "").replace(
