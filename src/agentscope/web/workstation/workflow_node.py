@@ -4,7 +4,9 @@ from abc import ABC, abstractmethod
 from enum import IntEnum
 from functools import partial
 from typing import List, Optional, Any
-
+import json
+import re
+from textwrap import dedent
 from agentscope import msghub
 from agentscope.agents import (
     DialogAgent,
@@ -39,6 +41,7 @@ from agentscope.service import (
     dashscope_text_to_audio,
     dashscope_text_to_image,
     ServiceToolkit,
+    ServiceExecStatus,
 )
 from agentscope.studio.tools.image_composition import stitch_images_with_grid
 
@@ -1104,6 +1107,104 @@ class ImageCompositionNode(WorkflowNode):
         }
 
 
+class CodeNode(WorkflowNode):
+    """
+    Python Code Node
+    """
+
+    node_type = WorkflowNodeType.TOOL
+
+    def __init__(
+        self,
+        node_id: str,
+        opt_kwargs: dict,
+        source_kwargs: dict,
+        dep_opts: list,
+        only_compile: bool = True,
+    ) -> None:
+        super().__init__(
+            node_id,
+            opt_kwargs,
+            source_kwargs,
+            dep_opts,
+            only_compile,
+        )
+
+        self.pipeline = execute_python_code
+        self.code_tags = "{{code}}"
+        self.input_tags = "{{inputs}}"
+        self.output_tags = "<<RESULT>>"
+
+    def template(self) -> str:
+        """
+        Code template
+        """
+        template = dedent(
+            f"""
+            {self.code_tags}
+            import json
+
+            if isinstance({self.input_tags}, str):
+                inputs_obj = json.loads({self.input_tags})
+            else:
+                inputs_obj = {self.input_tags}
+
+            output_obj = main(*inputs_obj)
+
+            output_json = json.dumps(output_obj, indent=4)
+            result = f'''{self.output_tags}{{output_json}}{self.output_tags}'''
+            print(result)
+            """,
+        )
+        return template
+
+    def extract_result(self, content: str) -> Any:
+        """
+        Extract result from content
+        """
+        result = re.search(
+            rf"{self.output_tags}(.*){self.output_tags}",
+            content,
+            re.DOTALL,
+        )
+        if not result:
+            raise ValueError("Failed to parse result")
+        result = result.group(1)
+        return result
+
+    def __call__(self, x: list = None) -> dict:
+        if isinstance(x, dict):
+            x = [x]
+
+        code = self.template().replace(
+            self.code_tags,
+            self.opt_kwargs.get("code", ""),
+        )
+        inputs = json.dumps(x, ensure_ascii=True).replace("null", "None")
+        code = code.replace(self.input_tags, inputs)
+        try:
+            out = self.pipeline(code)
+            if out.status == ServiceExecStatus.SUCCESS:
+                content = self.extract_result(out.content)
+                res = json.loads(content)
+                return res
+            return out
+        except Exception as e:
+            raise e
+
+    def compile(self) -> dict:
+        code = self.opt_kwargs.get("code", "").replace(
+            "def main",
+            f"def main_{self.node_id}",
+        )
+        return {
+            "imports": code,
+            "inits": f"{self.var_name} = main_{self.node_id}",
+            "execs": f"{DEFAULT_FLOW_VAR} = main_{self.node_id}"
+            f"(*[{DEFAULT_FLOW_VAR}])",
+        }
+
+
 NODE_NAME_MAPPING = {
     "dashscope_chat": ModelNode,
     "openai_chat": ModelNode,
@@ -1132,6 +1233,7 @@ NODE_NAME_MAPPING = {
     "TextToAudioService": TextToAudioServiceNode,
     "TextToImageService": TextToImageServiceNode,
     "ImageComposition": ImageCompositionNode,
+    "Code": CodeNode,
 }
 
 

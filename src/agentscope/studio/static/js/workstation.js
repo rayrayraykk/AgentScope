@@ -846,7 +846,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                 const CodeID = editor.addNode('Code', 1, 1,
                     pos_x, pos_y, 'Code', {
                         "args": {
-                            "code": "\ndef main():\n    pass\n",
+                            "code": "\ndef main(arg1, arg2):\n    return {\n        \"content\": arg1 + arg2\n    }\n"
                         }
                     }, htmlSourceCode);
                     initializeMonacoEditor(CodeID)
