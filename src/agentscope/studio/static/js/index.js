@@ -99,7 +99,7 @@ function loadTabPage(pageUrl, javascriptUrl) {
                     serverTabBtn.classList.remove("selected");
                     break;
 
-                case "static/html/market.html":
+                case "static/html/gallery.html":
                     dashboardTabBtn.classList.remove("selected");
                     workstationTabBtn.classList.remove("selected");
                     marketTabBtn.classList.add("selected");
@@ -120,6 +120,7 @@ function loadTabPage(pageUrl, javascriptUrl) {
                 "<p>Loading failed.</p>" + error;
         });
 }
+
 
 loadTabPage("static/html/index-guide.html", null);
 
