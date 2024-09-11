@@ -872,7 +872,7 @@ function initializeMonacoEditor(nodeId) {
             return;
         }
 
-        const codeContentElement = parentNode.querySelector(`#code-content`);
+        const codeContentElement = parentNode.querySelector(`.code-content`);
         if (!codeContentElement) {
             console.error(`Code content element not found within parent node ${parentSelector}.`);
             return;
@@ -974,7 +974,7 @@ function setupTextInputListeners(nodeId) {
         };
         newNode.addEventListener('mousedown', function (event) {
             const target = event.target;
-            if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.closest('.code-block-border')) {
+            if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.closest('.code-content')) {
                 stopPropagation(event);
             }
         }, false);
