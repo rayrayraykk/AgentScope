@@ -72,6 +72,9 @@
     <button onclick="redirectToGitHub()" disabled
             id="loginButton">{{ _("Login with GitHub") }}
     </button>
+    <button onclick="loginAsGuest()"
+            id="loginGuestButton">{{ _("Login as Guest") }}
+    </button>
     <br><br>
 
     <div id="loaderContainer" class="waiting" style="display: none;">
@@ -125,6 +128,17 @@
                     encodeURIComponent(address);
                 window.location.href = `https://github.com/login/oauth/authorize?client_id={{ client_id }}&redirect_uri=${otherRedirectUri}&scope=${scope}`;
             }
+        }, 500);
+    }
+
+    function loginAsGuest() {
+        showLoader();
+        setTimeout(() => {
+            const ip = "{{ ip }}";
+            const port = "{{ port }}";
+            let address;
+            address = `http://${ip}:${port}/workstation`
+            window.location.href = address;
         }, 500);
     }
 
