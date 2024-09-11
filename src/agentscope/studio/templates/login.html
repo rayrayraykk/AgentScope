@@ -72,7 +72,7 @@
     <button onclick="redirectToGitHub()" disabled
             id="loginButton">{{ _("Login with GitHub") }}
     </button>
-    <button onclick="loginAsGuest()"
+    <button onclick="loginAsGuest()" disabled
             id="loginGuestButton">{{ _("Login as Guest") }}
     </button>
     <br><br>
@@ -98,6 +98,8 @@
         const checkBox = document.getElementById('agreeTerms');
         const loginButton = document.getElementById('loginButton');
         loginButton.disabled = !checkBox.checked;
+        const loginGuestButton = document.getElementById('loginGuestButton');
+        loginGuestButton.disabled = !checkBox.checked;
     }
 
     function showLoader() {

@@ -74,6 +74,13 @@ body {
     text-decoration: underline;
 }
 
+#loginGuestButton:disabled {
+    color: #d3d3d3;
+    cursor: not-allowed;
+    text-decoration: none;
+    transform: none;
+}
+
 .terms {
     background: #fff;
     padding: 20px;
