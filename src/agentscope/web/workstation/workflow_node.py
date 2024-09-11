@@ -224,7 +224,7 @@ class DialogAgentNode(WorkflowNode):
         self.pipeline = DialogAgent(**self.opt_kwargs)
 
     def __call__(self, x: dict = None) -> dict:
-        return self.pipeline(x)
+        return self.pipeline([x])
 
     def compile(self) -> dict:
         return {
@@ -232,7 +232,7 @@ class DialogAgentNode(WorkflowNode):
             "inits": f"{self.var_name} = DialogAgent("
             f"{kwarg_converter(self.opt_kwargs)})",
             "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"({DEFAULT_FLOW_VAR})",
+            f"([{DEFAULT_FLOW_VAR}])",
         }
 
 
@@ -335,7 +335,7 @@ class DictDialogAgentNode(WorkflowNode):
         self.pipeline = DictDialogAgent(**self.opt_kwargs)
 
     def __call__(self, x: dict = None) -> dict:
-        return self.pipeline(x)
+        return self.pipeline([x])
 
     def compile(self) -> dict:
         return {
@@ -343,7 +343,7 @@ class DictDialogAgentNode(WorkflowNode):
             "inits": f"{self.var_name} = DictDialogAgent("
             f"{kwarg_converter(self.opt_kwargs)})",
             "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"({DEFAULT_FLOW_VAR})",
+            f"([{DEFAULT_FLOW_VAR}])",
         }
 
 
@@ -381,7 +381,7 @@ class ReActAgentNode(WorkflowNode):
         )
 
     def __call__(self, x: dict = None) -> dict:
-        return self.pipeline(x)
+        return self.pipeline([x])
 
     def compile(self) -> dict:
         tools = deps_converter(self.dep_vars)[1:-1].split(",")
@@ -397,7 +397,7 @@ class ReActAgentNode(WorkflowNode):
             f"({kwarg_converter(self.opt_kwargs)}, service_toolkit"
             f"={self.var_name}_service_toolkit)",
             "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"({DEFAULT_FLOW_VAR})",
+            f"([{DEFAULT_FLOW_VAR}])",
         }
 
 
