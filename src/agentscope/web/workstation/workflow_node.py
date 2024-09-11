@@ -224,7 +224,7 @@ class DialogAgentNode(WorkflowNode):
         self.pipeline = DialogAgent(**self.opt_kwargs)
 
     def __call__(self, x: dict = None) -> dict:
-        return self.pipeline([x])
+        return self.pipeline(x)
 
     def compile(self) -> dict:
         return {
@@ -335,7 +335,7 @@ class DictDialogAgentNode(WorkflowNode):
         self.pipeline = DictDialogAgent(**self.opt_kwargs)
 
     def __call__(self, x: dict = None) -> dict:
-        return self.pipeline([x])
+        return self.pipeline(x)
 
     def compile(self) -> dict:
         return {
@@ -381,7 +381,7 @@ class ReActAgentNode(WorkflowNode):
         )
 
     def __call__(self, x: dict = None) -> dict:
-        return self.pipeline([x])
+        return self.pipeline(x)
 
     def compile(self) -> dict:
         tools = deps_converter(self.dep_vars)[1:-1].split(",")
