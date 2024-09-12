@@ -1,24 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     showTab('tab1');
+    showGalleryWorkflowList('tab1');
 });
 
-function generateThumbnailFromContent(content) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 150;
-    canvas.height = 150;
-    const ctx = canvas.getContext('2d');
-
-
-    ctx.fillStyle = '#f0f0f0';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.font = 'italic bold 14px "Helvetica Neue", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#333';
-    ctx.fillText(content.title, canvas.width / 2, canvas.height / 2 + 20);
-
-    return canvas.toDataURL();
-}
 
 function sendWorkflow(fileName) {
     if (confirm('Are you sure you want to import this workflow?')) {
@@ -62,6 +46,16 @@ function showTab(tabId) {
     if (tab) {
         tab.classList.add("active");
         tab.style.display = "block";
+
+        var tabButtons = document.getElementsByClassName("tab-button");
+        for (var j = 0; j < tabButtons.length; j++) {
+            tabButtons[j].classList.remove("active");
+        }
+        var activeTabButton = document.querySelector(`.tab-button[onclick*="${tabId}"]`);
+        if (activeTabButton) {
+            activeTabButton.classList.add("active");
+        }
+
         if (tabId === "tab2") {
             showLoadWorkflowList(tabId);
         } else if (tabId === "tab1") {
@@ -70,52 +64,67 @@ function showTab(tabId) {
     }
 }
 
-function createGridItem(workflowName, container, thumbnail, author = '', time = '') {
+
+function createGridItem(workflowName, container, thumbnail, author = '', time = '', showDeleteButton = false) {
     var gridItem = document.createElement('div');
     gridItem.className = 'grid-item';
-    gridItem.style.backgroundImage = `url('${thumbnail}')`;
-    gridItem.style.backgroundSize = 'cover';
-    gridItem.style.backgroundPosition = 'center';
-    gridItem.style.backgroundRepeat = 'no-repeat';
+
+    var img = document.createElement('div');
+    img.className = 'thumbnail';
+    img.style.backgroundImage = `url('${thumbnail}')`;
+    img.style.backgroundSize = 'cover';
+    img.style.backgroundPosition = 'center';
+    img.style.height = '60%';
+    gridItem.appendChild(img);
 
     var caption = document.createElement('div');
     caption.className = 'caption';
+    caption.style.height = '40%';
 
-    var h3 = document.createElement('h3');
-    h3.textContent = workflowName;
+    var h6 = document.createElement('h6');
+    h6.textContent = workflowName;
+    h6.style.margin = '3px 0';
 
     var pAuthor = document.createElement('p');
     pAuthor.textContent = `Author: ${author}`;
+    pAuthor.style.margin = '3px 0';
+    pAuthor.style.fontSize = '10px';
 
     var pTime = document.createElement('p');
     pTime.textContent = `Date: ${time}`;
+    pTime.style.margin = '3px 0';
+    pTime.style.fontSize = '10px';
 
     var link = document.createElement('a');
     link.href = '#';
     link.textContent = 'Load';
+    link.style.marginRight = '5px';
     link.onclick = function(e) {
         e.preventDefault();
         sendWorkflow(workflowName);
     };
 
-    var deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Delete';
-    deleteButton.onclick = function(e) {
-        e.preventDefault();
-        deleteWorkflow(workflowName);
-    };
-
-    caption.appendChild(h3);
+    caption.appendChild(h6);
     if (author) caption.appendChild(pAuthor);
     if (time) caption.appendChild(pTime);
     caption.appendChild(link);
-    caption.appendChild(deleteButton);
+
+    if (showDeleteButton) {
+        var deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = function(e) {
+            e.preventDefault();
+            deleteWorkflow(workflowName);
+        };
+        caption.appendChild(deleteButton);
+    }
 
     gridItem.appendChild(caption);
-
     container.appendChild(gridItem);
     console.log('Grid item appended:', gridItem);
 }
+
+
 
 function showGalleryWorkflowList(tabId) {
     const container = document.getElementById(tabId).querySelector('.grid-container');
@@ -150,8 +159,7 @@ function showGalleryWorkflowList(tabId) {
                 const author = meta.author;
                 const time = meta.time;
                 const thumbnail = meta.thumbnail || generateThumbnailFromContent(meta);
-
-                createGridItem(title, container, thumbnail, author, time);
+                createGridItem(title, container, thumbnail, author, time, false);
             });
         })
         .catch(error => {
@@ -178,14 +186,9 @@ function showLoadWorkflowList(tabId) {
             container.innerHTML = '';
 
             data.files.forEach(workflowName => {
-                // 提取文件名（去除扩展名）
                 const title = workflowName.replace(/\.json$/, '');
-
-                // 生成缩略图
                 const thumbnail = generateThumbnailFromContent({ title });
-
-                // 创建并添加网格项
-                createGridItem(title, container, thumbnail);
+                createGridItem(title, container, thumbnail, '', '', true);
             });
         })
         .catch(error => {
@@ -194,23 +197,20 @@ function showLoadWorkflowList(tabId) {
         });
 }
 
-// 缩略图生成函数
+
 function generateThumbnailFromContent(content) {
     const canvas = document.createElement('canvas');
     canvas.width = 150;
     canvas.height = 150;
     const ctx = canvas.getContext('2d');
 
-    // 设置背景色
     ctx.fillStyle = '#f0f0f0';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 设置字体样式
     ctx.font = 'italic bold 14px "Helvetica Neue", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillStyle = '#333';
 
-    // 绘制文本
     ctx.fillText(content.title, canvas.width / 2, canvas.height / 2 + 20);
 
     return canvas.toDataURL();
