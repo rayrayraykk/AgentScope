@@ -134,6 +134,7 @@ async function initializeWorkstationPage() {
         setupNodeCopyListens(id);
         addEventListenersToNumberInputs(id);
         setupTextInputListeners(id);
+        reloadi18n();
     })
 
     editor.on('nodeRemoved', function (id) {
@@ -337,6 +338,7 @@ async function initializeWorkstationPage() {
     });
 
     setTimeout(showSurveyModal, 30000);
+    reloadi18n();
 }
 
 
@@ -2158,6 +2160,7 @@ function importExample(index) {
                         }
                     }
                 });
+                reloadi18n();
             });
     })
 }
@@ -2181,6 +2184,7 @@ function updateImportButtons() {
         <= 1;
     document.getElementById('import-next').disabled = currentImportIndex >= importQueue.length;
     document.getElementById('import-skip').disabled = currentImportIndex >= importQueue.length;
+    reloadi18n()
 }
 
 
@@ -2213,21 +2217,40 @@ function initializeImport(data) {
     importQueue = Object.keys(dataToImportStep.drawflow.Home.data);
 
     const importButtonsDiv = document.getElementById('import-buttons');
-    createElement('div', 'step-info', '', importButtonsDiv);
-    createElement('button', 'import-prev',
-        '<i class="fas fa-arrow-left"></i> <span>Previous</span>',
-        importButtonsDiv).onclick = importPreviousComponent;
-    createElement('button', 'import-next',
-        '<i class="fas fa-arrow-right"></i> <span>Next</span>',
-        importButtonsDiv).onclick = importNextComponent;
-    createElement('button', 'import-skip',
-        '<i class="fas fa-forward"></i> <span>Skip</span>',
-        importButtonsDiv).onclick = importSkipComponent;
-    createElement('button', 'import-quit',
-        '<i class="fas fa-sign-out-alt"></i> <span>Quit</span>',
-        importButtonsDiv).onclick = importQuitComponent;
-    createElement('div', 'step-warning',
-        'Caution: You are currently in the tutorial mode where modifications are restricted.<br>Please click <strong>Quit</strong> to exit and start creating your custom multi-agent applications.', document.body);
+    if(localStorage.getItem('currentLanguage') === "cn"){
+        createElement('div', 'step-info', '', importButtonsDiv);
+        createElement('button', 'import-prev',
+            '<i class="fas fa-arrow-left"></i> <span>上一步</span>',
+            importButtonsDiv).onclick = importPreviousComponent;
+        createElement('button', 'import-next',
+            '<i class="fas fa-arrow-right"></i> <span>下一步</span>',
+            importButtonsDiv).onclick = importNextComponent;
+        createElement('button', 'import-skip',
+            '<i class="fas fa-forward"></i> <span>跳过</span>',
+            importButtonsDiv).onclick = importSkipComponent;
+        createElement('button', 'import-quit',
+            '<i class="fas fa-sign-out-alt"></i> <span>退出</span>',
+            importButtonsDiv).onclick = importQuitComponent;
+        createElement('div', 'step-warning',
+            '注意：您当前处于教程模式，修改受到限制。<br>请单击<strong>退出</strong>退出并开始创建自定义多代理应用程序。', document.body);
+    }else {
+        createElement('div', 'step-info', '', importButtonsDiv);
+        createElement('button', 'import-prev',
+            '<i class="fas fa-arrow-left"></i> <span>Previous</span>',
+            importButtonsDiv).onclick = importPreviousComponent;
+        createElement('button', 'import-next',
+            '<i class="fas fa-arrow-right"></i> <span>Next</span>',
+            importButtonsDiv).onclick = importNextComponent;
+        createElement('button', 'import-skip',
+            '<i class="fas fa-forward"></i> <span>Skip</span>',
+            importButtonsDiv).onclick = importSkipComponent;
+        createElement('button', 'import-quit',
+            '<i class="fas fa-sign-out-alt"></i> <span>Quit</span>',
+            importButtonsDiv).onclick = importQuitComponent;
+        createElement('div', 'step-warning',
+            'Caution: You are currently in the tutorial mode where modifications are restricted.<br>Please click <strong>Quit</strong> to exit and start creating your custom multi-agent applications.', document.body);
+    }
+
 
     accumulatedImportData = {};
     currentImportIndex = 0;
@@ -2324,3 +2347,22 @@ function showSurveyModal() {
 function hideSurveyModal() {
     document.getElementById("surveyModal").style.display = "none";
 }
+
+function reloadi18n(){
+    let currentLanguage = localStorage.getItem('currentLanguage');
+    $("[i18n]").i18n({
+        defaultLang: `${currentLanguage || 'en'}`,
+        filePath: "../static/i18n/",
+        filePrefix: "i18n_",
+        fileSuffix: "",
+        forever: true,
+        callback: function() {
+        }
+    });
+}
+
+window.addEventListener('storage', function(event) {
+    if (event.key === 'currentLanguage') {
+        reloadi18n()
+    }
+}, false);
