@@ -36,7 +36,25 @@ let nameToHtmlFile = {
     'PythonService': 'service-execute-python.html',
     'ReadTextService': 'service-read-text.html',
     'WriteTextService': 'service-write-text.html',
+    'Post': 'tool-post.html',
+    'TextToAudioService': 'service-text-to-audio.html',
+    'TextToImageService': 'service-text-to-image.html',
+    'ImageComposition': 'tool-image-composition.html',
+    'ImageMotion': 'tool-image-motion.html',
+    'VideoComposition': 'tool-video-composition.html',
 }
+
+const ModelNames48k = [
+    'sambert-zhinan-v1',
+    "sambert-zhiqi-v1",
+    "sambert-zhichu-v1",
+    "sambert-zhide-v1",
+    "sambert-zhijia-v1",
+    "sambert-zhiru-v1",
+    "sambert-zhiqian-v1",
+    "sambert-zhixiang-v1",
+    "sambert-zhiwei-v1",
+]
 
 // Cache the loaded html files
 let htmlCache = {};
@@ -338,6 +356,10 @@ async function initializeWorkstationPage() {
     });
 
     setTimeout(showSurveyModal, 30000);
+
+    if(!localStorage.getItem('firstGuide')){
+        startGuide();
+    }
     reloadi18n();
 }
 
@@ -476,7 +498,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     switch (name) {
         // Workflow-Model
         case 'dashscope_chat':
-            const dashscope_chatId = editor.addNode('dashscope_chat', 0, 0, pos_x,
+            editor.addNode('dashscope_chat', 0, 0, pos_x,
                 pos_y,
                 'dashscope_chat', {
                     "args":
@@ -486,16 +508,14 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                             "api_key": '',
                             "temperature": 0.0,
                             "seed": 0,
-                            "model_type": 'dashscope_chat',
-                            "messages_key": 'input'
+                            "model_type": 'dashscope_chat'
                         }
                 },
                 htmlSourceCode);
-            addEventListenersToNumberInputs(dashscope_chatId);
             break;
 
         case 'openai_chat':
-            const openai_chatId = editor.addNode('openai_chat', 0, 0, pos_x,
+            editor.addNode('openai_chat', 0, 0, pos_x,
                 pos_y,
                 'openai_chat', {
                     "args":
@@ -505,16 +525,14 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                             "api_key": '',
                             "temperature": 0.0,
                             "seed": 0,
-                            "model_type": 'openai_chat',
-                            "messages_key": 'messages'
+                            "model_type": 'openai_chat'
                         }
                 },
                 htmlSourceCode);
-            addEventListenersToNumberInputs(openai_chatId);
             break;
 
         case 'post_api_chat':
-            const post_api_chatId = editor.addNode('post_api_chat', 0, 0, pos_x, pos_y,
+            editor.addNode('post_api_chat', 0, 0, pos_x, pos_y,
                 'post_api_chat', {
                     "args":
                         {
@@ -534,11 +552,10 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                         }
                 },
                 htmlSourceCode);
-            addEventListenersToNumberInputs(post_api_chatId);
             break;
 
         case 'post_api_dall_e':
-            const post_api_dall_eId = editor.addNode('post_api_dall_e', 0,
+            editor.addNode('post_api_dall_e', 0,
                 0,
                 pos_x, pos_y,
                 'post_api_dall_e', {
@@ -562,11 +579,10 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                         }
                 },
                 htmlSourceCode);
-            addEventListenersToNumberInputs(post_api_dall_eId);
             break;
 
         case 'dashscope_image_synthesis':
-            const dashscope_image_synthesisId = editor.addNode('dashscope_image_synthesis', 0,
+            editor.addNode('dashscope_image_synthesis', 0,
                 0,
                 pos_x, pos_y,
                 'dashscope_image_synthesis', {
@@ -580,11 +596,9 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                                 "temperature": 0.0,
                                 "seed": 0,
                             },
-                            "model_type": 'dashscope_image_synthesis',
-                            "messages_key": 'prompt'
+                            "model_type": 'dashscope_image_synthesis'
                         }
                 }, htmlSourceCode);
-            addEventListenersToNumberInputs(dashscope_image_synthesisId);
             break;
 
         // Message
@@ -707,16 +721,14 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             break;
 
         case 'ForLoopPipeline':
-            const ForLoopPipelineID =
-                editor.addNode('ForLoopPipeline', 1, 1, pos_x, pos_y,
-                    'GROUP', {
-                        elements: [],
-                        "args": {
-                            "max_loop": 3,
-                            "break_func": ''
-                        }
-                    }, htmlSourceCode);
-            addEventListenersToNumberInputs(ForLoopPipelineID);
+            editor.addNode('ForLoopPipeline', 1, 1, pos_x, pos_y,
+                'GROUP', {
+                    elements: [],
+                    "args": {
+                        "max_loop": 3,
+                        "break_func": ''
+                    }
+                }, htmlSourceCode);
             break;
 
         case 'WhileLoopPipeline':
@@ -791,7 +803,120 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                 pos_x, pos_y, 'WriteTextService', {}, htmlSourceCode);
             break;
 
+        case 'TextToAudioService':
+            const TextToAudioServiceID = editor.addNode('TextToAudioService', 0, 0,
+                pos_x, pos_y, 'TextToAudioService', {
+                    "args": {
+                        "model": "",
+                        "api_key": "",
+                        "sample_rate": ""
+                    }
+                }, htmlSourceCode);
+                updateSampleRate(TextToAudioServiceID)
+            break;
+        case 'TextToImageService':
+            editor.addNode('TextToImageService', 0, 0,
+                pos_x, pos_y, 'TextToImageService', {
+                    "args": {
+                        "model": "",
+                        "api_key": "",
+                        "n": 1,
+                        "size":""
+                    }
+                }, htmlSourceCode);
+            break;
+
+        case 'ImageComposition':
+            editor.addNode('ImageComposition', 1, 1,
+                pos_x, pos_y, 'ImageComposition', {
+                    "args": {
+                        "titles": "",
+                        "output_path": "",
+                        "row": 1,
+                        "column": 1,
+                        "spacing": 10,
+                        "title_height": 100,
+                        "font_name": "PingFang",
+                    }
+                }, htmlSourceCode);
+            break;
+
+        case 'ImageMotion':
+            editor.addNode('ImageMotion', 1, 1,
+                pos_x, pos_y, 'ImageMotion', {
+                    "args": {
+                        "output_path": "",
+                        "output_format": "",
+                        "duration": "",
+                    }
+                }, htmlSourceCode);
+            break;
+
+        case 'VideoComposition':
+            editor.addNode('VideoComposition', 1, 1,
+                pos_x, pos_y, 'VideoComposition', {
+                    "args": {
+                        "output_path": "",
+                        "target_width": "",
+                        "target_height": "",
+                        "fps": "",
+                    }
+               }, htmlSourceCode);
+            break;
+
+        case 'Post':
+            editor.addNode('Post', 1, 1,
+                pos_x, pos_y, 'Post', {
+                    "args": {
+                        "url": "",
+                        "headers": '',
+                        "data": '',
+                        "json": '',
+                        "kwargs": '',
+                        "output_path": "",
+                        "output_type": "",
+                    }
+                }, htmlSourceCode);
+            break;
+
         default:
+    }
+}
+
+function updateSampleRate(nodeId) {
+    const newNode = document.getElementById(`node-${nodeId}`);
+    if (!newNode) {
+        console.error(`Node with ID node-${nodeId} not found.`);
+        return;
+    }
+
+    const modelNameInput = newNode.querySelector('#model_name');
+    function updateSampleRateValue() {
+        const modelName = modelNameInput ? modelNameInput.value : '';
+
+        if (ModelNames48k.includes(modelName)) {
+            sampleRate = 48000
+        } else {
+            sampleRate = 16000
+        }
+
+        const sampleRateInput = newNode.querySelector('#sample_rate');
+
+        if (sampleRateInput) {
+            sampleRateInput.value = sampleRate;
+            var nodeData = editor.getNodeFromId(nodeId).data;
+            nodeData.args.sample_rate = sampleRate
+            nodeData.args.model = modelName
+            editor.updateNodeDataFromId(nodeId, nodeData);
+
+            console.log(`${modelName} sample rate updated to: ${sampleRate}`);
+        } else {
+            console.log(`Sample Rate input not found.`);
+        }
+    }
+
+    if (modelNameInput) {
+        modelNameInput.addEventListener('input', updateSampleRateValue);
     }
 }
 
@@ -889,6 +1014,16 @@ function validateSeed(input) {
     input.reportValidity();
 }
 
+function validateDuration(input) {
+    const value = parseInt(input.value, 10); // Parse the value as an integer.
+    if (isNaN(value) || value < 0 || !Number.isInteger(parseFloat(input.value))) {
+        input.setCustomValidity('Duration must be a non-negative integer!');
+    } else {
+        input.setCustomValidity('');
+    }
+    input.reportValidity();
+}
+
 
 document.addEventListener('input', function (event) {
     const input = event.target;
@@ -901,6 +1036,10 @@ document.addEventListener('input', function (event) {
     if (input.getAttribute('df-args-seed') !== null ||
         input.getAttribute('df-args-json_args-seed') !== null) {
         validateSeed(input);
+    }
+
+    if (input.getAttribute('df-args-duration') !== null) {
+        validateDuration(input)
     }
 });
 
@@ -1292,8 +1431,8 @@ function sortElementsByPosition(inputData) {
 
 
 function checkConditions() {
-    let hasModelTypeError = true;
-    let hasAgentError = true;
+    let hasModelTypeError = false;
+    let hasAgentError = false;
     let agentModelConfigNames = new Set();
     let modelConfigNames = new Set();
     let isApiKeyEmpty = false;
@@ -1303,22 +1442,6 @@ function checkConditions() {
         let node = nodesData[nodeId];
         console.log("node", node);
         console.log("node.inputs", node.inputs);
-
-        if (node.inputs) {
-            for (let inputKey in node.inputs) {
-                if (node.inputs[inputKey].connections &&
-                    node.inputs[inputKey].connections.length > 1) {
-                    Swal.fire({
-                        title: 'Invalid Connections',
-                        text:
-                            `${node.name} has more than one connection in inputs.`,
-                        icon: 'error',
-                        confirmButtonText: 'Ok'
-                    });
-                    return false;
-                }
-            }
-        }
 
         let nodeElement = document.getElementById('node-' + nodeId);
         const requiredInputs = nodeElement.querySelectorAll('input[data-required="true"]');
@@ -2167,6 +2290,10 @@ function importExample(index) {
 
 
 function importExample_step(index) {
+    if(!localStorage.getItem('firstGuide')){
+        localStorage.setItem('firstGuide', 'true');
+        skipGuide();
+    }
     fetchExample(index, data => {
         const dataToImportStep = data.json;
         addHtmlAndReplacePlaceHolderBeforeImport(dataToImportStep).then(() => {
@@ -2366,3 +2493,306 @@ window.addEventListener('storage', function(event) {
         reloadi18n()
     }
 }, false);
+function startGuide(){
+    const targetElement = document.querySelector('.guide-Example');
+    const element = document.querySelector('.tour-guide');
+    positionElementRightOf(element, targetElement);
+}
+
+function getElementCoordinates(targetElement) {
+    const style = window.getComputedStyle(targetElement);
+    const rect = targetElement.getBoundingClientRect();
+    return {
+      left: rect.left + (parseFloat(style.left) || 0),
+      top: rect.top + (parseFloat(style.top) || 0),
+      right: rect.right + (parseFloat(style.top) || 0),
+      bottom: rect.bottom + (parseFloat(style.top) || 0),
+      width: rect.width,
+      height: rect.height,
+      x: rect.x,
+      y: rect.y,
+    };
+}
+
+function positionElementRightOf(element, targetElement) {
+    const targetCoordinates = getElementCoordinates(targetElement);
+    const mask  = document.querySelector(".overlay");
+    mask.style.display = "block";
+    element.style.position = 'absolute';
+    element.style.display = 'block';
+    element.style.left = `${targetCoordinates.x + targetCoordinates.right}px`;
+    element.style.top = `${targetCoordinates.y}px`;
+}
+
+function skipGuide(){
+    const element = document.querySelector(".tour-guide");
+    const mask  = document.querySelector(".overlay");
+    localStorage.setItem('firstGuide', 'true');
+    if(element){
+        element.style.display = "none";
+        element.remove();
+        mask.style.display = "none";
+        mask.remove();
+    }
+}
+class Notification {
+    static count = 0;
+    static instances = [];
+    static clearInstances() {
+        Notification.count = 0;
+        Notification.instances = [];
+    }
+    constructor(props) {
+        Notification.count += 1;
+        Notification.instances.push(this);
+        this.currentIndex = Notification.count;
+        this.position = 'bottom-right';
+        this.title = 'Notification Title';
+        this.content = 'Notification Content';
+        this.element = null;
+        this.closeBtn = true;
+        this.progress = false;
+        this.intervalTime = 3000;
+        this.confirmBtn = false;
+        this.cancelBtn = false;
+        this.pause = true;
+        this.reduceNumber = 0;
+        this.init(props);
+    }
+    init(props){
+        this.setDefaultValues(props);
+        this.element = document.createElement('div');
+        // init notification-box css
+        this.element.className = 'notification';
+        // render title
+        this.title && this.renderTitle(this.title);
+        // render closeButtion
+        this.closeBtn && this.renderCloseButton();
+        // render content
+        this.content && this.renderContent(this.content);
+        // render confirmBtn
+        (this.confirmBtn || this.cancelBtn) && this.renderClickButton();
+        this.progress && this.renderProgressBar();
+        // set position
+        this.setPosition(this.position);
+        document.body.appendChild(this.element);
+        setTimeout(()=>{
+            this.show();
+        },10)
+    }
+    // check if string is HTML
+    isHTMLString(string){
+        const doc = new DOMParser().parseFromString(string, 'text/html');
+        return Array.from(doc.body.childNodes).some(node => node.nodeType === 1);
+    }
+    // render closeButtion
+    renderCloseButton(){
+        this.closeBtn = document.createElement('span');
+        this.closeBtn.className = 'notification-close';
+        this.closeBtn.innerText = 'X';
+        this.closeBtn.onclick = this.destroyAll.bind(this);
+        this.title.appendChild(this.closeBtn);
+    }
+    // render title string or HTML
+    renderTitle(component){
+        if(this.isHTMLString(component)){
+            this.title = document.createElement('div');
+            this.title.className = 'notification-title';
+            this.title.innerHTML = component;
+        }else{
+            this.title = document.createElement('div');
+            this.titleText = document.createElement('div');
+            this.title.className = 'notification-title';
+            this.titleText.className = 'notification-titleText';
+            this.titleText.innerText = component;
+            this.title.appendChild(this.titleText);
+        }
+        this.element.appendChild(this.title);
+    }
+    // render content string or HTML
+    renderContent(component){
+        if(this.isHTMLString(component)){
+            this.content = document.createElement('div');
+            this.content.className = 'notification-content';
+            this.content.innerHTML = component;
+        }else{
+            this.content = document.createElement('div');
+            this.content.className = 'notification-content';
+            this.content.innerText = component;
+        }
+        this.element.appendChild(this.content);
+    }
+    // render clickbtn
+    renderClickButton(){
+        if(this.confirmBtn || this.cancelBtn){
+            this.clickBottonBox = document.createElement('div');
+            this.clickBottonBox.className = 'notification-clickBotton-box';
+        }
+        if(this.confirmBtn){
+            this.confirmBotton = document.createElement('button');
+            this.confirmBotton.className = 'notification-btn confirmBotton';
+            this.confirmBotton.innerText = this.confirmBtn;
+            this.confirmBotton.onclick = this.onConfirmCallback.bind(this);
+            this.clickBottonBox.appendChild(this.confirmBotton);
+        }
+        if(this.cancelBtn){
+            this.cancelBotton = document.createElement('button');
+            this.cancelBotton.className = 'notification-btn cancelBotton';
+            this.cancelBotton.innerText = this.cancelBtn;
+            this.cancelBotton.onclick = this.onCancelCallback.bind(this);
+            this.clickBottonBox.appendChild(this.cancelBotton);
+        }
+        this.element.appendChild(this.clickBottonBox);
+    }
+    // render progress bar
+    renderProgressBar(){
+        this.progressBar = document.createElement('div');
+        this.progressBar.className = 'notification-progress';
+        this.element.appendChild(this.progressBar);
+    }
+    // stepProgressBar
+    stepProgressBar(callback){
+        let startTime = performance.now();
+        const step = (timestamp) => {
+            const progress = Math.min((timestamp + this.reduceNumber - startTime) / this.intervalTime, 1);
+            this.progressBar.style.width = ( 1- progress ) * 100 + '%';
+            if (progress < 1 && this.pause == false) {
+                requestAnimationFrame(step)
+            }else{
+                this.reduceNumber  = timestamp + this.reduceNumber - startTime
+            }
+            if(progress == 1){
+                this.pause == true;
+                this.reduceNumber = 0;
+                callback();
+                this.removeChild();
+            }
+        }
+        requestAnimationFrame(step);
+    }
+    setDefaultValues(props) {
+        for (const key in props) {
+            if (props[key] === undefined) {
+               return ;
+            } else {
+                this[key] = props[key];
+            }
+        }
+    }
+    setPosition() {
+        switch (this.position) {
+            case 'top-left':
+                this.element.style.top = '25px';
+                this.element.style.left = '-100%';
+                break;
+            case 'top-right':
+                this.element.style.top = '25px';
+                this.element.style.right = '-100%';
+                break;
+            case 'bottom-right':
+                this.element.style.bottom = '25px';
+                this.element.style.right = '-100%';
+                break;
+            case 'bottom-left':
+                this.element.style.bottom = '25px';
+                this.element.style.left = '-100%';
+                break;
+        }
+    }
+    show() {
+        this.element.style.display = 'flex';
+        switch (this.position) {
+            case 'top-left':
+                this.element.style.top = '25px';
+                this.element.style.left = '25px';
+                break;
+            case 'top-right':
+                this.element.style.top = '25px';
+                this.element.style.right = '25px';
+                break;
+            case 'bottom-right':
+                this.element.style.bottom = '25px';
+                this.element.style.right = '25px';
+                break;
+            case 'bottom-left':
+                this.element.style.bottom = '25px';
+                this.element.style.left = '25px';
+                break;
+        }
+    }
+    // hide() {
+    //     // this.element.style.display = 'none';
+    // }
+    destroyAll() {
+        for (const instance of Notification.instances) {
+            document.body.removeChild(instance.element);
+        }
+        Notification.clearInstances();
+    }
+    removeChild() {
+        let removeIndex;
+        for (let i = 0; i < Notification.instances.length; i++) {
+            if (Notification.instances[i].currentIndex === this.currentIndex) {
+                removeIndex = i;
+                break;
+            }
+        }
+        if (removeIndex !== undefined) {
+            Notification.instances.splice(removeIndex, 1);
+        }
+        this.element.remove();
+    }
+    addCloseListener() {
+        this.closeBtn.addEventListener('click', () => {
+            this.removeChild();
+        });
+    }
+
+    onCancelCallback() {
+        if (typeof this.onCancel === 'function') {
+            this.onCancel();
+            this.removeChild();
+        }
+    }
+
+    onConfirmCallback() {
+        if (typeof this.onConfirm === 'function') {
+            this.pause = !this.pause
+            if(!this.pause){
+                this.stepProgressBar(this.onConfirm);
+                this.confirmBotton.innerText = 'pause'
+            }else{
+                this.confirmBotton.innerText = this.confirmBtn
+            }
+        }
+    }
+}
+
+function createNotification({
+    title = 'Notification',
+    content = 'Notification content',
+    position = 'top-right',
+    intervalTime = 3000,
+    progress = true,
+    confirmBtn = 'Yes',
+    cancelBtn = 'No',
+    closeBtn = true,
+    onConfirm = () => {
+    },
+    onCancel = () => {
+
+    }
+}) {
+    const notice = new Notification({
+        title: title,
+        content: content,
+        position: position,
+        closeBtn: closeBtn,
+        intervalTime: intervalTime,
+        progress: progress,
+        confirmBtn: confirmBtn,
+        cancelBtn: cancelBtn,
+        onConfirm: onConfirm,
+        onCancel: onCancel
+    });
+}
