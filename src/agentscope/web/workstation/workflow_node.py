@@ -47,6 +47,7 @@ from agentscope.service import (
 from agentscope.studio.tools.image_composition import stitch_images_with_grid
 from agentscope.studio.tools.image_motion import create_video_or_gif_from_image
 from agentscope.studio.tools.video_composition import merge_videos
+from agentscope.studio.tools.condition_operator import eval_condition_operator
 
 from agentscope.studio.tools.web_post import web_post
 
@@ -96,16 +97,16 @@ class WorkflowNode(ABC):
         self.dep_opts = dep_opts
         self.dep_vars = [opt.var_name for opt in self.dep_opts]
         self.var_name = f"{self.node_type.name.lower()}_{self.node_id}"
-
-        # Warning: Might cause error when args is still string
-        if not only_compile:
-            for key, value in self.opt_kwargs.items():
-                if is_callable_expression(value):
-                    self.opt_kwargs[key] = convert_str_to_callable(value)
+        self.source_kwargs.pop("condition_op", "")
+        self.source_kwargs.pop("target_value", "")
         self._post_init()
 
     def _post_init(self) -> None:
-        pass
+        # Warning: Might cause error when args is still string
+        if not self.only_compile:
+            for key, value in self.opt_kwargs.items():
+                if is_callable_expression(value):
+                    self.opt_kwargs[key] = convert_str_to_callable(value)
 
     def __call__(self, x: Any = None):  # type: ignore[no-untyped-def]
         """
@@ -436,12 +437,16 @@ class ForLoopPipelineNode(WorkflowNode):
     node_type = WorkflowNodeType.PIPELINE
 
     def _post_init(self) -> None:
-        super()._post_init()
-        assert (
-            len(self.dep_opts) == 1
-        ), "ForLoopPipelineNode can only contain one PipelineNode."
+        # Not call super post init to avoid converting callable
+        self.condition_op = self.opt_kwargs.pop("condition_op", "")
+        self.target_value = self.opt_kwargs.pop("target_value", "")
+        self.opt_kwargs["break_func"] = partial(
+            eval_condition_operator,
+            operator=self.condition_op,
+            target_value=self.target_value,
+        )
         self.pipeline = ForLoopPipeline(
-            loop_body_operators=self.dep_opts[0],
+            loop_body_operators=self.dep_opts,
             **self.opt_kwargs,
         )
 
@@ -450,11 +455,16 @@ class ForLoopPipelineNode(WorkflowNode):
 
     def compile(self) -> dict:
         return {
-            "imports": "from agentscope.pipelines import ForLoopPipeline",
+            "imports": "from agentscope.pipelines import ForLoopPipeline\n"
+            "from functools import partial\n"
+            "from agentscope.studio.tools.condition_operator import "
+            "eval_condition_operator",
             "inits": f"{self.var_name} = ForLoopPipeline("
             f"loop_body_operators="
             f"{deps_converter(self.dep_vars)},"
-            f" {kwarg_converter(self.source_kwargs)})",
+            f" {kwarg_converter(self.source_kwargs)},"
+            f" break_func=partial(eval_condition_operator, operator"
+            f"='{self.condition_op}', target_value='{self.target_value}'))",
             "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
             f"({DEFAULT_FLOW_VAR})",
         }
@@ -506,7 +516,15 @@ class IfElsePipelineNode(WorkflowNode):
     node_type = WorkflowNodeType.PIPELINE
 
     def _post_init(self) -> None:
-        super()._post_init()
+        # Not call super post init to avoid converting callable
+        self.condition_op = self.opt_kwargs.pop("condition_op", "")
+        self.target_value = self.opt_kwargs.pop("target_value", "")
+        self.opt_kwargs["condition_func"] = partial(
+            eval_condition_operator,
+            operator=self.condition_op,
+            target_value=self.target_value,
+        )
+
         assert (
             0 < len(self.dep_opts) <= 2
         ), "IfElsePipelineNode must contain one or two PipelineNode."
@@ -526,13 +544,21 @@ class IfElsePipelineNode(WorkflowNode):
         return self.pipeline(x)
 
     def compile(self) -> dict:
-        imports = "from agentscope.pipelines import IfElsePipeline"
+        imports = (
+            "from agentscope.pipelines import IfElsePipeline\n"
+            "from functools import partial\n"
+            "from agentscope.studio.tools.condition_operator "
+            "import eval_condition_operator"
+        )
         execs = f"{DEFAULT_FLOW_VAR} = {self.var_name}({DEFAULT_FLOW_VAR})"
         if len(self.dep_vars) == 1:
             return {
                 "imports": imports,
                 "inits": f"{self.var_name} = IfElsePipeline("
-                f"if_body_operators={self.dep_vars[0]})",
+                f"if_body_operators={self.dep_vars[0]}, "
+                f"condition_func=partial(eval_condition_operator, "
+                f"operator='{self.condition_op}', "
+                f"target_value='{self.target_value}'))",
                 "execs": execs,
             }
         elif len(self.dep_vars) == 2:
@@ -540,7 +566,10 @@ class IfElsePipelineNode(WorkflowNode):
                 "imports": imports,
                 "inits": f"{self.var_name} = IfElsePipeline("
                 f"if_body_operators={self.dep_vars[0]}, "
-                f"else_body_operators={self.dep_vars[1]})",
+                f"else_body_operators={self.dep_vars[1]},"
+                f"condition_func=partial(eval_condition_operator, "
+                f"operator='{self.condition_op}', "
+                f"target_value='{self.target_value}'))",
                 "execs": execs,
             }
         raise ValueError
