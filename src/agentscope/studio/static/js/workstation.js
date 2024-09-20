@@ -88,6 +88,70 @@ async function fetchHtml(fileName) {
 }
 
 
+class ConditionOperator {
+    constructor() {
+        this.initialize()
+    }
+
+    async loadTemplate() {
+        let templateUrl = 'condition-template.html'
+        const templateText = await fetchHtml(templateUrl);
+        const templateContainer = document.createElement('div');
+        templateContainer.innerHTML = templateText;
+        document.body.appendChild(templateContainer.querySelector('template'));
+
+        const templates = document.querySelectorAll('.condition-operator-wrapper');
+        const conditionOperatorTemplate = document.getElementById('condition-operator-template').content;
+
+        templates.forEach(wrapper => {
+            const clone = document.importNode(conditionOperatorTemplate, true);
+            wrapper.appendChild(clone);
+        });
+    }
+
+    setupConditionListeners(box) {
+        const conditionOp = box.querySelector('.condition_op');
+        const targetContainer = box.querySelector('.target-container');
+
+        function updateTargetVisibility() {
+            const condition_op = conditionOp ? conditionOp.value : '';
+            const hideConditions = ['','is empty', 'is null', 'is not empty', 'is not null'];
+            if (hideConditions.includes(condition_op)) {
+                targetContainer.style.display = 'none';
+            } else {
+                targetContainer.style.display = 'block';
+            }
+        }
+
+        if (conditionOp) {
+            conditionOp.addEventListener('input', updateTargetVisibility);
+            updateTargetVisibility();
+        }
+    }
+
+    async initialize() {
+        await this.loadTemplate();
+        document.querySelectorAll('.box').forEach(box => {
+            this.setupConditionListeners(box);
+        });
+    }
+
+    async handleNodeCreated(nodeId) {
+        const newNode = document.getElementById(`node-${nodeId}`);
+        if (newNode) {
+            const templates = newNode.querySelectorAll('.condition-operator-wrapper');
+            const conditionOperatorTemplate = document.getElementById('condition-operator-template').content;
+
+            templates.forEach(wrapper => {
+                const clone = document.importNode(conditionOperatorTemplate, true);
+                wrapper.appendChild(clone);
+            });
+
+            this.setupConditionListeners(newNode);
+        }
+    }
+}
+
 async function initializeWorkstationPage() {
     console.log("Initialize Workstation Page")
     // Initialize the Drawflow editor
@@ -146,15 +210,16 @@ async function initializeWorkstationPage() {
     const welcomeID = editor.addNode('welcome', 0, 0, 50, 50, 'welcome', {}, welcome);
     setupNodeListeners(welcomeID);
 
+    const condition_manager = new ConditionOperator();
     editor.on('nodeCreated', function (id) {
         console.log("Node created " + id);
         disableButtons();
         makeNodeTop(id);
         setupNodeListeners(id);
         setupNodeCopyListens(id);
-        setupConditionListeners(id);
         addEventListenersToNumberInputs(id);
         setupTextInputListeners(id);
+        condition_manager.handleNodeCreated(id)
     })
 
     editor.on('nodeRemoved', function (id) {
@@ -901,33 +966,6 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             break;
 
         default:
-    }
-}
-
-function setupConditionListeners(nodeId) {
-    const newNode = document.getElementById(`node-${nodeId}`);
-    if (!newNode) {
-        console.error(`Node with ID node-${nodeId} not found.`);
-        return;
-    }
-
-    const conditionOp = newNode.querySelector('#condition_op');
-    const targetContainer = newNode.querySelector('#target-container');
-
-    function updateTargetVisibility() {
-        const condition_op = conditionOp ? conditionOp.value : '';
-        const hideConditions = ['','is empty', 'is null', 'is not empty', 'is not null'];
-
-        if (hideConditions.includes(condition_op)) {
-            targetContainer.style.display = 'none';
-        } else {
-            targetContainer.style.display = 'block';
-        }
-    }
-
-    if (conditionOp) {
-        conditionOp.addEventListener('input', updateTargetVisibility);
-        updateTargetVisibility();
     }
 }
 

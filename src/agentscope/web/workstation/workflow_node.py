@@ -445,8 +445,12 @@ class ForLoopPipelineNode(WorkflowNode):
             operator=self.condition_op,
             target_value=self.target_value,
         )
+
+        assert (
+            len(self.dep_opts) == 1
+        ), "ForLoopPipelineNode can only contain one PipelineNode."
         self.pipeline = ForLoopPipeline(
-            loop_body_operators=self.dep_opts,
+            loop_body_operators=self.dep_opts[0],
             **self.opt_kwargs,
         )
 
