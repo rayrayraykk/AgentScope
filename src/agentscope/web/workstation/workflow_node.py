@@ -326,21 +326,8 @@ class BroadcastAgentNode(WorkflowNode):
 
     node_type = WorkflowNodeType.AGENT
 
-    def __init__(
-        self,
-        node_id: str,
-        opt_kwargs: dict,
-        source_kwargs: dict,
-        dep_opts: list,
-        only_compile: bool = True,
-    ) -> None:
-        super().__init__(
-            node_id,
-            opt_kwargs,
-            source_kwargs,
-            dep_opts,
-            only_compile,
-        )
+    def _post_init(self) -> None:
+        super()._post_init()
         self.pipeline = BroadcastAgent(**self.opt_kwargs)
 
     def __call__(self, x: dict = None) -> dict:
