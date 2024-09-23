@@ -2387,7 +2387,7 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
     const readmePlaceholderRegex = /README_PLACEHOLDER/g;
 
     const classToReadmeDescription = {
-        "node-DialogAgent": "An dialog agent that can interact with users or other agents",
+        "node-DialogAgent": "A dialog agent that can interact with users or other agents",
         "node-UserAgent": "A proxy agent for user",
         "node-TextToImageAgent": "Agent for text to image generation",
         "node-DictDialogAgent": "Agent that generates response in a dict format",
