@@ -15,6 +15,7 @@ from agentscope.agents import (
     TextToImageAgent,
     DictDialogAgent,
     ReActAgent,
+    BroadcastAgent,
 )
 from agentscope.manager import ModelManager
 from agentscope.message import Msg
@@ -313,6 +314,43 @@ class ReActAgentNode(WorkflowNode):
             f"    {self.var_name} = ReActAgent"
             f"({kwarg_converter(self.opt_kwargs)}, service_toolkit"
             f"={self.var_name}_service_toolkit)",
+            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
+            f"([{DEFAULT_FLOW_VAR}])",
+        }
+
+
+class BroadcastAgentNode(WorkflowNode):
+    """
+    A node representing a BroadcastAgent within a workflow.
+    """
+
+    node_type = WorkflowNodeType.AGENT
+
+    def __init__(
+        self,
+        node_id: str,
+        opt_kwargs: dict,
+        source_kwargs: dict,
+        dep_opts: list,
+        only_compile: bool = True,
+    ) -> None:
+        super().__init__(
+            node_id,
+            opt_kwargs,
+            source_kwargs,
+            dep_opts,
+            only_compile,
+        )
+        self.pipeline = BroadcastAgent(**self.opt_kwargs)
+
+    def __call__(self, x: dict = None) -> dict:
+        return self.pipeline(x)
+
+    def compile(self) -> dict:
+        return {
+            "imports": "from agentscope.agents import BroadcastAgent",
+            "inits": f"{self.var_name} = BroadcastAgent("
+            f"{kwarg_converter(self.opt_kwargs)})",
             "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
             f"([{DEFAULT_FLOW_VAR}])",
         }
@@ -1032,6 +1070,7 @@ NODE_NAME_MAPPING = {
     "TextToImageAgent": TextToImageAgentNode,
     "DictDialogAgent": DictDialogAgentNode,
     "ReActAgent": ReActAgentNode,
+    "BroadcastAgent": BroadcastAgentNode,
     "Placeholder": PlaceHolderNode,
     "MsgHub": MsgHubNode,
     "SequentialPipeline": SequentialPipelineNode,
