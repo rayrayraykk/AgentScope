@@ -64,6 +64,7 @@ class WorkflowNodeType(IntEnum):
     MESSAGE = 4
     COPY = 5
     TOOL = 6
+    START = 7
 
 
 class WorkflowNode(ABC):
@@ -151,6 +152,24 @@ class ModelNode(WorkflowNode):
             "imports": "from agentscope.manager import ModelManager",
             "inits": f"ModelManager.get_instance().load_model_configs("
             f"[{self.opt_kwargs}])",
+            "execs": "",
+        }
+
+
+class StartNode(WorkflowNode):
+    """
+    A node that represents a start in a workflow.
+    """
+
+    node_type = WorkflowNodeType.START
+
+    def compile(self) -> dict:
+        """
+        Compile Node to python executable code dict
+        """
+        return {
+            "imports": "",
+            "inits": "",
             "execs": "",
         }
 
@@ -1021,6 +1040,7 @@ class CodeNode(WorkflowNode):
 
 
 NODE_NAME_MAPPING = {
+    "start": StartNode,
     "dashscope_chat": ModelNode,
     "openai_chat": ModelNode,
     "post_api_chat": ModelNode,
