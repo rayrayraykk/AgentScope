@@ -1014,7 +1014,7 @@ class CodeNode(WorkflowNode):
         )
         return {
             "imports": code,
-            "inits": f"{self.var_name} = main_{self.node_id}",
+            "inits": "",
             "execs": f"{DEFAULT_FLOW_VAR} = main_{self.node_id}"
             f"(*[{DEFAULT_FLOW_VAR}])",
         }
