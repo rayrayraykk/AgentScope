@@ -140,7 +140,7 @@
                     "data": {
                         "args": {
                             "name": "moderator",
-                            "content": "It's the description phase now, and you need to describe your word in one sentence.\nRethink what is your name and check if you have been eliminated. If you have been eliminated, reply with 'This player has been eliminated.'."
+                            "content": "It's the description phase now, and you need to describe your word in one sentence."
                         }
                     },
                     "class": "BroadcastAgent",
@@ -289,7 +289,7 @@
                     "data": {
                         "args": {
                             "name": "moderator",
-                            "content": "It's the voting phase now, and you need to vote for the player you think is most likely the undercover. Do not vote for players who have already been eliminated.\nRespond only with the player's name. If you have been  eliminated, reply with 'This player has been eliminated.'.\n# Using the first-person perspective and do not respond anything else."
+                            "content": "It's the voting phase now, and you need to vote for the player you think is most likely the undercover. Do not vote for players who have been eliminated. Respond only with the player's name."
                         }
                     },
                     "class": "BroadcastAgent",
