@@ -26,6 +26,7 @@ try:
 except ImportError:
     nx = None
 
+
 class ASDiGraph(nx.DiGraph):
     """
     A class that represents a directed graph, extending the functionality of
@@ -116,6 +117,7 @@ class ASDiGraph(nx.DiGraph):
             try:
                 from black import FileMode, format_str
                 import isort
+
                 logger.debug("Formatting Code with black and isort...")
                 return isort.code(format_str(code, mode=FileMode()))
             except Exception:
