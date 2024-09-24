@@ -24,6 +24,7 @@ let nameToHtmlFile = {
     'TextToImageAgent': 'agent-texttoimageagent.html',
     'DictDialogAgent': 'agent-dictdialogagent.html',
     'ReActAgent': 'agent-reactagent.html',
+    'BroadcastAgent': 'agent-broadcastagent.html',
     'Placeholder': 'pipeline-placeholder.html',
     'MsgHub': 'pipeline-msghub.html',
     'SequentialPipeline': 'pipeline-sequentialpipeline.html',
@@ -40,8 +41,11 @@ let nameToHtmlFile = {
     'TextToAudioService': 'service-text-to-audio.html',
     'TextToImageService': 'service-text-to-image.html',
     'ImageComposition': 'tool-image-composition.html',
+    'Code': 'tool-code.html',
+    // 'IF/ELSE': 'tool-if-else.html',
     'ImageMotion': 'tool-image-motion.html',
     'VideoComposition': 'tool-video-composition.html',
+    'CopyNode': 'agent-copyagent.html'
 }
 
 const ModelNames48k = [
@@ -85,6 +89,70 @@ async function fetchHtml(fileName) {
     }
 }
 
+
+class ConditionOperator {
+    constructor() {
+        this.initialize()
+    }
+
+    async loadTemplate() {
+        let templateUrl = 'condition-template.html'
+        const templateText = await fetchHtml(templateUrl);
+        const templateContainer = document.createElement('div');
+        templateContainer.innerHTML = templateText;
+        document.body.appendChild(templateContainer.querySelector('template'));
+
+        const templates = document.querySelectorAll('.condition-operator-wrapper');
+        const conditionOperatorTemplate = document.getElementById('condition-operator-template').content;
+
+        templates.forEach(wrapper => {
+            const clone = document.importNode(conditionOperatorTemplate, true);
+            wrapper.appendChild(clone);
+        });
+    }
+
+    setupConditionListeners(box) {
+        const conditionOp = box.querySelector('.condition_op');
+        const targetContainer = box.querySelector('.target-container');
+
+        function updateTargetVisibility() {
+            const condition_op = conditionOp ? conditionOp.value : '';
+            const hideConditions = ['','is empty', 'is null', 'is not empty', 'is not null'];
+            if (hideConditions.includes(condition_op)) {
+                targetContainer.style.display = 'none';
+            } else {
+                targetContainer.style.display = 'block';
+            }
+        }
+
+        if (conditionOp) {
+            conditionOp.addEventListener('input', updateTargetVisibility);
+            updateTargetVisibility();
+        }
+    }
+
+    async initialize() {
+        await this.loadTemplate();
+        document.querySelectorAll('.box').forEach(box => {
+            this.setupConditionListeners(box);
+        });
+    }
+
+    async handleNodeCreated(nodeId) {
+        const newNode = document.getElementById(`node-${nodeId}`);
+        if (newNode) {
+            const templates = newNode.querySelectorAll('.condition-operator-wrapper');
+            const conditionOperatorTemplate = document.getElementById('condition-operator-template').content;
+
+            templates.forEach(wrapper => {
+                const clone = document.importNode(conditionOperatorTemplate, true);
+                wrapper.appendChild(clone);
+            });
+
+            this.setupConditionListeners(newNode);
+        }
+    }
+}
 
 async function initializeWorkstationPage() {
     console.log("Initialize Workstation Page")
@@ -144,6 +212,7 @@ async function initializeWorkstationPage() {
     const welcomeID = editor.addNode('welcome', 0, 0, 50, 50, 'welcome', {}, welcome);
     setupNodeListeners(welcomeID);
 
+    const condition_manager = new ConditionOperator();
     editor.on('nodeCreated', function (id) {
         console.log("Node created " + id);
         disableButtons();
@@ -152,6 +221,7 @@ async function initializeWorkstationPage() {
         setupNodeCopyListens(id);
         addEventListenersToNumberInputs(id);
         setupTextInputListeners(id);
+        condition_manager.handleNodeCreated(id)
     })
 
     editor.on('nodeRemoved', function (id) {
@@ -694,6 +764,34 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             }
             break;
 
+        case 'BroadcastAgent':
+            const BroadcastAgentID = editor.addNode('BroadcastAgent', 1, 1,
+                pos_x,
+                pos_y,
+                'BroadcastAgent', {
+                    "args": {
+                        "name": '',
+                        "content": ''
+                    }
+                }, htmlSourceCode);
+            var nodeElement = document.querySelector(`#node-${BroadcastAgentID} .node-id`);
+            if (nodeElement) {
+                nodeElement.textContent = BroadcastAgentID;
+            }
+            break;
+
+        case 'CopyNode':
+            const CopyNodeID = editor.addNode('CopyNode', 1, 1,
+                pos_x,
+                pos_y,
+                'CopyNode', {
+                }, htmlSourceCode);
+            var nodeElement = document.querySelector(`#node-${CopyNodeID} .node-id`);
+            if (nodeElement) {
+                nodeElement.textContent = nodeElement;
+            }
+            break;
+
         // Workflow-Pipeline
         case 'Placeholder':
             editor.addNode('Placeholder', 1, 1,
@@ -724,7 +822,8 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                     elements: [],
                     "args": {
                         "max_loop": 3,
-                        "break_func": ''
+                        "condition_op": "",
+                        "target_value": "",
                     }
                 }, htmlSourceCode);
             break;
@@ -743,7 +842,8 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             editor.addNode('IfElsePipeline', 1,
                 1, pos_x, pos_y, 'GROUP', {
                     elements: [], args: {
-                        "condition_func": ''
+                        "condition_op": "",
+                        "target_value": "",
                     }
                 }, htmlSourceCode);
             break;
@@ -838,6 +938,24 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                     }
                 }, htmlSourceCode);
             break;
+        case 'Code':
+            const CodeID = editor.addNode('Code', 1, 1,
+                pos_x, pos_y, 'Code', {
+                    "args": {
+                        "code": "\ndef main(arg1, arg2):\n    return {\n        \"content\": arg1 + arg2\n    }\n"
+                    }
+                }, htmlSourceCode);
+                initializeMonacoEditor(CodeID)
+            break;
+        // case 'IF/ELSE':
+        //     const IfelseID = editor.addNode('IF/ELSE', 1, 2,
+        //         pos_x, pos_y, 'IF/ELSE', {
+        //             "args": {
+        //                 "condition_op": "",
+        //                 "target_value": "",
+        //             }
+        //         }, htmlSourceCode);
+        //     break;
 
         case 'ImageMotion':
             editor.addNode('ImageMotion', 1, 1,
@@ -880,6 +998,80 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         default:
     }
 }
+
+
+function initializeMonacoEditor(nodeId) {
+    require.config({
+        paths: {
+            vs: "https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs",
+        },
+    });
+
+    require(["vs/editor/editor.main"], function () {
+        const parentSelector = `#node-${nodeId}`;
+        const parentNode = document.querySelector(parentSelector);
+
+        if (!parentNode) {
+            console.error(`Parent node with selector ${parentSelector} not found.`);
+            return;
+        }
+
+        const codeContentElement = parentNode.querySelector(`.code-content`);
+        if (!codeContentElement) {
+            console.error(`Code content element not found within parent node ${parentSelector}.`);
+            return;
+        }
+
+        const node = editor.getNodeFromId(nodeId);
+        if (!node) {
+            console.error(`Node with ID ${nodeId} not found.`);
+            return;
+        }
+
+        const editorInstance = monaco.editor.create(codeContentElement, {
+            value: node.data.args.code,
+            language: "python",
+            theme: "vs-light",
+            minimap: {
+                enabled: false,
+            },
+            wordWrap: "on",
+            lineNumbersMinChars: 1,
+            scrollBeyondLastLine: false,
+            readOnly: false,
+        });
+
+        editorInstance.onDidChangeModelContent(function () {
+            const updatedNode = editor.getNodeFromId(nodeId);
+            if (updatedNode) {
+                updatedNode.data.args.code = editorInstance.getValue();
+                editor.updateNodeDataFromId(nodeId, updatedNode.data);
+            }
+        });
+
+        editorInstance.onDidChangeModelContent(function () {
+            const updatedNode = editor.getNodeFromId(nodeId);
+            if (updatedNode) {
+                updatedNode.data.args.code = editorInstance.getValue();
+                editor.updateNodeDataFromId(nodeId, updatedNode.data);
+            }
+        });
+
+        const resizeObserver = new ResizeObserver(() => {
+            editorInstance.layout();
+        });
+        resizeObserver.observe(parentNode);
+
+        parentNode.addEventListener('DOMNodeRemoved', function () {
+            resizeObserver.disconnect();
+        });
+
+    }, function (error) {
+        console.error("Error encountered while loading monaco editor: ", error);
+    });
+}
+
+
 
 function updateSampleRate(nodeId) {
     const newNode = document.getElementById(`node-${nodeId}`);
@@ -926,7 +1118,7 @@ function setupTextInputListeners(nodeId) {
         };
         newNode.addEventListener('mousedown', function (event) {
             const target = event.target;
-            if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') {
+            if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.closest('.code-content')) {
                 stopPropagation(event);
             }
         }, false);
@@ -1874,6 +2066,10 @@ function showExportHTMLPopup() {
 
     // Remove the html attribute from the nodes to avoid inconsistencies in html
     removeHtmlFromUsers(rawData);
+    const hasError = sortElementsByPosition(rawData);
+    if (hasError) {
+        return;
+    }
 
     const exportData = JSON.stringify(rawData, null, 4);
 
@@ -2187,20 +2383,40 @@ async function fetchHtmlSourceCodeByName(name) {
 
 async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
     const idPlaceholderRegex = /ID_PLACEHOLDER/g;
+    const namePlaceholderRegex = /NAME_PLACEHOLDER/g;
+    const readmePlaceholderRegex = /README_PLACEHOLDER/g;
+
+    const classToReadmeDescription = {
+        "node-DialogAgent": "A dialog agent that can interact with users or other agents",
+        "node-UserAgent": "A proxy agent for user",
+        "node-TextToImageAgent": "Agent for text to image generation",
+        "node-DictDialogAgent": "Agent that generates response in a dict format",
+        "node-ReActAgent": "Agent for ReAct (reasoning and acting) with tools",
+        "node-BroadcastAgent": "A broadcast agent that only broadcasts the messages it receives"
+    };
+
     for (const nodeId of Object.keys(data.drawflow.Home.data)) {
         const node = data.drawflow.Home.data[nodeId];
+
         if (!node.html) {
             if (node.name === "readme") {
-                // Remove the node if its name is "readme"
                 delete data.drawflow.Home.data[nodeId];
-                continue; // Skip to the next iteration
+                continue;
             }
-            console.log(node.name)
-            const sourceCode = await fetchHtmlSourceCodeByName(node.name);
 
-            // Add new html attribute to the node
-            console.log(sourceCode)
-            node.html = sourceCode.replace(idPlaceholderRegex, nodeId);
+            node.html = await fetchHtmlSourceCodeByName(node.name);
+
+            if (node.name === "CopyNode") {
+                node.html = node.html.replace(idPlaceholderRegex, node.data.elements[0]);
+                node.html = node.html.replace(namePlaceholderRegex, node.class.split("-").slice(-1)[0]);
+
+                const readmeDescription = classToReadmeDescription[node.class];
+                if (readmeDescription) {
+                    node.html = node.html.replace(readmePlaceholderRegex, readmeDescription);
+                }
+            } else {
+                node.html = node.html.replace(idPlaceholderRegex, nodeId);
+            }
         }
     }
 }
