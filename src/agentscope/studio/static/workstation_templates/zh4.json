@@ -2,6 +2,26 @@
   "drawflow": {
     "Home": {
       "data": {
+        "0": {
+          "id": 0,
+          "name": "start",
+          "data": {},
+          "class": "Start",
+          "typenode": false,
+          "inputs": {},
+          "outputs": {
+            "output_1": {
+              "connections": [
+                {
+                  "node": "3",
+                  "output": "input_1"
+                }
+              ]
+            }
+          },
+          "pos_x": 15,
+          "pos_y": 8
+        },
         "4": {
           "id": 4,
           "name": "MsgHub",
@@ -213,7 +233,7 @@
           "inputs": {},
           "outputs": {},
           "pos_x": 358,
-          "pos_y": 7
+          "pos_y": 367
         },
         "3": {
           "id": 3,
@@ -230,7 +250,12 @@
           "typenode": false,
           "inputs": {
             "input_1": {
-              "connections": []
+              "connections": [
+                {
+                  "node": "0",
+                  "input": "output_1"
+                }
+              ]
             }
           },
           "outputs": {
@@ -244,7 +269,7 @@
             }
           },
           "pos_x": 350,
-          "pos_y": 505
+          "pos_y": 8
         },
         "1": {
           "id": 1,
@@ -256,7 +281,7 @@
           "inputs": {},
           "outputs": {},
           "pos_x": 68,
-          "pos_y": 67
+          "pos_y": 367
         }
       }
     }

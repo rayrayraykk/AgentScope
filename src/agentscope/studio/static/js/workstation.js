@@ -13,6 +13,7 @@ let descriptionStep;
 
 let nameToHtmlFile = {
     'welcome': 'welcome.html',
+    'start': 'start.html',
     'dashscope_chat': 'model-dashscope-chat.html',
     'openai_chat': 'model-openai-chat.html',
     'post_api_chat': 'model-post-api-chat.html',
@@ -209,6 +210,11 @@ async function initializeWorkstationPage() {
     let welcome = await fetchHtml('welcome.html');
     const welcomeID = editor.addNode('welcome', 0, 0, 50, 50, 'welcome', {}, welcome);
     setupNodeListeners(welcomeID);
+    collapseNode(welcomeID);
+
+    let start = await fetchHtml('start.html');
+    const startID = editor.addNode('start', 0, 1, 50, 200, 'start', {}, start);
+    setupNodeListeners(startID);
 
     const condition_manager = new ConditionOperator();
     editor.on('nodeCreated', function (id) {
@@ -482,7 +488,8 @@ function moveGroupNodes(groupId, dx, dy) {
 
 function collapseNode(nodeId) {
     const nodeElement = document.getElementById(`node-${nodeId}`);
-    const contentBox = nodeElement.querySelector('.box');
+    const contentBox = nodeElement.querySelector('.box') ||
+        nodeElement.querySelector('.box-highlight');
     const toggleArrow = nodeElement.querySelector('.toggle-arrow');
 
     contentBox.classList.add('hidden');
@@ -563,6 +570,14 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
 
     switch (name) {
         // Workflow-Model
+        case 'start':
+            editor.addNode('start', 0, 0, pos_x,
+                pos_y,
+                'start', {
+                },
+                htmlSourceCode);
+            break;
+
         case 'dashscope_chat':
             editor.addNode('dashscope_chat', 0, 0, pos_x,
                 pos_y,
