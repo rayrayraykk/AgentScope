@@ -1238,8 +1238,8 @@ function hideShowGroupNodes(groupId, show) {
 function setupConditionListeners(nodeId) {
     const newNode = document.getElementById(`node-${nodeId}`);
     if (newNode) {
-        const conditionOp = newNode.querySelector('.condition_op');
-        const targetContainer = newNode.querySelector('.target-container');
+        const conditionOp = newNode.querySelector('#condition_op');
+        const targetContainer = newNode.querySelector('#target-container');
         console.log(conditionOp, targetContainer);
 
         function updateTargetVisibility() {
