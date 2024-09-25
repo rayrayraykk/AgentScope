@@ -77,7 +77,7 @@ class ASDiGraph(nx.DiGraph):
         if self.only_compile:
             raise ValueError("Workflow cannot run on compile mode!")
 
-        agentscope.init(logger_level="DEBUG")
+        agentscope.init(logger_level="DEBUG", studio_url="http://127.0.0.1:5000")
         sorted_nodes = list(nx.topological_sort(self))
         sorted_nodes = [
             node_id
@@ -90,21 +90,81 @@ class ASDiGraph(nx.DiGraph):
         # Cache output
         values = {}
 
-        # Run with predecessors outputs
-        for node_id in sorted_nodes:
-            inputs = [
-                values[predecessor]
+        root_node_ids = [
+            node_id for node_id in sorted_nodes if self.in_degree(node_id) == 0
+        ]
+        start_node_ids = []
+        model_node_ids = []
+        for node_id in root_node_ids:
+            if self.nodes[node_id]["opt"].node_type == WorkflowNodeType.START:
+                start_node_ids.append(node_id)
+            elif (
+                self.nodes[node_id]["opt"].node_type == WorkflowNodeType.MODEL
+            ):
+                model_node_ids.append(node_id)
+
+        if len(start_node_ids) <= 0:
+            raise ValueError("No start node found!")
+
+        from collections import deque
+
+        node_queue = deque(start_node_ids)
+        visited = set()
+        values = {}
+
+        while node_queue:
+            node_id = node_queue.popleft()
+            if node_id in visited:
+                continue
+            if all(
+                predecessor in visited
                 for predecessor in self.predecessors(node_id)
-            ]
-            if not inputs:
-                values[node_id] = self.exec_node(node_id)
-            elif len(inputs) == 1:
-                # Note: only support exec with the first predecessor now
-                values[node_id] = self.exec_node(node_id, inputs[0])
-            elif len(inputs) > 1:
-                values[node_id] = self.exec_node(node_id, inputs)
+            ):
+                inputs = [
+                    values[predecessor]
+                    for predecessor in self.predecessors(node_id)
+                ]
+                if not inputs:
+                    values[node_id] = self.exec_node(node_id)
+                elif len(inputs) == 1:
+                    # Note: only support exec with the first predecessor now
+                    values[node_id] = self.exec_node(node_id, inputs[0])
+                elif len(inputs) > 1:
+                    values[node_id] = self.exec_node(node_id, inputs)
+                else:
+                    raise ValueError("Too many predecessors!")
+
+                visited.add(node_id)
+                if (
+                    self.nodes[node_id]["opt"].node_type
+                    == WorkflowNodeType.IFELSE
+                ):
+                    node_info = self.nodes[node_id]
+                    branch_true = values[node_id].get("branch", True)
+                    next_node_ids = []
+                    if branch_true:
+                        next_node_ids = [
+                            connection["node"]
+                            for connection in node_info["outputs"][
+                                "output_1"
+                            ].get("connections", [])
+                        ]
+                    else:
+                        next_node_ids = [
+                            connection["node"]
+                            for connection in node_info["outputs"][
+                                "output_2"
+                            ].get("connections", [])
+                        ]
+                    for child_id in next_node_ids:
+                        if child_id not in visited:
+                            node_queue.append(child_id)
+                else:
+                    for child_id in self.adj[node_id].keys():
+                        if child_id not in visited:
+                            node_queue.append(child_id)
             else:
-                raise ValueError("Too many predecessors!")
+                node_queue.append(node_id)
 
     def compile(  # type: ignore[no-untyped-def]
         self,
@@ -191,6 +251,7 @@ class ASDiGraph(nx.DiGraph):
             WorkflowNodeType.SERVICE,
             WorkflowNodeType.TOOL,
             WorkflowNodeType.START,
+            WorkflowNodeType.IFELSE,
         ]:
             raise NotImplementedError(node_cls)
 

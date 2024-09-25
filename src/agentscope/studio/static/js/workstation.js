@@ -42,7 +42,7 @@ let nameToHtmlFile = {
     'TextToImageService': 'service-text-to-image.html',
     'ImageComposition': 'tool-image-composition.html',
     'Code': 'tool-code.html',
-    // 'IF/ELSE': 'tool-if-else.html',
+    'IF/ELSE': 'tool-if-else.html',
     'ImageMotion': 'tool-image-motion.html',
     'VideoComposition': 'tool-video-composition.html',
 }
@@ -932,15 +932,15 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                 }, htmlSourceCode);
                 initializeMonacoEditor(CodeID)
             break;
-        // case 'IF/ELSE':
-        //     const IfelseID = editor.addNode('IF/ELSE', 1, 2,
-        //         pos_x, pos_y, 'IF/ELSE', {
-        //             "args": {
-        //                 "condition_op": "",
-        //                 "target_value": "",
-        //             }
-        //         }, htmlSourceCode);
-        //     break;
+        case 'IF/ELSE':
+            const IfelseID = editor.addNode('IF/ELSE', 1, 2,
+                pos_x, pos_y, 'IF/ELSE', {
+                    "args": {
+                        "condition_op": "",
+                        "target_value": "",
+                    }
+                }, htmlSourceCode);
+            break;
 
         case 'ImageMotion':
             editor.addNode('ImageMotion', 1, 1,

@@ -65,6 +65,7 @@ class WorkflowNodeType(IntEnum):
     COPY = 5
     TOOL = 6
     START = 7
+    IFELSE = 8
 
 
 class WorkflowNode(ABC):
@@ -1039,6 +1040,35 @@ class CodeNode(WorkflowNode):
         }
 
 
+class IfElseNode(WorkflowNode):
+    """
+    Python Code Node
+    """
+
+    node_type = WorkflowNodeType.IFELSE
+
+    def _post_init(self) -> None:
+        super()._post_init()
+        self.condition_op = self.opt_kwargs.pop("condition_op", "")
+        self.target_value = self.opt_kwargs.pop("target_value", "")
+        self.pipeline = partial(
+            eval_condition_operator,
+            operator=self.condition_op,
+            target_value=self.target_value,
+        )
+
+    def __call__(self, x: dict = None) -> dict:
+        x["branch"] = self.pipeline(x)
+        return x
+
+    def compile(self) -> dict:
+        return {
+            "imports": "",
+            "inits": "",
+            "execs": ""
+        }
+
+
 NODE_NAME_MAPPING = {
     "start": StartNode,
     "dashscope_chat": ModelNode,
@@ -1069,6 +1099,7 @@ NODE_NAME_MAPPING = {
     "TextToAudioService": TextToAudioServiceNode,
     "TextToImageService": TextToImageServiceNode,
     "ImageComposition": ImageCompositionNode,
+    "IF/ELSE": IfElseNode,
     "Code": CodeNode,
     "ImageMotion": ImageMotionNode,
     "VideoComposition": VideoCompositionNode,
