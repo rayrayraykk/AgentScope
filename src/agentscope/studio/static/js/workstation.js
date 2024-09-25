@@ -154,7 +154,7 @@ async function initializeWorkstationPage() {
         addEventListenersToNumberInputs(id);
         setupTextInputListeners(id);
         setupConditionListeners(id);
-        
+
     })
 
     editor.on('nodeRemoved', function (id) {
