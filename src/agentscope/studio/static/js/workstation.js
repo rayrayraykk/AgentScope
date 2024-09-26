@@ -2335,6 +2335,7 @@ function importSetupNodes(dataToImport) {
     Object.keys(dataToImport.drawflow.Home.data).forEach((nodeId) => {
         setupNodeListeners(nodeId);
         setupConditionListeners(nodeId);
+        initializeMonacoEditor(nodeId);
 
         const nodeElement = document.getElementById(`node-${nodeId}`);
         if (nodeElement) {
