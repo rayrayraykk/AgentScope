@@ -774,13 +774,6 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                     "cases": [],
                 }
             }, htmlSourceCode);
-            setupSwitchPipelineListeners(SwitchPipelineID);
-            const caseContainer = document.querySelector(`#node-${SwitchPipelineID} .case-container`);
-            if (caseContainer) {
-                addDefaultCase(caseContainer);
-            } else {
-                console.error(`Case container not found in node-${SwitchPipelineID}.`);
-            }
             break;
 
         // Workflow-Service
@@ -1276,7 +1269,8 @@ function setupNodeListeners(nodeId) {
 
         initializeMonacoEditor(nodeId);
         setupConditionListeners(nodeId);
-        updateSampleRate(nodeId)
+        updateSampleRate(nodeId);
+        setupSwitchPipelineListeners(nodeId);
 
         const titleBox = newNode.querySelector('.title-box');
         const contentBox = newNode.querySelector('.box') ||
@@ -1356,7 +1350,6 @@ function setupSwitchPipelineListeners(nodeId) {
     }
     const addCaseButton = newNode.querySelector('.add-case');
     if (!addCaseButton) {
-        console.error(`Add Case button not found in node-${nodeId}.`);
         return;
     }
     addCaseButton.addEventListener('click', function () {
@@ -1402,7 +1395,6 @@ function setupSwitchPipelineListeners(nodeId) {
 
     const removeCaseButton = newNode.querySelector('.remove-case');
     if (!removeCaseButton) {
-        console.error(`Remove Case button not found in node-${nodeId}.`);
         return;
     }
     removeCaseButton.addEventListener('click', function () {
@@ -1416,6 +1408,47 @@ function setupSwitchPipelineListeners(nodeId) {
         }
         editor.updateConnectionNodes('node-' + nodeId);
     });
+
+    var caseContainer = newNode.querySelector('.case-container');
+    if (!caseContainer) {
+        console.error(`Case container not found in node-${nodeId}.`);
+        return;
+    }
+
+    var defaultCaseElement = caseContainer.querySelector('.default-case');
+    if (defaultCaseElement) {
+        caseContainer.removeChild(defaultCaseElement);
+    }
+
+    var cases = editor.getNodeFromId(nodeId).data.args.cases;
+    for (var caseCount = 0; caseCount < cases.length; caseCount++) {
+
+        var caseElement = document.createElement('div');
+        caseElement.classList.add('case-placeholder');
+
+        var caseText = document.createTextNode(`Case ${caseCount + 1}: `);
+        caseElement.appendChild(caseText);
+
+        var inputElement = document.createElement('input');
+        inputElement.type = 'text';
+        inputElement.placeholder = `Case Pattern`;
+        inputElement.value = cases[caseCount];
+
+        inputElement.dataset.caseIndex = caseCount;
+
+        caseElement.appendChild(inputElement);
+        caseContainer.appendChild(caseElement);
+
+        inputElement.addEventListener('input', function (e) {
+            var nodeData = editor.getNodeFromId(nodeId).data;
+            console.log("nodeData", nodeData);
+            var index = e.target.dataset.caseIndex;
+            console.log("index", index);
+            nodeData.args.cases[index] = e.target.value;
+            editor.updateNodeDataFromId(nodeId, nodeData);
+        });
+    }
+    addDefaultCase(caseContainer);
 }
 
 function addDefaultCase(caseContainer) {
