@@ -1065,7 +1065,7 @@ class IfElseNode(WorkflowNode):
         return {
             "imports": "",
             "inits": "",
-            "execs": ""
+            "execs": "",
         }
 
 

@@ -77,7 +77,9 @@ class ASDiGraph(nx.DiGraph):
         if self.only_compile:
             raise ValueError("Workflow cannot run on compile mode!")
 
-        agentscope.init(logger_level="DEBUG", studio_url="http://127.0.0.1:5000")
+        agentscope.init(
+            logger_level="DEBUG", studio_url="http://127.0.0.1:5000"
+        )
         sorted_nodes = list(nx.topological_sort(self))
         sorted_nodes = [
             node_id
