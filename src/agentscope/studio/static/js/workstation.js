@@ -153,7 +153,6 @@ async function initializeWorkstationPage() {
         setupNodeCopyListens(id);
         addEventListenersToNumberInputs(id);
         setupTextInputListeners(id);
-        setupConditionListeners(id);
 
     })
 
@@ -815,7 +814,6 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                         "sample_rate": ""
                     }
                 }, htmlSourceCode);
-                updateSampleRate(TextToAudioServiceID)
             break;
         case 'TextToImageService':
             editor.addNode('TextToImageService', 0, 0,
@@ -850,7 +848,6 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                         "code": "\ndef main(arg1, arg2):\n    return {\n        \"content\": arg1 + arg2\n    }\n"
                     }
                 }, htmlSourceCode);
-                initializeMonacoEditor(CodeID)
             break;
         // case 'IF/ELSE':
         //     const IfelseID = editor.addNode('IF/ELSE', 1, 2,
@@ -923,7 +920,6 @@ function initializeMonacoEditor(nodeId) {
 
         const codeContentElement = parentNode.querySelector(`.code-content`);
         if (!codeContentElement) {
-            console.error(`Code content element not found within parent node ${parentSelector}.`);
             return;
         }
 
@@ -1262,6 +1258,10 @@ function setupConditionListeners(nodeId) {
 function setupNodeListeners(nodeId) {
     const newNode = document.getElementById(`node-${nodeId}`);
     if (newNode) {
+
+        initializeMonacoEditor(nodeId);
+        setupConditionListeners(nodeId);
+        updateSampleRate(nodeId)
 
         const titleBox = newNode.querySelector('.title-box');
         const contentBox = newNode.querySelector('.box') ||
@@ -2334,8 +2334,6 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
 function importSetupNodes(dataToImport) {
     Object.keys(dataToImport.drawflow.Home.data).forEach((nodeId) => {
         setupNodeListeners(nodeId);
-        setupConditionListeners(nodeId);
-        initializeMonacoEditor(nodeId);
 
         const nodeElement = document.getElementById(`node-${nodeId}`);
         if (nodeElement) {
