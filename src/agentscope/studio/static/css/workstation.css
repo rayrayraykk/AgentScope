@@ -993,3 +993,11 @@ pre[class*="language-"] {
     background-color: #4CAF50;
     transition: width 0.1s linear;
 }
+.code-content {
+    display: flex;
+    width: var(--code-content-width);
+    min-height: 200px;
+    height: 100%;
+    overflow: auto;
+    white-space: pre;
+}

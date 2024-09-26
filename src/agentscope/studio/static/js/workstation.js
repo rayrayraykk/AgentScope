@@ -40,6 +40,8 @@ let nameToHtmlFile = {
     'TextToAudioService': 'service-text-to-audio.html',
     'TextToImageService': 'service-text-to-image.html',
     'ImageComposition': 'tool-image-composition.html',
+    'Code': 'tool-code.html',
+    // 'IF/ELSE': 'tool-if-else.html',
     'ImageMotion': 'tool-image-motion.html',
     'VideoComposition': 'tool-video-composition.html',
 }
@@ -84,7 +86,6 @@ async function fetchHtml(fileName) {
         return error;
     }
 }
-
 
 async function initializeWorkstationPage() {
     console.log("Initialize Workstation Page")
@@ -152,6 +153,7 @@ async function initializeWorkstationPage() {
         setupNodeCopyListens(id);
         addEventListenersToNumberInputs(id);
         setupTextInputListeners(id);
+
     })
 
     editor.on('nodeRemoved', function (id) {
@@ -724,7 +726,8 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                     elements: [],
                     "args": {
                         "max_loop": 3,
-                        "break_func": ''
+                        "condition_op": "",
+                        "target_value": "",
                     }
                 }, htmlSourceCode);
             break;
@@ -743,7 +746,8 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             editor.addNode('IfElsePipeline', 1,
                 1, pos_x, pos_y, 'GROUP', {
                     elements: [], args: {
-                        "condition_func": ''
+                        "condition_op": "",
+                        "target_value": "",
                     }
                 }, htmlSourceCode);
             break;
@@ -755,13 +759,6 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                     "cases": [],
                 }
             }, htmlSourceCode);
-            setupSwitchPipelineListeners(SwitchPipelineID);
-            const caseContainer = document.querySelector(`#node-${SwitchPipelineID} .case-container`);
-            if (caseContainer) {
-                addDefaultCase(caseContainer);
-            } else {
-                console.error(`Case container not found in node-${SwitchPipelineID}.`);
-            }
             break;
 
         // Workflow-Service
@@ -810,7 +807,6 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                         "sample_rate": ""
                     }
                 }, htmlSourceCode);
-                updateSampleRate(TextToAudioServiceID)
             break;
         case 'TextToImageService':
             editor.addNode('TextToImageService', 0, 0,
@@ -838,6 +834,23 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                     }
                 }, htmlSourceCode);
             break;
+        case 'Code':
+            const CodeID = editor.addNode('Code', 1, 1,
+                pos_x, pos_y, 'Code', {
+                    "args": {
+                        "code": "\ndef main(arg1, arg2):\n    return {\n        \"content\": arg1 + arg2\n    }\n"
+                    }
+                }, htmlSourceCode);
+            break;
+        // case 'IF/ELSE':
+        //     const IfelseID = editor.addNode('IF/ELSE', 1, 2,
+        //         pos_x, pos_y, 'IF/ELSE', {
+        //             "args": {
+        //                 "condition_op": "",
+        //                 "target_value": "",
+        //             }
+        //         }, htmlSourceCode);
+        //     break;
 
         case 'ImageMotion':
             editor.addNode('ImageMotion', 1, 1,
@@ -880,6 +893,79 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         default:
     }
 }
+
+
+function initializeMonacoEditor(nodeId) {
+    require.config({
+        paths: {
+            vs: "https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs",
+        },
+    });
+
+    require(["vs/editor/editor.main"], function () {
+        const parentSelector = `#node-${nodeId}`;
+        const parentNode = document.querySelector(parentSelector);
+
+        if (!parentNode) {
+            console.error(`Parent node with selector ${parentSelector} not found.`);
+            return;
+        }
+
+        const codeContentElement = parentNode.querySelector(`.code-content`);
+        if (!codeContentElement) {
+            return;
+        }
+
+        const node = editor.getNodeFromId(nodeId);
+        if (!node) {
+            console.error(`Node with ID ${nodeId} not found.`);
+            return;
+        }
+
+        const editorInstance = monaco.editor.create(codeContentElement, {
+            value: node.data.args.code,
+            language: "python",
+            theme: "vs-light",
+            minimap: {
+                enabled: false,
+            },
+            wordWrap: "on",
+            lineNumbersMinChars: 1,
+            scrollBeyondLastLine: false,
+            readOnly: false,
+        });
+
+        editorInstance.onDidChangeModelContent(function () {
+            const updatedNode = editor.getNodeFromId(nodeId);
+            if (updatedNode) {
+                updatedNode.data.args.code = editorInstance.getValue();
+                editor.updateNodeDataFromId(nodeId, updatedNode.data);
+            }
+        });
+
+        editorInstance.onDidChangeModelContent(function () {
+            const updatedNode = editor.getNodeFromId(nodeId);
+            if (updatedNode) {
+                updatedNode.data.args.code = editorInstance.getValue();
+                editor.updateNodeDataFromId(nodeId, updatedNode.data);
+            }
+        });
+
+        const resizeObserver = new ResizeObserver(() => {
+            editorInstance.layout();
+        });
+        resizeObserver.observe(parentNode);
+
+        parentNode.addEventListener('DOMNodeRemoved', function () {
+            resizeObserver.disconnect();
+        });
+
+    }, function (error) {
+        console.error("Error encountered while loading monaco editor: ", error);
+    });
+}
+
+
 
 function updateSampleRate(nodeId) {
     const newNode = document.getElementById(`node-${nodeId}`);
@@ -926,7 +1012,7 @@ function setupTextInputListeners(nodeId) {
         };
         newNode.addEventListener('mousedown', function (event) {
             const target = event.target;
-            if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') {
+            if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.closest('.code-content')) {
                 stopPropagation(event);
             }
         }, false);
@@ -1138,9 +1224,38 @@ function hideShowGroupNodes(groupId, show) {
     }
 }
 
+function setupConditionListeners(nodeId) {
+    const newNode = document.getElementById(`node-${nodeId}`);
+    if (newNode) {
+        const conditionOp = newNode.querySelector('#condition_op');
+        const targetContainer = newNode.querySelector('#target-container');
+        console.log(conditionOp, targetContainer);
+
+        function updateTargetVisibility() {
+            const condition_op = conditionOp ? conditionOp.value : '';
+            const hideConditions = ['', 'is empty', 'is null', 'is not empty', 'is not null'];
+            if (hideConditions.includes(condition_op)) {
+                targetContainer.style.display = 'none';
+            } else {
+                targetContainer.style.display = 'block';
+            }
+        }
+
+        if (conditionOp) {
+            conditionOp.addEventListener('input', updateTargetVisibility);
+            updateTargetVisibility();
+        }
+    }
+}
+
 function setupNodeListeners(nodeId) {
     const newNode = document.getElementById(`node-${nodeId}`);
     if (newNode) {
+
+        initializeMonacoEditor(nodeId);
+        setupConditionListeners(nodeId);
+        updateSampleRate(nodeId);
+        setupSwitchPipelineListeners(nodeId);
 
         const titleBox = newNode.querySelector('.title-box');
         const contentBox = newNode.querySelector('.box') ||
@@ -1220,7 +1335,6 @@ function setupSwitchPipelineListeners(nodeId) {
     }
     const addCaseButton = newNode.querySelector('.add-case');
     if (!addCaseButton) {
-        console.error(`Add Case button not found in node-${nodeId}.`);
         return;
     }
     addCaseButton.addEventListener('click', function () {
@@ -1266,7 +1380,6 @@ function setupSwitchPipelineListeners(nodeId) {
 
     const removeCaseButton = newNode.querySelector('.remove-case');
     if (!removeCaseButton) {
-        console.error(`Remove Case button not found in node-${nodeId}.`);
         return;
     }
     removeCaseButton.addEventListener('click', function () {
@@ -1280,6 +1393,47 @@ function setupSwitchPipelineListeners(nodeId) {
         }
         editor.updateConnectionNodes('node-' + nodeId);
     });
+
+    var caseContainer = newNode.querySelector('.case-container');
+    if (!caseContainer) {
+        console.error(`Case container not found in node-${nodeId}.`);
+        return;
+    }
+
+    var defaultCaseElement = caseContainer.querySelector('.default-case');
+    if (defaultCaseElement) {
+        caseContainer.removeChild(defaultCaseElement);
+    }
+
+    var cases = editor.getNodeFromId(nodeId).data.args.cases;
+    for (var caseCount = 0; caseCount < cases.length; caseCount++) {
+
+        var caseElement = document.createElement('div');
+        caseElement.classList.add('case-placeholder');
+
+        var caseText = document.createTextNode(`Case ${caseCount + 1}: `);
+        caseElement.appendChild(caseText);
+
+        var inputElement = document.createElement('input');
+        inputElement.type = 'text';
+        inputElement.placeholder = `Case Pattern`;
+        inputElement.value = cases[caseCount];
+
+        inputElement.dataset.caseIndex = caseCount;
+
+        caseElement.appendChild(inputElement);
+        caseContainer.appendChild(caseElement);
+
+        inputElement.addEventListener('input', function (e) {
+            var nodeData = editor.getNodeFromId(nodeId).data;
+            console.log("nodeData", nodeData);
+            var index = e.target.dataset.caseIndex;
+            console.log("index", index);
+            nodeData.args.cases[index] = e.target.value;
+            editor.updateNodeDataFromId(nodeId, nodeData);
+        });
+    }
+    addDefaultCase(caseContainer);
 }
 
 function addDefaultCase(caseContainer) {
@@ -1874,6 +2028,10 @@ function showExportHTMLPopup() {
 
     // Remove the html attribute from the nodes to avoid inconsistencies in html
     removeHtmlFromUsers(rawData);
+    const hasError = sortElementsByPosition(rawData);
+    if (hasError) {
+        return;
+    }
 
     const exportData = JSON.stringify(rawData, null, 4);
 
