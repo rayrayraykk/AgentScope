@@ -248,14 +248,10 @@ observer.observe(document.body, {
 });
 
 const debounceFun = debounce(function refreshI18n() {
-    let currentLanguage = localStorage.getItem('currentLanguage')
-    let defaultLang = {
-        "zh-CN": "cn",
-        "en-US": "en"
-    }
+    let currentLang = getCookie('locale') || 'en';
     observer.disconnect();
     $("[i18n]").i18n({
-        defaultLang: currentLanguage,
+        defaultLang: currentLang,
         filePath: "../static/i18n/",
         filePrefix: "i18n_",
         fileSuffix: "",
@@ -269,16 +265,31 @@ const debounceFun = debounce(function refreshI18n() {
     });
 },100)
 
+document.addEventListener('DOMContentLoaded', function() {
+    let currentLang = getCookie('locale') || 'en';
+    switch (currentLang){
+        case 'en':
+            document.getElementById('translate').innerText = 'en'
+            break;
+        case 'zh':
+            document.getElementById('translate').innerText = '中'
+            break;
+    }
+});
+
 function changeLanguage(){
-    let currentLanguage = localStorage.getItem('currentLanguage');
-    switch (currentLanguage){
+    let currentLang = getCookie('locale') || 'en';
+    switch (currentLang){
         case 'en':
             document.getElementById('translate').innerText = '中'
-            localStorage.setItem('currentLanguage', 'cn');
-            break
-        case 'cn':
+            localStorage.setItem('locale', 'zh');
+            setCookie('locale', 'zh');
+            break;
+        case 'zh':
             document.getElementById('translate').innerText = 'en'
-            localStorage.setItem('currentLanguage', 'en');
+            localStorage.setItem('locale', 'en');
+            setCookie('locale', 'en');
+            break;
     }
 }
 
@@ -291,3 +302,19 @@ function debounce(func, delay) {
     };
 }
 
+function getCookie(name) {
+    var matches = document.cookie.match(new RegExp(
+        "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+
+function setCookie(name, value, days) {
+    var expires = "";
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+}

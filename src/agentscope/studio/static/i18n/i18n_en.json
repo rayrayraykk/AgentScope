@@ -202,5 +202,13 @@
     "tool-video-composition-outputPath": "Output path",
     "tool-video-composition-targetVideoWidth": "Target Video Width",
     "tool-video-composition-targetVideoHeight": "Target Video Height",
-    "tool-video-composition-targetVideoFps": "Target Video Fps"
+    "tool-video-composition-targetVideoFps": "Target Video Fps",
+    "workstarionjs-import-prev": "Previous",
+    "workstarionjs-import-next": "Next",
+    "workstarionjs-import-skip": "Skip",
+    "workstarionjs-import-quit": "Quit",
+    "workstarionjs-import-caution": "Caution: You are currently in the tutorial mode where modifications are restricted.",
+    "workstarionjs-import-Caution-click": "Please click",
+    "workstarionjs-import-Caution-quit": "Quit",
+    "workstarionjs-import-Caution-exit": "to exit and start creating your custom multi-agent applications. "
 }

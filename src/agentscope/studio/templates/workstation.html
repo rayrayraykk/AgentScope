@@ -59,13 +59,17 @@
                 <div class="dropdown">
                     <a onclick="createNotification({
                         title: 'Notification',
+                        i18nTitle: '通知',
                         content: `You will be logged out`,
+                        i18nContent: '您将登出',
                         position: 'top-right',
                         closeBtn: true,
                         intervalTime: 3000,
                         progress: true,
                         confirmBtn: 'Yes',
+                        i18nConfirmBtn: '确定',
                         cancelBtn: 'No',
+                        i18nCancelBtn: '取消',
                         onConfirm: () => {
                             window.location.href = '/';
                         },

@@ -202,5 +202,13 @@
     "tool-video-composition-outputPath": "输出路径",
     "tool-video-composition-targetVideoWidth": "目标视频宽度",
     "tool-video-composition-targetVideoHeight": "目标视频高度",
-    "tool-video-composition-targetVideoFps": "目标视频帧率"
+    "tool-video-composition-targetVideoFps": "目标视频帧率",
+    "workstarionjs-import-prev": "上一步",
+    "workstarionjs-import-next": "下一步",
+    "workstarionjs-import-skip": "跳过",
+    "workstarionjs-import-quit": "退出",
+    "workstarionjs-import-caution": "注意：您当前处于教程模式，修改受到限制。",
+    "workstarionjs-import-Caution-click": "请单击",
+    "workstarionjs-import-Caution-quit": "退出",
+    "workstarionjs-import-Caution-exit": "退出并开始创建自定义多代理应用程序。"
 }
