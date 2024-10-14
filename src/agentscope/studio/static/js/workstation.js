@@ -2856,53 +2856,28 @@ function showTab(tabId) {
 function createGridItem(workflowName, container, thumbnail, author = '', time = '', showDeleteButton = false) {
     var gridItem = document.createElement('div');
     gridItem.className = 'grid-item';
-    gridItem.style.borderRadius = '15px';
-    gridItem.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
 
     var img = document.createElement('div');
     img.className = 'thumbnail';
     img.style.backgroundImage = `url('${thumbnail}')`;
-    img.style.backgroundSize = 'cover';
-    img.style.backgroundPosition = 'center';
     gridItem.appendChild(img);
 
     var caption = document.createElement('div');
     caption.className = 'caption';
-    caption.style.backgroundColor = 'white';
 
     var h6 = document.createElement('h6');
     h6.textContent = workflowName;
-    h6.style.margin = '1px 0';
 
     var pAuthor = document.createElement('p');
     pAuthor.textContent = `Author: ${author}`;
-    pAuthor.style.margin = '1px 0';
-    pAuthor.style.fontSize = '10px';
 
     var pTime = document.createElement('p');
     pTime.textContent = `Date: ${time}`;
-    pTime.style.margin = '1px 0';
-    pTime.style.fontSize = '10px';
 
     var button = document.createElement('button');
     button.textContent = ' Load ';
-    button.className = 'button';
-    button.style.backgroundColor = '#007aff';
-    button.style.color = 'white';
-    button.style.padding = '2px 7px';
-    button.style.border = 'none';
-    button.style.borderRadius = '8px';
-    button.style.fontSize = '12px';
-    button.style.cursor = 'pointer';
-    button.style.transition = 'background 0.3s';
+    button.className = 'button load-button';
 
-    button.addEventListener('mouseover', function () {
-        button.style.backgroundColor = '#005bb5';
-    });
-
-    button.addEventListener('mouseout', function () {
-        button.style.backgroundColor = '#007aff';
-    });
     button.onclick = function (e) {
         e.preventDefault();
         sendWorkflow(workflowName);
@@ -2916,22 +2891,7 @@ function createGridItem(workflowName, container, thumbnail, author = '', time = 
     if (showDeleteButton) {
         var deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
-        deleteButton.className = 'button';
-        deleteButton.style.backgroundColor = '#007aff';
-        deleteButton.style.color = 'white';
-        deleteButton.style.padding = '2px 3px';
-        deleteButton.style.border = 'none';
-        deleteButton.style.borderRadius = '8px';
-        deleteButton.style.fontSize = '12px';
-        deleteButton.style.cursor = 'pointer';
-        deleteButton.style.transition = 'background 0.3s';
-
-        deleteButton.addEventListener('mouseover', function () {
-            deleteButton.style.backgroundColor = '#005bb5';
-        });
-        deleteButton.addEventListener('mouseout', function () {
-            deleteButton.style.backgroundColor = '#007aff';
-        });
+        deleteButton.className = 'button delete-button';
 
         deleteButton.onclick = function (e) {
             e.preventDefault();
