@@ -11,6 +11,8 @@
 
     --workstation-sidebar-item-font-size: 18px;
     --workstation-sidebar-subitem-font-size: 15px;
+
+    --logo-font-color: #000000;
 }
 
 html {
@@ -1108,10 +1110,6 @@ pre[class*="language-"] {
     transition: background 0.3s;
 }
 
-.caption .button:hover {
-    background-color: #005bb5;
-}
-
 .caption .load-button {
     margin-top: 5px;
 }
@@ -1141,4 +1139,15 @@ pre[class*="language-"] {
 .menu-btn:hover .tooltip {
     visibility: visible;
     opacity: 1;
+}
+
+#navigation-bar-logo {
+    font-family: 'krypton', sans-serif;
+    font-size: 20px;
+    color: var(--logo-font-color);
+    white-space: nowrap;
+}
+
+#navigation-bar-logo:hover {
+    cursor: pointer;
 }
