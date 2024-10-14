@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=R0912,R0915
 """
 AgentScope workstation DAG running engine.
 
@@ -78,7 +79,8 @@ class ASDiGraph(nx.DiGraph):
             raise ValueError("Workflow cannot run on compile mode!")
 
         agentscope.init(
-            logger_level="DEBUG", studio_url="http://127.0.0.1:5000"
+            logger_level="DEBUG",
+            studio_url="http://127.0.0.1:5000",
         )
         sorted_nodes = list(nx.topological_sort(self))
         sorted_nodes = [
@@ -348,7 +350,15 @@ class ASDiGraph(nx.DiGraph):
         # Initialize labels dict with empty sets for parent labels
         labels = {node: (set(), "") for node in self.nodes()}
 
-        for idx, root in enumerate(roots):
+        start_node_ids = [
+            node_id
+            for node_id in roots
+            if self.nodes[node_id]["opt"].node_type == WorkflowNodeType.START
+        ]
+        for idx, root in enumerate(
+            self.successors(start_node_ids[0]),
+            start=1,
+        ):
             # Each root node gets a label starting with its index
             self.label_nodes(root, f"{idx}", labels)
 
@@ -488,6 +498,19 @@ def build_dag(config: dict, only_compile: bool = True) -> ASDiGraph:
         ValueError: If the resulting graph is not acyclic.
     """
     dag = ASDiGraph(only_compile=only_compile)
+
+    if (
+        "drawflow" in config
+        and "Home" in config["drawflow"]
+        and "data" in config["drawflow"]["Home"]
+    ):
+        config = config["drawflow"]["Home"]["data"]
+
+        config = {
+            k: v
+            for k, v in config.items()
+            if not ("class" in v and v["class"] == "welcome")
+        }
 
     for node_id, node_info in config.items():
         config[node_id] = sanitize_node_data(node_info)
