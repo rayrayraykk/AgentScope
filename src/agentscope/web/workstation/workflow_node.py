@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Workflow node opt."""
 import ast
-from abc import ABC, abstractmethod
+from abc import ABC
 from enum import IntEnum
 from functools import partial
 from typing import List, Optional, Any
@@ -27,9 +27,6 @@ from agentscope.pipelines import (
 )
 from agentscope.pipelines.functional import placeholder
 from agentscope.web.workstation.workflow_utils import (
-    kwarg_converter,
-    deps_converter,
-    dict_converter,
     convert_str_to_callable,
     is_callable_expression,
 )
@@ -85,13 +82,11 @@ class WorkflowNode(ABC):
         opt_kwargs: dict,
         source_kwargs: dict,
         dep_opts: list,
-        only_compile: bool = True,
     ) -> None:
         """
         Initialize nodes. Implement specific initialization logic in
         subclasses.
         """
-        self.only_compile = only_compile
 
         self.node_id = node_id
         self.opt_kwargs = opt_kwargs
@@ -105,10 +100,9 @@ class WorkflowNode(ABC):
 
     def _post_init(self) -> None:
         # Warning: Might cause error when args is still string
-        if not self.only_compile:
-            for key, value in self.opt_kwargs.items():
-                if is_callable_expression(value):
-                    self.opt_kwargs[key] = convert_str_to_callable(value)
+        for key, value in self.opt_kwargs.items():
+            if is_callable_expression(value):
+                self.opt_kwargs[key] = convert_str_to_callable(value)
 
     def __call__(self, x: Any = None):  # type: ignore[no-untyped-def]
         """
@@ -120,17 +114,6 @@ class WorkflowNode(ABC):
         `_execute` method.
         """
         return x
-
-    @abstractmethod
-    def compile(self) -> dict:
-        """
-        Compile Node to python executable code dict
-        """
-        return {
-            "imports": "",
-            "inits": "",
-            "execs": "",
-        }
 
 
 class ModelNode(WorkflowNode):
@@ -148,14 +131,6 @@ class ModelNode(WorkflowNode):
         super()._post_init()
         ModelManager.get_instance().load_model_configs([self.opt_kwargs])
 
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.manager import ModelManager",
-            "inits": f"ModelManager.get_instance().load_model_configs("
-            f"[{self.opt_kwargs}])",
-            "execs": "",
-        }
-
 
 class StartNode(WorkflowNode):
     """
@@ -163,16 +138,6 @@ class StartNode(WorkflowNode):
     """
 
     node_type = WorkflowNodeType.START
-
-    def compile(self) -> dict:
-        """
-        Compile Node to python executable code dict
-        """
-        return {
-            "imports": "",
-            "inits": "",
-            "execs": "",
-        }
 
 
 class MsgNode(WorkflowNode):
@@ -192,14 +157,6 @@ class MsgNode(WorkflowNode):
     def __call__(self, x: dict = None) -> dict:
         return self.msg
 
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.message import Msg",
-            "inits": "",
-            "execs": f"{DEFAULT_FLOW_VAR} = Msg"
-            f"({kwarg_converter(self.opt_kwargs)})",
-        }
-
 
 class DialogAgentNode(WorkflowNode):
     """
@@ -214,15 +171,6 @@ class DialogAgentNode(WorkflowNode):
 
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
-
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.agents import DialogAgent",
-            "inits": f"{self.var_name} = DialogAgent("
-            f"{kwarg_converter(self.opt_kwargs)})",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"([{DEFAULT_FLOW_VAR}])",
-        }
 
 
 class UserAgentNode(WorkflowNode):
@@ -239,15 +187,6 @@ class UserAgentNode(WorkflowNode):
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
 
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.agents import UserAgent",
-            "inits": f"{self.var_name} = UserAgent("
-            f"{kwarg_converter(self.opt_kwargs)})",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"({DEFAULT_FLOW_VAR})",
-        }
-
 
 class TextToImageAgentNode(WorkflowNode):
     """
@@ -263,15 +202,6 @@ class TextToImageAgentNode(WorkflowNode):
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
 
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.agents import TextToImageAgent",
-            "inits": f"{self.var_name} = TextToImageAgent("
-            f"{kwarg_converter(self.opt_kwargs)})",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"({DEFAULT_FLOW_VAR})",
-        }
-
 
 class DictDialogAgentNode(WorkflowNode):
     """
@@ -286,15 +216,6 @@ class DictDialogAgentNode(WorkflowNode):
 
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
-
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.agents import DictDialogAgent",
-            "inits": f"{self.var_name} = DictDialogAgent("
-            f"{kwarg_converter(self.opt_kwargs)})",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"([{DEFAULT_FLOW_VAR}])",
-        }
 
 
 class ReActAgentNode(WorkflowNode):
@@ -319,23 +240,6 @@ class ReActAgentNode(WorkflowNode):
 
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
-
-    def compile(self) -> dict:
-        tools = deps_converter(self.dep_vars)[1:-1].split(",")
-        service_toolkit_code = ";".join(
-            f"{self.var_name}_service_toolkit.add({tool.strip()})"
-            for tool in tools
-        )
-        return {
-            "imports": "from agentscope.agents import ReActAgent",
-            "inits": f"{self.var_name}_service_toolkit = ServiceToolkit()\n"
-            f"    {service_toolkit_code}\n"
-            f"    {self.var_name} = ReActAgent"
-            f"({kwarg_converter(self.opt_kwargs)}, service_toolkit"
-            f"={self.var_name}_service_toolkit)",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"([{DEFAULT_FLOW_VAR}])",
-        }
 
 
 class MsgHubNode(WorkflowNode):
@@ -372,25 +276,6 @@ class MsgHubNode(WorkflowNode):
             x = self.pipeline(x)
         return x
 
-    def compile(self) -> dict:
-        announcement = (
-            f'Msg(name="'
-            f'{self.opt_kwargs["announcement"].get("name", "Host")}", '
-            f'content="'
-            f'{self.opt_kwargs["announcement"].get("content", "Host")}"'
-            f', role="system")'
-        )
-        execs = f"""with msghub({deps_converter(self.participants_var)},
-        announcement={announcement}):
-        {DEFAULT_FLOW_VAR} = {self.dep_vars[0]}({DEFAULT_FLOW_VAR})
-        """
-        return {
-            "imports": "from agentscope.msghub import msghub\n"
-            "from agentscope.message import Msg",
-            "inits": "",
-            "execs": execs,
-        }
-
 
 class PlaceHolderNode(WorkflowNode):
     """
@@ -409,15 +294,6 @@ class PlaceHolderNode(WorkflowNode):
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
 
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.pipelines.functional import "
-            "placeholder",
-            "inits": f"{self.var_name} = placeholder",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"({DEFAULT_FLOW_VAR})",
-        }
-
 
 class SequentialPipelineNode(WorkflowNode):
     """
@@ -435,15 +311,6 @@ class SequentialPipelineNode(WorkflowNode):
 
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
-
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.pipelines import SequentialPipeline",
-            "inits": f"{self.var_name} = SequentialPipeline("
-            f"{deps_converter(self.dep_vars)})",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"({DEFAULT_FLOW_VAR})",
-        }
 
 
 class ForLoopPipelineNode(WorkflowNode):
@@ -477,22 +344,6 @@ class ForLoopPipelineNode(WorkflowNode):
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
 
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.pipelines import ForLoopPipeline\n"
-            "from functools import partial\n"
-            "from agentscope.studio.tools.condition_operator import "
-            "eval_condition_operator",
-            "inits": f"{self.var_name} = ForLoopPipeline("
-            f"loop_body_operators="
-            f"{deps_converter(self.dep_vars)},"
-            f" {kwarg_converter(self.source_kwargs)},"
-            f" break_func=partial(eval_condition_operator, operator"
-            f"='{self.condition_op}', target_value='{self.target_value}'))",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"({DEFAULT_FLOW_VAR})",
-        }
-
 
 class WhileLoopPipelineNode(WorkflowNode):
     """
@@ -516,17 +367,6 @@ class WhileLoopPipelineNode(WorkflowNode):
 
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
-
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.pipelines import WhileLoopPipeline",
-            "inits": f"{self.var_name} = WhileLoopPipeline("
-            f"loop_body_operators="
-            f"{deps_converter(self.dep_vars)},"
-            f" {kwarg_converter(self.source_kwargs)})",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"({DEFAULT_FLOW_VAR})",
-        }
 
 
 class IfElsePipelineNode(WorkflowNode):
@@ -566,37 +406,6 @@ class IfElsePipelineNode(WorkflowNode):
 
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
-
-    def compile(self) -> dict:
-        imports = (
-            "from agentscope.pipelines import IfElsePipeline\n"
-            "from functools import partial\n"
-            "from agentscope.studio.tools.condition_operator "
-            "import eval_condition_operator"
-        )
-        execs = f"{DEFAULT_FLOW_VAR} = {self.var_name}({DEFAULT_FLOW_VAR})"
-        if len(self.dep_vars) == 1:
-            return {
-                "imports": imports,
-                "inits": f"{self.var_name} = IfElsePipeline("
-                f"if_body_operators={self.dep_vars[0]}, "
-                f"condition_func=partial(eval_condition_operator, "
-                f"operator='{self.condition_op}', "
-                f"target_value='{self.target_value}'))",
-                "execs": execs,
-            }
-        elif len(self.dep_vars) == 2:
-            return {
-                "imports": imports,
-                "inits": f"{self.var_name} = IfElsePipeline("
-                f"if_body_operators={self.dep_vars[0]}, "
-                f"else_body_operators={self.dep_vars[1]},"
-                f"condition_func=partial(eval_condition_operator, "
-                f"operator='{self.condition_op}', "
-                f"target_value='{self.target_value}'))",
-                "execs": execs,
-            }
-        raise ValueError
 
 
 class SwitchPipelineNode(WorkflowNode):
@@ -649,21 +458,6 @@ class SwitchPipelineNode(WorkflowNode):
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
 
-    def compile(self) -> dict:
-        imports = (
-            "from agentscope.pipelines import SwitchPipeline\n"
-            "from agentscope.pipelines.functional import placeholder"
-        )
-        execs = f"{DEFAULT_FLOW_VAR} = {self.var_name}({DEFAULT_FLOW_VAR})"
-        return {
-            "imports": imports,
-            "inits": f"{self.var_name} = SwitchPipeline(case_operators="
-            f"{dict_converter(self.case_operators_var)}, "
-            f"default_operators={self.default_var_name},"
-            f" {kwarg_converter(self.source_kwargs)})",
-            "execs": execs,
-        }
-
 
 class CopyNode(WorkflowNode):
     """
@@ -685,14 +479,6 @@ class CopyNode(WorkflowNode):
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
 
-    def compile(self) -> dict:
-        return {
-            "imports": "",
-            "inits": "",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.dep_vars[0]}"
-            f"({DEFAULT_FLOW_VAR})",
-        }
-
 
 class BingSearchServiceNode(WorkflowNode):
     """
@@ -704,16 +490,6 @@ class BingSearchServiceNode(WorkflowNode):
     def _post_init(self) -> None:
         super()._post_init()
         self.service_func = partial(bing_search, **self.opt_kwargs)
-
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.service import ServiceToolkit\n"
-            "from functools import partial\n"
-            "from agentscope.service import bing_search",
-            "inits": f"{self.var_name} = partial(bing_search,"
-            f" {kwarg_converter(self.opt_kwargs)})",
-            "execs": "",
-        }
 
 
 class GoogleSearchServiceNode(WorkflowNode):
@@ -727,16 +503,6 @@ class GoogleSearchServiceNode(WorkflowNode):
         super()._post_init()
         self.service_func = partial(google_search, **self.opt_kwargs)
 
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.service import ServiceToolkit\n"
-            "from functools import partial\n"
-            "from agentscope.service import google_search",
-            "inits": f"{self.var_name} = partial(google_search,"
-            f" {kwarg_converter(self.opt_kwargs)})",
-            "execs": "",
-        }
-
 
 class PythonServiceNode(WorkflowNode):
     """
@@ -748,14 +514,6 @@ class PythonServiceNode(WorkflowNode):
     def _post_init(self) -> None:
         super()._post_init()
         self.service_func = execute_python_code
-
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.service import ServiceToolkit\n"
-            "from agentscope.service import execute_python_code",
-            "inits": f"{self.var_name} = execute_python_code",
-            "execs": "",
-        }
 
 
 class ReadTextServiceNode(WorkflowNode):
@@ -769,14 +527,6 @@ class ReadTextServiceNode(WorkflowNode):
         super()._post_init()
         self.service_func = read_text_file
 
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.service import ServiceToolkit\n"
-            "from agentscope.service import read_text_file",
-            "inits": f"{self.var_name} = read_text_file",
-            "execs": "",
-        }
-
 
 class WriteTextServiceNode(WorkflowNode):
     """
@@ -788,14 +538,6 @@ class WriteTextServiceNode(WorkflowNode):
     def _post_init(self) -> None:
         super()._post_init()
         self.service_func = write_text_file
-
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.service import ServiceToolkit\n"
-            "from agentscope.service import write_text_file",
-            "inits": f"{self.var_name} = write_text_file",
-            "execs": "",
-        }
 
 
 class PostNode(WorkflowNode):
@@ -815,17 +557,6 @@ class PostNode(WorkflowNode):
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
 
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.studio.tools.web_post import "
-            "web_post\n"
-            "from functools import partial",
-            "inits": f"{self.var_name} = partial(web_post,"
-            f"{kwarg_converter(self.opt_kwargs)})",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}(msg="
-            f"{DEFAULT_FLOW_VAR})",
-        }
-
 
 class TextToAudioServiceNode(WorkflowNode):
     """
@@ -838,16 +569,6 @@ class TextToAudioServiceNode(WorkflowNode):
         super()._post_init()
         self.service_func = partial(dashscope_text_to_audio, **self.opt_kwargs)
 
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.service import ServiceToolkit\n"
-            "from functools import partial\n"
-            "from agentscope.service import dashscope_text_to_audio",
-            "inits": f"{self.var_name} = partial(dashscope_text_to_audio,"
-            f" {kwarg_converter(self.opt_kwargs)})",
-            "execs": "",
-        }
-
 
 class TextToImageServiceNode(WorkflowNode):
     """
@@ -859,16 +580,6 @@ class TextToImageServiceNode(WorkflowNode):
     def _post_init(self) -> None:
         super()._post_init()
         self.service_func = partial(dashscope_text_to_image, **self.opt_kwargs)
-
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.service import ServiceToolkit\n"
-            "from functools import partial\n"
-            "from agentscope.service import dashscope_text_to_image",
-            "inits": f"{self.var_name} = partial(dashscope_text_to_image,"
-            f" {kwarg_converter(self.opt_kwargs)})",
-            "execs": "",
-        }
 
 
 class ImageCompositionNode(WorkflowNode):
@@ -886,17 +597,6 @@ class ImageCompositionNode(WorkflowNode):
         if isinstance(x, dict):
             x = [x]
         return self.pipeline(x)
-
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.studio.tools.image_composition import "
-            "stitch_images_with_grid\n"
-            "from functools import partial\n",
-            "inits": f"{self.var_name} = partial(stitch_images_with_grid"
-            f", {kwarg_converter(self.opt_kwargs)})",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"([{DEFAULT_FLOW_VAR}])",
-        }
 
 
 class ImageMotionNode(WorkflowNode):
@@ -916,18 +616,6 @@ class ImageMotionNode(WorkflowNode):
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
 
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.studio.tools.image_motion import "
-            "create_video_or_gif_from_image\n"
-            "from functools import partial\n",
-            "inits": f"{self.var_name} = partial("
-            f"create_video_or_gif_from_image,"
-            f" {kwarg_converter(self.opt_kwargs)})",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}(msg="
-            f"{DEFAULT_FLOW_VAR})",
-        }
-
 
 class VideoCompositionNode(WorkflowNode):
     """
@@ -942,17 +630,6 @@ class VideoCompositionNode(WorkflowNode):
 
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
-
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.studio.tools.video_composition import "
-            "merge_videos\n"
-            "from functools import partial\n",
-            "inits": f"{self.var_name} = partial(merge_videos"
-            f", {kwarg_converter(self.opt_kwargs)})",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"([{DEFAULT_FLOW_VAR}])",
-        }
 
 
 class CodeNode(WorkflowNode):
@@ -1027,18 +704,6 @@ class CodeNode(WorkflowNode):
                 f"Code id: {self.node_id},error executing :{e}",
             ) from e
 
-    def compile(self) -> dict:
-        code = self.opt_kwargs.get("code", "").replace(
-            "def main",
-            f"def main_{self.node_id}",
-        )
-        return {
-            "imports": code,
-            "inits": "",
-            "execs": f"{DEFAULT_FLOW_VAR} = main_{self.node_id}"
-            f"(*[{DEFAULT_FLOW_VAR}])",
-        }
-
 
 class IfElseNode(WorkflowNode):
     """
@@ -1060,13 +725,6 @@ class IfElseNode(WorkflowNode):
     def __call__(self, x: dict = None) -> dict:
         x["branch"] = self.pipeline(x)
         return x
-
-    def compile(self) -> dict:
-        return {
-            "imports": "",
-            "inits": "",
-            "execs": "",
-        }
 
 
 NODE_NAME_MAPPING = {

@@ -1520,6 +1520,7 @@ function filterEmptyValues(obj) {
 
 // This function is the most important to AgentScope config.
 function reorganizeAndFilterConfigForAgentScope(inputData) {
+
     // Assuming there's only one tab ('Home'), but adjust if there are more
     const homeTab = inputData.drawflow.Home;
     // Create a new object to hold the reorganized and filtered nodes
@@ -1553,7 +1554,9 @@ function reorganizeAndFilterConfigForAgentScope(inputData) {
     });
 
     // Return the filtered and reorganized nodes instead of the original structure
-    return filteredNodes;
+
+    inputData.drawflow.Home.data = filteredNodes;
+    return inputData;
 }
 
 
@@ -1776,96 +1779,6 @@ function disableButtons() {
 }
 
 
-function showExportPyPopup() {
-    if (checkConditions()) {
-        const rawData = editor.export();
-
-        const hasError = sortElementsByPosition(rawData);
-        if (hasError) {
-            return;
-        }
-
-        const filteredData = reorganizeAndFilterConfigForAgentScope(rawData);
-
-        Swal.fire({
-            title: 'Processing...',
-            text: 'Please wait.',
-            allowOutsideClick: false,
-            willOpen: () => {
-                Swal.showLoading()
-            }
-        });
-
-        fetch('/convert-to-py', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                data: JSON.stringify(filteredData, null, 4),
-            })
-        }).then(response => {
-            if (!response.ok) {
-                throw new Error('Network error.');
-            }
-            return response.json();
-        })
-            .then(data => {
-                Swal.close();
-                if (data.is_success === 'True') {
-                    Swal.fire({
-                        title: '<b>Workflow Python Code</b>',
-                        html:
-                            '<p>Save as main.py<br>' +
-                            'Then run the following command in your terminal:<br>' +
-                            '<div class="code-snippet">python main.py</div><br>' +
-                            'or <div class="code-snippet">as_gradio main.py</div></p>' +
-                            '<pre class="line-numbers"><code class="language-py" id="export-data">' +
-                            data.py_code +
-                            '</code></pre>',
-                        showCloseButton: true,
-                        showCancelButton: true,
-                        confirmButtonText: 'Copy',
-                        cancelButtonText: 'Close',
-                        willOpen: (element) => {
-                            const codeElement = element.querySelector('code');
-                            Prism.highlightElement(codeElement);
-                            const copyButton = Swal.getConfirmButton();
-                            copyButton.addEventListener('click', () => {
-                                copyToClipboard(codeElement.textContent);
-                            });
-                        }
-                    });
-                } else {
-                    const errorMessage = `
-                <p>An error occurred during the Python code generation process. Please check the following error:</p>
-                <pre class="line-numbers"><code class="language-py">${data.py_code}</code></pre>
-        `;
-                    Swal.fire({
-                        title: 'Error!',
-                        html: errorMessage,
-                        icon: 'error',
-                        customClass: {
-                            popup: 'error-popup'
-                        },
-                        confirmButtonText: 'Close',
-                        willOpen: (element) => {
-                            const codeElement = element.querySelector('code');
-                            Prism.highlightElement(codeElement);
-                        }
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire('Failed!',
-                    'There was an error generating your code.',
-                    'error');
-            });
-    }
-}
-
-
 function showExportRunPopup(version) {
     if (version === "local") {
         showExportRunLocalPopup();
@@ -1893,7 +1806,7 @@ function showExportRunLocalPopup() {
             }
         });
 
-        fetch('/convert-to-py-and-run', {
+        fetch('/convert-to-json-and-run', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

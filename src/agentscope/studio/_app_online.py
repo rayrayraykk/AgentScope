@@ -30,7 +30,6 @@ from dotenv import load_dotenv
 from agentscope.constants import EXPIRATION_SECONDS, FILE_SIZE_LIMIT
 from agentscope.studio.utils import _require_auth, generate_jwt
 from agentscope.studio._app import (
-    _convert_config_to_py,
     _read_examples,
     _save_workflow,
     _delete_workflow,
@@ -329,16 +328,6 @@ def _upload_file_to_oss_online(**kwargs: Any) -> Response:
 
     config_url = write_and_upload(content, user_login)
     return jsonify(config_url=config_url)
-
-
-@_app.route("/convert-to-py", methods=["POST"])
-@_require_auth(fail_with_exception=True, secret_key=SECRET_KEY)
-def _online_convert_config_to_py(**kwargs: Any) -> Response:
-    # pylint: disable=unused-argument
-    """
-    Convert json config to python code and send back.
-    """
-    return _convert_config_to_py()
 
 
 @_app.route("/read-examples", methods=["POST"])

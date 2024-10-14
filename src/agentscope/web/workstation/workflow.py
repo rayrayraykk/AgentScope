@@ -2,7 +2,7 @@
 """ Workflow"""
 import argparse
 import json
-import os
+from typing import Any
 
 from loguru import logger
 from agentscope.web.workstation.workflow_dag import build_dag
@@ -22,34 +22,19 @@ def load_config(config_path: str) -> dict:
     return config
 
 
-def start_workflow(config: dict) -> None:
+def start_workflow(config: dict, **kwargs: Any) -> None:
     """Start the application workflow based on the given configuration.
 
     Args:
         config: A dictionary containing the application configuration.
+        kwargs: Extra params.
 
     This function will initialize and launch the application.
     """
     logger.info("Launching...")
 
-    dag = build_dag(config, only_compile=False)
-    dag.run()
-
-    logger.info("Finished.")
-
-
-def compile_workflow(config: dict, compiled_filename: str = "main.py") -> None:
-    """Generates Python code based on the given configuration.
-
-    Args:
-        config: A dictionary containing the application configuration.
-        compiled_filename: complied file name.
-
-    """
-    logger.info("Compiling...")
-
-    dag = build_dag(config, only_compile=True)
-    dag.compile(compiled_filename)
+    dag = build_dag(config)
+    dag.run(**kwargs)
 
     logger.info("Finished.")
 
@@ -70,38 +55,26 @@ def main() -> None:
         help="Path to the config file.",
         nargs="?",
     )
+
     parser.add_argument(
-        "--compile",
+        "--run_id",
         type=str,
-        help="Compile the json code to python file, e.g. main.py",
+        help="run id",
         default=False,
         nargs="?",
         const="",
     )
     args = parser.parse_args()
     cfg_path = args.cfg
-    compiled_filename = args.compile
+    run_id = args.run_id
+
+    args = parser.parse_args()
+    cfg_path = args.cfg
 
     if cfg_path:
         config = load_config(cfg_path)
-        if not compiled_filename:
-            start_workflow(config)
-        else:
-            if os.path.exists(compiled_filename):
-                while True:
-                    user_input = input(
-                        f"File 【{compiled_filename}】already exists, are you "
-                        f"sure to overwrite? (yes/no)",
-                    )
-                    if user_input.lower() in ["no", "n", "false"]:
-                        raise FileExistsError(compiled_filename)
+        start_workflow(config, runtime_id=run_id)
 
-                    if user_input.lower() in ["", "yes", "y", "true"]:
-                        logger.warning(f"Overwrite 【{compiled_filename}】!")
-                        break
-
-                    logger.info("Invalid input.")
-            compile_workflow(config, compiled_filename)
     else:
         raise FileNotFoundError("Please provide config file.")
 
