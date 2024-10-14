@@ -1061,13 +1061,27 @@ pre[class*="language-"] {
     flex-direction: column;
 }
 
+.grid-item :hover {
+    transform: scale(1.05);
+}
+
+.grid-item img {
+    width: 100%;
+    height: 61.8%;
+    object-fit: cover;
+}
+
+.grid-item .caption {
+    width: 100%;
+    height: 38.2%;
+}
+
 .thumbnail {
     width: 100%;
     flex-grow: 1;
 }
 
 .caption {
-    padding: 10px;
     text-align: center;
 }
 

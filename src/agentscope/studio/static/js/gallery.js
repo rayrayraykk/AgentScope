@@ -1,9 +1,5 @@
-document.addEventListener('DOMContentLoaded', function() {
-    showTab('tab1');
-    showGalleryWorkflowList('tab1');
-});
 
-
+showTab('tab1');
 function sendWorkflow(fileName) {
     if (confirm('Are you sure you want to import this workflow?')) {
         const workstationUrl = '/workstation?filename=' + encodeURIComponent(fileName);
@@ -68,31 +64,33 @@ function showTab(tabId) {
 function createGridItem(workflowName, container, thumbnail, author = '', time = '', showDeleteButton = false) {
     var gridItem = document.createElement('div');
     gridItem.className = 'grid-item';
+    gridItem.style.borderRadius = '15px';
+    gridItem.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+
 
     var img = document.createElement('div');
     img.className = 'thumbnail';
     img.style.backgroundImage = `url('${thumbnail}')`;
     img.style.backgroundSize = 'cover';
     img.style.backgroundPosition = 'center';
-    img.style.height = '50%';
     gridItem.appendChild(img);
 
     var caption = document.createElement('div');
     caption.className = 'caption';
-    caption.style.height = '50%';
+    caption.style.backgroundColor = 'white';
 
     var h6 = document.createElement('h6');
     h6.textContent = workflowName;
-    h6.style.margin = '3px 0';
+    h6.style.margin = '1px 0';
 
     var pAuthor = document.createElement('p');
     pAuthor.textContent = `Author: ${author}`;
-    pAuthor.style.margin = '3px 0';
+    pAuthor.style.margin = '1px 0';
     pAuthor.style.fontSize = '10px';
 
     var pTime = document.createElement('p');
     pTime.textContent = `Date: ${time}`;
-    pTime.style.margin = '3px 0';
+    pTime.style.margin = '1px 0';
     pTime.style.fontSize = '10px';
 
     var button = document.createElement('button');
@@ -102,10 +100,10 @@ function createGridItem(workflowName, container, thumbnail, author = '', time = 
     button.style.backgroundColor = '#007aff';
     button.style.backgroundImage = 'linear-gradient(to right, #6e48aa, #9d50bb)';
     button.style.color = 'white';
-    button.style.padding = '12px 10px';
+    button.style.padding = '2px 7px';
     button.style.border = 'none';
     button.style.borderRadius = '8px';
-    button.style.fontSize = '16px';
+    button.style.fontSize = '12px';
     button.style.cursor = 'pointer';
     button.style.transition = 'background 0.3s';
 
@@ -133,10 +131,10 @@ function createGridItem(workflowName, container, thumbnail, author = '', time = 
         deleteButton.style.backgroundColor = '#007aff';
         deleteButton.style.backgroundImage = 'linear-gradient(to right, #6e48aa, #9d50bb)';
         deleteButton.style.color = 'white';
-        deleteButton.style.padding = '12px 5px';
+        deleteButton.style.padding = '2px 3px';
         deleteButton.style.border = 'none';
         deleteButton.style.borderRadius = '8px';
-        deleteButton.style.fontSize = '16px';
+        deleteButton.style.fontSize = '12px';
         deleteButton.style.cursor = 'pointer';
         deleteButton.style.transition = 'background 0.3s';
 
