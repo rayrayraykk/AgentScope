@@ -2,8 +2,8 @@
 """A dummy agent."""
 from typing import Optional, Union, Sequence
 
-from ..message import Msg
-from .agent import AgentBase
+from agentscope.agents import AgentBase
+from agentscope.message import Msg
 
 
 class BroadcastAgent(AgentBase):
@@ -60,7 +60,7 @@ class BroadcastAgent(AgentBase):
 
         # Print/speak the message in this agent's voice
         # Support both streaming and non-streaming responses by "or"
-        msg = Msg(name=self.name, content=self.content, role="assistant")
-        self.speak(msg)
+        x = Msg(name=self.name, content=self.content, role="assistant")
+        self.speak(x)
 
-        return msg
+        return x

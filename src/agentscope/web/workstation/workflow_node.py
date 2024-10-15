@@ -15,7 +15,6 @@ from agentscope.agents import (
     TextToImageAgent,
     DictDialogAgent,
     ReActAgent,
-    BroadcastAgent,
 )
 from agentscope.manager import ModelManager
 from agentscope.message import Msg
@@ -51,6 +50,7 @@ from agentscope.studio.tools.video_composition import merge_videos
 from agentscope.studio.tools.condition_operator import eval_condition_operator
 
 from agentscope.studio.tools.web_post import web_post
+from agentscope.studio.tools.broadcast_agent import BroadcastAgent
 
 DEFAULT_FLOW_VAR = "flow"
 
@@ -335,7 +335,8 @@ class BroadcastAgentNode(WorkflowNode):
 
     def compile(self) -> dict:
         return {
-            "imports": "from agentscope.agents import BroadcastAgent",
+            "imports": "from agentscope.studio.tools.broadcast_agent "
+            "import BroadcastAgent",
             "inits": f"{self.var_name} = BroadcastAgent("
             f"{kwarg_converter(self.opt_kwargs)})",
             "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"

@@ -9,7 +9,6 @@ from .text_to_image_agent import TextToImageAgent
 from .rpc_agent import RpcAgent
 from .react_agent import ReActAgent
 from .rag_agent import LlamaIndexAgent
-from .broadcast_agent import BroadcastAgent
 
 
 __all__ = [
@@ -23,5 +22,4 @@ __all__ = [
     "DistConf",
     "RpcAgent",
     "LlamaIndexAgent",
-    "BroadcastAgent",
 ]
