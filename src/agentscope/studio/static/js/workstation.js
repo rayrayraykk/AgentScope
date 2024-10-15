@@ -2192,11 +2192,11 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
     for (const nodeId of Object.keys(data.drawflow.Home.data)) {
         const node = data.drawflow.Home.data[nodeId];
         if (!node.html) {
-            if (node.name === "readme") {
-                // Remove the node if its name is "readme"
-                delete data.drawflow.Home.data[nodeId];
-                continue; // Skip to the next iteration
-            }
+//            if (node.name === "readme") {
+//                // Remove the node if its name is "readme"
+//                delete data.drawflow.Home.data[nodeId];
+//                continue; // Skip to the next iteration
+//            }
             console.log(node.name)
             const sourceCode = await fetchHtmlSourceCodeByName(node.name);
 
