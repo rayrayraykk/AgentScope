@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=R0912,R0915
 """
 AgentScope workstation DAG running engine.
 
@@ -48,6 +47,7 @@ class ASDiGraph(nx.DiGraph):
         super().__init__(*args, **kwargs)
         self.nodes_not_in_graph = set()
 
+    # pylint: disable=R0912
     def run(self, **kwargs: Any) -> None:
         """
         Execute the computations associated with each node in the graph.
