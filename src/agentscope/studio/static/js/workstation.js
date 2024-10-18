@@ -1363,9 +1363,9 @@ function reorganizeAndFilterConfigForAgentScope(inputData) {
     Object.entries(homeTab.data).forEach(([key, node]) => {
         // Skip the node if the name is 'welcome' or 'readme'
         const nodeName = node.name.toLowerCase();
-        if (nodeName === 'welcome' || nodeName === 'readme') {
-            return;
-        }
+//        if (nodeName === 'welcome' || nodeName === 'readme') {
+//            return;
+//        }
 
         // Create a copy of the node without 'html', 'typenode', 'class', 'id', and 'name' fields
         const {
@@ -1906,7 +1906,8 @@ function showExportHTMLPopup() {
             const content = codeElement.textContent;
             const copyButton = Swal.getConfirmButton();
             copyButton.addEventListener('click', () => {
-                copyToClipboard(content);
+//                copyToClipboard(content);
+                DownloadToClipboard(content);
             });
         }
     });
@@ -1940,58 +1941,113 @@ function isValidDataStructure(data) {
 }
 
 
-function showImportHTMLPopup() {
+function showImportHTMLPopup(version) {
     Swal.fire({
         title: 'Import Workflow Data',
-        html:
-            "<p>Please paste your HTML data below. Ensure that the source of the HTML data is trusted, as importing HTML from unknown or untrusted sources may pose security risks.</p>",
-        input: 'textarea',
-        inputLabel: 'Paste your HTML data here:',
-        inputPlaceholder:
-            'Paste your HTML data generated from `Export HTML` button...',
-        inputAttributes: {
-            'aria-label': 'Paste your HTML data here',
-            'class': 'code'
-        },
-        customClass: {
-            input: 'code'
-        },
+        html: '<div id="fileInputContainer" style="width: 200px;height: 50px;border: 2px dashed #ccc;display: flex;align-items: center;justify-content: center;cursor: pointer;margin-left: auto;margin-right:auto;transition: border-color 0.3s, background 0.3s;">'+
+                '<label for="fileInput" id="fileInputLabel">File upload</label>'+
+                '<input id="fileInput" type="file" class="swal2-file" style="display: none"></div>',
         showCancelButton: true,
-        confirmButtonText: 'Import',
+        confirmButtonText: 'upload',
         cancelButtonText: 'Cancel',
-        inputValidator: (value) => {
-            if (!value) {
-                return 'You need to paste code generated from `Export HTML` button!';
+        preConfirm: () => {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) {
+                Swal.showValidationMessage('Please select a file first');
             }
-            try {
-                const parsedData = JSON.parse(value);
-                if (isValidDataStructure(parsedData)) {
-
-                } else {
-                    return 'The data is invalid. Please check your data and try again.';
-                }
-            } catch (e) {
-                return 'Invalid data! You need to paste code generated from `Export HTML` button!';
-            }
+            return fileInput.files;
         },
-        preConfirm: (data) => {
-            try {
-                const parsedData = JSON.parse(data);
+        didOpen: (modal) => {
+            const fileInput = modal.querySelector('#fileInput');
+            const fileInputLabel = modal.querySelector('#fileInputLabel');
 
-                // Add html source code to the nodes data
-                addHtmlAndReplacePlaceHolderBeforeImport(parsedData)
-                    .then(() => {
-                        editor.clear();
-                        editor.import(parsedData);
-                        importSetupNodes(parsedData);
-                        Swal.fire('Imported!', '', 'success');
+            // 当文件选择发生变化时更新标签文本
+            fileInput.addEventListener('change', (event) => {
+              if (event.target.files.length > 0) {
+                fileInputLabel.textContent = event.target.files[0].name; // 显示文件名
+              } else {
+                fileInputLabel.textContent = '选择文件'; // 恢复默认文案
+              }
+            });
+
+            // 如果有外部按钮，可以绑定点击事件
+            const selectFileButton = document.getElementById('selectFileButton');
+            if (selectFileButton) {
+              selectFileButton.addEventListener('click', () => {
+                fileInput.click();
+              });
+            }
+         },
+        willOpen: (modal) => {
+            // 确保文件输入框被正确初始化
+            const fileInput = modal.querySelector('#fileInput');
+            fileInput.value = ''; // 清空之前的值
+        }
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+            const file = result.value[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const fileContent = e.target.result;
+                        console.log(fileContent);
+                        const jsonData = JSON.parse(e.target.result);
+                        console.log(jsonData);
+                        // Upload files to the cloud
+                        if (version !== "local") {
+                            uploadFileToCloud(jsonData);
+                        }
+                    } catch (error) {
+                        console.error("Error parsing JSON:", error);
+                        Swal.fire('Error', 'Unable to parse the selected file, please ensure it is a valid JSON file。', 'error');
+                    }
+                };
+                reader.onerror = (e) => {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Unable to read file content',
+                        icon: 'error'
                     });
-
-            } catch (error) {
-                Swal.showValidationMessage(`Import error: ${error}`);
+                };
+                reader.readAsText(file);
+            }else {
+                Swal.fire('Error', 'No file selected。', 'warning');
             }
         }
+
     });
+}
+
+
+// Upload files to the cloud
+function uploadFileToCloud(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/upload-to-oss', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            data: JSON.stringify(formData, null, 4),
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            const params = {'CONFIG_URL': data.config_url};
+            const paramsStr = encodeURIComponent(JSON.stringify(params));
+            const org = "agentscope";
+            const fork_repo = "agentscope_workstation";
+            const url = `https://www.modelscope.cn/studios/fork?target=${org}/${fork_repo}&overwriteEnv=${paramsStr}`;
+            Swal.fire('Success!', '', 'success');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Failed', data.message || 'An error occurred while uploading to oss', 'error');
+        });
 }
 
 
@@ -2193,11 +2249,11 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
     for (const nodeId of Object.keys(data.drawflow.Home.data)) {
         const node = data.drawflow.Home.data[nodeId];
         if (!node.html) {
-            if (node.name === "readme") {
-                // Remove the node if its name is "readme"
-                delete data.drawflow.Home.data[nodeId];
-                continue; // Skip to the next iteration
-            }
+//            if (node.name === "readme") {
+//                // Remove the node if its name is "readme"
+//                delete data.drawflow.Home.data[nodeId];
+//                continue; // Skip to the next iteration
+//            }
             console.log(node.name)
             const sourceCode = await fetchHtmlSourceCodeByName(node.name);
 
@@ -2242,6 +2298,25 @@ function copyToClipboard(contentToCopy) {
         Swal.fire('Failed to copy', '', 'error');
     }
     document.body.removeChild(tempTextarea);
+}
+
+function DownloadToClipboard(contentToCopy) {
+    const fileContent = contentToCopy;
+    // 创建一个Blob对象，将文件内容作为参数传入
+    const blob = new Blob([fileContent], { type: "text/plain" });
+    // 使用URL.createObjectURL()方法，将Blob对象转换为一个临时的URL
+    const url = URL.createObjectURL(blob);
+    // 创建一个<a>标签，将其href属性设置为临时URL，并设置download属性为文件名
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "example.json";
+    // 将<a>标签添加到页面中，触发点击事件，开始下载文件
+    document.body.appendChild(link);
+    link.click();
+    // 下载完成后，释放临时URL
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
 }
 
 
