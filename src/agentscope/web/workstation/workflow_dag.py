@@ -420,6 +420,17 @@ def sanitize_node_data(raw_info: dict) -> dict:
     return raw_info
 
 
+def check_config_node(config: dict) -> dict:
+    """
+    """
+    new_config_data = {}
+    for node_id, node_info in config.items():
+        if node_info["name"] != "drawflow":
+            continue
+        new_config_data[node_id] = node_info
+    return new_config_data
+
+
 def build_dag(config: dict, only_compile: bool = True) -> ASDiGraph:
     """
     Construct a Directed Acyclic Graph (DAG) from the provided configuration.
@@ -437,6 +448,7 @@ def build_dag(config: dict, only_compile: bool = True) -> ASDiGraph:
     Raises:
         ValueError: If the resulting graph is not acyclic.
     """
+    config = check_config_node(config)
     dag = ASDiGraph(only_compile=only_compile)
 
     for node_id, node_info in config.items():
@@ -445,8 +457,8 @@ def build_dag(config: dict, only_compile: bool = True) -> ASDiGraph:
     # Add and init model nodes first
     for node_id, node_info in config.items():
         if (
-            NODE_NAME_MAPPING[node_info["name"]].node_type
-            == WorkflowNodeType.MODEL
+                NODE_NAME_MAPPING[node_info["name"]].node_type
+                == WorkflowNodeType.MODEL
         ):
             dag.add_as_node(
                 node_id,
@@ -458,8 +470,8 @@ def build_dag(config: dict, only_compile: bool = True) -> ASDiGraph:
     # Add and init non-model nodes
     for node_id, node_info in config.items():
         if (
-            NODE_NAME_MAPPING[node_info["name"]].node_type
-            != WorkflowNodeType.MODEL
+                NODE_NAME_MAPPING[node_info["name"]].node_type
+                != WorkflowNodeType.MODEL
         ):
             dag.add_as_node(
                 node_id,
