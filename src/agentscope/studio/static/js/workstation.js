@@ -2787,6 +2787,35 @@ function sendWorkflow(fileName) {
     });
 }
 
+
+function showEditorTab() {
+    document.getElementById('col-right').style.display = 'block';
+    document.getElementById('col-right2').style.display = 'none';
+    console.log('Show Editor');
+}
+function importGalleryWorkflow(data) {
+    try {
+        const parsedData = JSON.parse(data);
+        addHtmlAndReplacePlaceHolderBeforeImport(parsedData)
+            .then(() => {
+                editor.clear();
+                editor.import(parsedData);
+                importSetupNodes(parsedData);
+                Swal.fire({
+                    title: 'Imported!',
+                    icon: 'success',
+                    showConfirmButton: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        showEditorTab();
+                    }
+                });
+            });
+    } catch (error) {
+        Swal.showValidationMessage(`Import error: ${error}`);
+    }
+}
+
 function deleteWorkflow(fileName) {
     Swal.fire({
         title: 'Are you sure?',
@@ -2852,8 +2881,39 @@ function showTab(tabId) {
     }
 }
 
+let galleryWorkflows = [];
 
-function createGridItem(workflowName, container, thumbnail, author = '', time = '', showDeleteButton = false) {
+function showGalleryWorkflowList(tabId) {
+    const container = document.getElementById(tabId).querySelector('.grid-container');
+    container.innerHTML = '';
+    fetch('/fetch-gallery', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(data => {
+        galleryWorkflows = data.json || []; // 存储获取到的工作流数据
+        galleryWorkflows.forEach((workflow, index) => {
+            const meta = workflow.meta;
+            const title = meta.title;
+            const author = meta.author;
+            const time = meta.time;
+            const thumbnail = meta.thumbnail || generateThumbnailFromContent(meta);
+            createGridItem(title, container, thumbnail, author, time, false, index); // 将index传递给createGridItem
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching gallery workflows:', error);
+    });
+}
+
+function createGridItem(workflowName, container, thumbnail, author = '', time = '', showDeleteButton = false, index) {
+    var gridItem = document.createElement('div');
+    gridItem.className = 'grid-item';
+    gridItem.style.borderRadius = '15px';
     var gridItem = document.createElement('div');
     gridItem.className = 'grid-item';
     gridItem.style.borderRadius = '15px';
@@ -2905,7 +2965,12 @@ function createGridItem(workflowName, container, thumbnail, author = '', time = 
     });
     button.onclick = function (e) {
         e.preventDefault();
-        sendWorkflow(workflowName);
+        if (showDeleteButton) {
+            sendWorkflow(workflowName);
+        } else {
+            const workflowData = galleryWorkflows[index];
+            importGalleryWorkflow(JSON.stringify(workflowData));
+        }
     };
 
     caption.appendChild(h6);
@@ -2944,50 +3009,6 @@ function createGridItem(workflowName, container, thumbnail, author = '', time = 
     gridItem.appendChild(caption);
     container.appendChild(gridItem);
     console.log('Grid item appended:', gridItem);
-}
-
-
-
-function showGalleryWorkflowList(tabId) {
-    const container = document.getElementById(tabId).querySelector('.grid-container');
-    container.innerHTML = '';
-
-    fetch('/fetch-gallery', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({})
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Fetched gallery data:', data);
-
-            const workflows = data.json || [];
-
-            if (!Array.isArray(workflows)) {
-                console.error('The server did not return an array as expected.', data);
-                workflows = [workflows];
-            }
-
-            workflows.forEach(workflow => {
-                const meta = workflow.meta;
-                const title = meta.title;
-                const author = meta.author;
-                const time = meta.time;
-                const thumbnail = meta.thumbnail || generateThumbnailFromContent(meta);
-                createGridItem(title, container, thumbnail, author, time, false);
-            });
-        })
-        .catch(error => {
-            console.error('Error fetching gallery workflows:', error);
-
-        });
 }
 
 function showLoadWorkflowList(tabId) {

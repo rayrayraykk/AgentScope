@@ -1106,3 +1106,7 @@ pre[class*="language-"] {
     visibility: visible;
     opacity: 1;
 }
+
+.workstation-span{
+    cursor: pointer;
+}
