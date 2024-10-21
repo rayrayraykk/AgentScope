@@ -44,7 +44,16 @@ from ..rpc.rpc_agent_client import RpcAgentClient
 _app = Flask(__name__)
 
 # Set the cache directory
-_cache_dir = Path.home() / ".cache" / "agentscope-studio"
+_cache_dir = (
+    Path(
+        os.environ.get(
+            "AS_HOME_PATH",
+            str(Path.home()),
+        ),
+    )
+    / ".cache"
+    / "agentscope-studio"
+)
 _cache_db = _cache_dir / "agentscope.db"
 os.makedirs(str(_cache_dir), exist_ok=True)
 
