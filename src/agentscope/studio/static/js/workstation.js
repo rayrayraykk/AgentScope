@@ -13,6 +13,7 @@ let descriptionStep;
 
 let nameToHtmlFile = {
     'welcome': 'welcome.html',
+    'start': 'start.html',
     'dashscope_chat': 'model-dashscope-chat.html',
     'openai_chat': 'model-openai-chat.html',
     'post_api_chat': 'model-post-api-chat.html',
@@ -40,6 +41,8 @@ let nameToHtmlFile = {
     'TextToAudioService': 'service-text-to-audio.html',
     'TextToImageService': 'service-text-to-image.html',
     'ImageComposition': 'tool-image-composition.html',
+    'Code': 'tool-code.html',
+    'IF/ELSE': 'tool-if-else.html',
     'ImageMotion': 'tool-image-motion.html',
     'VideoComposition': 'tool-video-composition.html',
 }
@@ -84,7 +87,6 @@ async function fetchHtml(fileName) {
         return error;
     }
 }
-
 
 async function initializeWorkstationPage() {
     console.log("Initialize Workstation Page")
@@ -143,6 +145,11 @@ async function initializeWorkstationPage() {
     let welcome = await fetchHtml('welcome.html');
     const welcomeID = editor.addNode('welcome', 0, 0, 50, 50, 'welcome', {}, welcome);
     setupNodeListeners(welcomeID);
+    collapseNode(welcomeID);
+
+    let start = await fetchHtml('start.html');
+    const startID = editor.addNode('start', 0, 1, 50, 200, 'start', {}, start);
+    setupNodeListeners(startID);
 
     editor.on('nodeCreated', function (id) {
         console.log("Node created " + id);
@@ -416,7 +423,8 @@ function moveGroupNodes(groupId, dx, dy) {
 
 function collapseNode(nodeId) {
     const nodeElement = document.getElementById(`node-${nodeId}`);
-    const contentBox = nodeElement.querySelector('.box');
+    const contentBox = nodeElement.querySelector('.box') ||
+        nodeElement.querySelector('.box-highlight');
     const toggleArrow = nodeElement.querySelector('.toggle-arrow');
 
     contentBox.classList.add('hidden');
@@ -497,6 +505,14 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
 
     switch (name) {
         // Workflow-Model
+        case 'start':
+            editor.addNode('start', 0, 0, pos_x,
+                pos_y,
+                'start', {
+                },
+                htmlSourceCode);
+            break;
+
         case 'dashscope_chat':
             editor.addNode('dashscope_chat', 0, 0, pos_x,
                 pos_y,
@@ -726,7 +742,8 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                     elements: [],
                     "args": {
                         "max_loop": 3,
-                        "break_func": ''
+                        "condition_op": "",
+                        "target_value": "",
                     }
                 }, htmlSourceCode);
             break;
@@ -745,7 +762,8 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             editor.addNode('IfElsePipeline', 1,
                 1, pos_x, pos_y, 'GROUP', {
                     elements: [], args: {
-                        "condition_func": ''
+                        "condition_op": "",
+                        "target_value": "",
                     }
                 }, htmlSourceCode);
             break;
@@ -757,13 +775,6 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                     "cases": [],
                 }
             }, htmlSourceCode);
-            setupSwitchPipelineListeners(SwitchPipelineID);
-            const caseContainer = document.querySelector(`#node-${SwitchPipelineID} .case-container`);
-            if (caseContainer) {
-                addDefaultCase(caseContainer);
-            } else {
-                console.error(`Case container not found in node-${SwitchPipelineID}.`);
-            }
             break;
 
         // Workflow-Service
@@ -812,7 +823,6 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                         "sample_rate": ""
                     }
                 }, htmlSourceCode);
-            updateSampleRate(TextToAudioServiceID)
             break;
         case 'TextToImageService':
             editor.addNode('TextToImageService', 0, 0,
@@ -837,6 +847,23 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                         "spacing": 10,
                         "title_height": 100,
                         "font_name": "PingFang",
+                    }
+                }, htmlSourceCode);
+            break;
+        case 'Code':
+            const CodeID = editor.addNode('Code', 1, 1,
+                pos_x, pos_y, 'Code', {
+                    "args": {
+                        "code": "def function(msg1: \"Msg\") -> \"Msg\":\n    content1 = msg1.get(\"content\", \"\")\n    return {\n        \"role\": \"assistant\",\n        \"content\": content1,\n        \"name\": \"function\",\n    }"
+                    }
+                }, htmlSourceCode);
+            break;
+        case 'IF/ELSE':
+            const IfelseID = editor.addNode('IF/ELSE', 1, 2,
+                pos_x, pos_y, 'IF/ELSE', {
+                    "args": {
+                        "condition_op": "",
+                        "target_value": "",
                     }
                 }, htmlSourceCode);
             break;
@@ -882,6 +909,71 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         default:
     }
 }
+
+
+function initializeMonacoEditor(nodeId) {
+    require.config({
+        paths: {
+            vs: "https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs",
+        },
+    });
+
+    require(["vs/editor/editor.main"], function () {
+        const parentSelector = `#node-${nodeId}`;
+        const parentNode = document.querySelector(parentSelector);
+
+        if (!parentNode) {
+            console.error(`Parent node with selector ${parentSelector} not found.`);
+            return;
+        }
+
+        const codeContentElement = parentNode.querySelector(`.code-content`);
+        if (!codeContentElement) {
+            return;
+        }
+
+        const node = editor.getNodeFromId(nodeId);
+        if (!node) {
+            console.error(`Node with ID ${nodeId} not found.`);
+            return;
+        }
+
+        const editorInstance = monaco.editor.create(codeContentElement, {
+            value: node.data.args.code,
+            language: "python",
+            theme: "vs-light",
+            minimap: {
+                enabled: false,
+            },
+            wordWrap: "on",
+            lineNumbersMinChars: 1,
+            scrollBeyondLastLine: false,
+            readOnly: false,
+        });
+
+        editorInstance.onDidChangeModelContent(function () {
+            const updatedNode = editor.getNodeFromId(nodeId);
+            if (updatedNode) {
+                updatedNode.data.args.code = editorInstance.getValue().trim();
+                editor.updateNodeDataFromId(nodeId, updatedNode.data);
+            }
+        });
+
+        const resizeObserver = new ResizeObserver(() => {
+            editorInstance.layout();
+        });
+        resizeObserver.observe(parentNode);
+
+        parentNode.addEventListener('DOMNodeRemoved', function () {
+            resizeObserver.disconnect();
+        });
+
+    }, function (error) {
+        console.error("Error encountered while loading monaco editor: ", error);
+    });
+}
+
+
 
 function updateSampleRate(nodeId) {
     const newNode = document.getElementById(`node-${nodeId}`);
@@ -929,7 +1021,7 @@ function setupTextInputListeners(nodeId) {
         };
         newNode.addEventListener('mousedown', function (event) {
             const target = event.target;
-            if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') {
+            if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT' || target.closest('.code-content')) {
                 stopPropagation(event);
             }
         }, false);
@@ -1141,9 +1233,38 @@ function hideShowGroupNodes(groupId, show) {
     }
 }
 
+function setupConditionListeners(nodeId) {
+    const newNode = document.getElementById(`node-${nodeId}`);
+    if (newNode) {
+        const conditionOp = newNode.querySelector('#condition_op');
+        const targetContainer = newNode.querySelector('#target-container');
+        console.log(conditionOp, targetContainer);
+
+        function updateTargetVisibility() {
+            const condition_op = conditionOp ? conditionOp.value : '';
+            const hideConditions = ['', 'is empty', 'is null', 'is not empty', 'is not null'];
+            if (hideConditions.includes(condition_op)) {
+                targetContainer.style.display = 'none';
+            } else {
+                targetContainer.style.display = 'block';
+            }
+        }
+
+        if (conditionOp) {
+            conditionOp.addEventListener('input', updateTargetVisibility);
+            updateTargetVisibility();
+        }
+    }
+}
+
 function setupNodeListeners(nodeId) {
     const newNode = document.getElementById(`node-${nodeId}`);
     if (newNode) {
+
+        initializeMonacoEditor(nodeId);
+        setupConditionListeners(nodeId);
+        updateSampleRate(nodeId);
+        setupSwitchPipelineListeners(nodeId);
 
         const titleBox = newNode.querySelector('.title-box');
         const contentBox = newNode.querySelector('.box') ||
@@ -1223,7 +1344,6 @@ function setupSwitchPipelineListeners(nodeId) {
     }
     const addCaseButton = newNode.querySelector('.add-case');
     if (!addCaseButton) {
-        console.error(`Add Case button not found in node-${nodeId}.`);
         return;
     }
     addCaseButton.addEventListener('click', function () {
@@ -1269,7 +1389,6 @@ function setupSwitchPipelineListeners(nodeId) {
 
     const removeCaseButton = newNode.querySelector('.remove-case');
     if (!removeCaseButton) {
-        console.error(`Remove Case button not found in node-${nodeId}.`);
         return;
     }
     removeCaseButton.addEventListener('click', function () {
@@ -1283,6 +1402,47 @@ function setupSwitchPipelineListeners(nodeId) {
         }
         editor.updateConnectionNodes('node-' + nodeId);
     });
+
+    var caseContainer = newNode.querySelector('.case-container');
+    if (!caseContainer) {
+        console.error(`Case container not found in node-${nodeId}.`);
+        return;
+    }
+
+    var defaultCaseElement = caseContainer.querySelector('.default-case');
+    if (defaultCaseElement) {
+        caseContainer.removeChild(defaultCaseElement);
+    }
+
+    var cases = editor.getNodeFromId(nodeId).data.args.cases;
+    for (var caseCount = 0; caseCount < cases.length; caseCount++) {
+
+        var caseElement = document.createElement('div');
+        caseElement.classList.add('case-placeholder');
+
+        var caseText = document.createTextNode(`Case ${caseCount + 1}: `);
+        caseElement.appendChild(caseText);
+
+        var inputElement = document.createElement('input');
+        inputElement.type = 'text';
+        inputElement.placeholder = `Case Pattern`;
+        inputElement.value = cases[caseCount];
+
+        inputElement.dataset.caseIndex = caseCount;
+
+        caseElement.appendChild(inputElement);
+        caseContainer.appendChild(caseElement);
+
+        inputElement.addEventListener('input', function (e) {
+            var nodeData = editor.getNodeFromId(nodeId).data;
+            console.log("nodeData", nodeData);
+            var index = e.target.dataset.caseIndex;
+            console.log("index", index);
+            nodeData.args.cases[index] = e.target.value;
+            editor.updateNodeDataFromId(nodeId, nodeData);
+        });
+    }
+    addDefaultCase(caseContainer);
 }
 
 function addDefaultCase(caseContainer) {
@@ -1354,6 +1514,7 @@ function filterEmptyValues(obj) {
 
 // This function is the most important to AgentScope config.
 function reorganizeAndFilterConfigForAgentScope(inputData) {
+
     // Assuming there's only one tab ('Home'), but adjust if there are more
     const homeTab = inputData.drawflow.Home;
     // Create a new object to hold the reorganized and filtered nodes
@@ -1387,7 +1548,9 @@ function reorganizeAndFilterConfigForAgentScope(inputData) {
     });
 
     // Return the filtered and reorganized nodes instead of the original structure
-    return filteredNodes;
+
+    inputData.drawflow.Home.data = filteredNodes;
+    return inputData;
 }
 
 
@@ -1431,7 +1594,7 @@ function sortElementsByPosition(inputData) {
 }
 
 
-function checkConditions() {
+function checkConditions(check_all=true) {
     let hasModelTypeError = false;
     let hasAgentError = false;
     let agentModelConfigNames = new Set();
@@ -1443,6 +1606,25 @@ function checkConditions() {
         let node = nodesData[nodeId];
         console.log("node", node);
         console.log("node.inputs", node.inputs);
+
+        if (node.name === 'Code') {
+            const code = node.data.args.code;
+            const pattern = /\bdef\s+function\s*\(/;
+
+            if (!pattern.test(code)) {
+                Swal.fire({
+                    title: 'Invalid Code Function Name',
+                    text: `${node.name} only support "function" as the function name.`,
+                    icon: 'error',
+                    confirmButtonText: 'Ok'
+                });
+                return false;
+            }
+        }
+
+        if (!check_all){
+            continue;
+        }
 
         let nodeElement = document.getElementById('node-' + nodeId);
         const requiredInputs = nodeElement.querySelectorAll('input[data-required="true"]');
@@ -1610,96 +1792,6 @@ function disableButtons() {
 }
 
 
-function showExportPyPopup() {
-    if (checkConditions()) {
-        const rawData = editor.export();
-
-        const hasError = sortElementsByPosition(rawData);
-        if (hasError) {
-            return;
-        }
-
-        const filteredData = reorganizeAndFilterConfigForAgentScope(rawData);
-
-        Swal.fire({
-            title: 'Processing...',
-            text: 'Please wait.',
-            allowOutsideClick: false,
-            willOpen: () => {
-                Swal.showLoading()
-            }
-        });
-
-        fetch('/convert-to-py', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                data: JSON.stringify(filteredData, null, 4),
-            })
-        }).then(response => {
-            if (!response.ok) {
-                throw new Error('Network error.');
-            }
-            return response.json();
-        })
-            .then(data => {
-                Swal.close();
-                if (data.is_success === 'True') {
-                    Swal.fire({
-                        title: '<b>Workflow Python Code</b>',
-                        html:
-                            '<p>Save as main.py<br>' +
-                            'Then run the following command in your terminal:<br>' +
-                            '<div class="code-snippet">python main.py</div><br>' +
-                            'or <div class="code-snippet">as_gradio main.py</div></p>' +
-                            '<pre class="line-numbers"><code class="language-py" id="export-data">' +
-                            data.py_code +
-                            '</code></pre>',
-                        showCloseButton: true,
-                        showCancelButton: true,
-                        confirmButtonText: 'Copy',
-                        cancelButtonText: 'Close',
-                        willOpen: (element) => {
-                            const codeElement = element.querySelector('code');
-                            Prism.highlightElement(codeElement);
-                            const copyButton = Swal.getConfirmButton();
-                            copyButton.addEventListener('click', () => {
-                                copyToClipboard(codeElement.textContent);
-                            });
-                        }
-                    });
-                } else {
-                    const errorMessage = `
-                <p>An error occurred during the Python code generation process. Please check the following error:</p>
-                <pre class="line-numbers"><code class="language-py">${data.py_code}</code></pre>
-        `;
-                    Swal.fire({
-                        title: 'Error!',
-                        html: errorMessage,
-                        icon: 'error',
-                        customClass: {
-                            popup: 'error-popup'
-                        },
-                        confirmButtonText: 'Close',
-                        willOpen: (element) => {
-                            const codeElement = element.querySelector('code');
-                            Prism.highlightElement(codeElement);
-                        }
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire('Failed!',
-                    'There was an error generating your code.',
-                    'error');
-            });
-    }
-}
-
-
 function showExportRunPopup(version) {
     if (version === "local") {
         showExportRunLocalPopup();
@@ -1727,7 +1819,7 @@ function showExportRunLocalPopup() {
             }
         });
 
-        fetch('/convert-to-py-and-run', {
+        fetch('/convert-to-json-and-run', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1873,43 +1965,50 @@ function showExportRunMSPopup() {
 
 
 function showExportHTMLPopup() {
-    const rawData = editor.export();
+    if (checkConditions(false)) {
 
-    // Remove the html attribute from the nodes to avoid inconsistencies in html
-    removeHtmlFromUsers(rawData);
+        const rawData = editor.export();
 
-    const exportData = JSON.stringify(rawData, null, 4);
-
-    const escapedExportData = exportData
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-
-    Swal.fire({
-        title: '<b>Workflow HTML</b>',
-        html:
-            '<p>This is used for generating HTML code, not for running.<br>' +
-            '<pre class="line-numbers"><code class="language-javascript" id="export-data">'
-            + escapedExportData +
-            '</code></pre>',
-        showCloseButton: true,
-        showCancelButton: true,
-        confirmButtonText: 'Copy',
-        cancelButtonText: 'Close',
-        willOpen: (element) => {
-            // Find the code element inside the Swal content
-            const codeElement = element.querySelector('code');
-
-            // Now highlight the code element with Prism
-            Prism.highlightElement(codeElement);
-
-            // Copy to clipboard logic
-            const content = codeElement.textContent;
-            const copyButton = Swal.getConfirmButton();
-            copyButton.addEventListener('click', () => {
-                copyToClipboard(content);
-            });
+        // Remove the html attribute from the nodes to avoid inconsistencies in html
+        removeHtmlFromUsers(rawData);
+        const hasError = sortElementsByPosition(rawData);
+        if (hasError) {
+            return;
         }
-    });
+
+        const exportData = JSON.stringify(rawData, null, 4);
+
+        const escapedExportData = exportData
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        Swal.fire({
+            title: '<b>Workflow HTML</b>',
+            html:
+                '<p>This is used for generating HTML code, not for running.<br>' +
+                '<pre class="line-numbers"><code class="language-javascript" id="export-data">'
+                + escapedExportData +
+                '</code></pre>',
+            showCloseButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Copy',
+            cancelButtonText: 'Close',
+            willOpen: (element) => {
+                // Find the code element inside the Swal content
+                const codeElement = element.querySelector('code');
+
+                // Now highlight the code element with Prism
+                Prism.highlightElement(codeElement);
+
+                // Copy to clipboard logic
+                const content = codeElement.textContent;
+                const copyButton = Swal.getConfirmButton();
+                copyButton.addEventListener('click', () => {
+                    copyToClipboard(content);
+                });
+            }
+        });
+    }
 }
 
 

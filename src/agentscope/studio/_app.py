@@ -200,18 +200,15 @@ def _remove_file_paths(error_trace: str) -> str:
     return cleaned_trace
 
 
-def _convert_to_py(  # type: ignore[no-untyped-def]
+def _try_load_config(  # type: ignore[no-untyped-def]
     content: str,
-    **kwargs,
 ) -> Tuple:
     """
-    Convert json config to python code.
+    Check json config
     """
-    from agentscope.web.workstation.workflow_dag import build_dag
-
     try:
-        cfg = json.loads(content)
-        return "True", build_dag(cfg).compile(**kwargs)
+        json.loads(content)
+        return "True", content
     except Exception as e:
         return "False", _remove_file_paths(
             f"Error: {e}\n\n" f"Traceback:\n" f"{traceback.format_exc()}",
@@ -595,34 +592,21 @@ def _get_file() -> Any:
     return jsonify({"error": "File not found."})
 
 
-@_app.route("/convert-to-py", methods=["POST"])
-def _convert_config_to_py() -> Response:
-    """
-    Convert json config to python code and send back.
-    """
-    content = request.json.get("data")
-    status, py_code = _convert_to_py(content)
-    return jsonify(py_code=py_code, is_success=status)
-
-
 def _cleanup_process(proc: subprocess.Popen) -> None:
     """Clean up the process for running application started by workstation."""
     proc.wait()
     _app.logger.debug(f"The process with pid {proc.pid} is closed")
 
 
-@_app.route("/convert-to-py-and-run", methods=["POST"])
-def _convert_config_to_py_and_run() -> Response:
+@_app.route("/convert-to-json-and-run", methods=["POST"])
+def _convert_config_to_json_and_run() -> Response:
     """
     Convert json config to python code and run.
     """
     content = request.json.get("data")
-    studio_url = request.url_root.rstrip("/")
     run_id = _generate_new_runtime_id()
-    status, py_code = _convert_to_py(
+    status, py_code = _try_load_config(
         content,
-        runtime_id=run_id,
-        studio_url=studio_url,
     )
 
     if status == "True":
@@ -635,14 +619,14 @@ def _convert_config_to_py_and_run() -> Response:
                 tmp.write(py_code)
                 tmp.flush()
                 proc = subprocess.Popen(  # pylint: disable=R1732
-                    ["python", tmp.name],
+                    ["as_workflow", tmp.name, "--run_id", run_id],
                 )
                 threading.Thread(target=_cleanup_process, args=(proc,)).start()
         except Exception as e:
             status, py_code = "False", _remove_file_paths(
                 f"Error: {e}\n\n" f"Traceback:\n" f"{traceback.format_exc()}",
             )
-    return jsonify(py_code=py_code, is_success=status, run_id=run_id)
+    return jsonify(py_code=content, is_success=status, run_id=run_id)
 
 
 @_app.route("/read-examples", methods=["POST"])

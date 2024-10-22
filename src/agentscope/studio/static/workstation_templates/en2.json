@@ -2,6 +2,26 @@
   "drawflow": {
     "Home": {
       "data": {
+        "0": {
+          "id": 0,
+          "name": "start",
+          "data": {},
+          "class": "Start",
+          "typenode": false,
+          "inputs": {},
+          "outputs": {
+            "output_1": {
+              "connections": [
+                {
+                  "node": "3",
+                  "output": "input_1"
+                }
+              ]
+            }
+          },
+          "pos_x": 68,
+          "pos_y": 68
+        },
         "2": {
           "id": 2,
           "name": "dashscope_chat",
@@ -18,10 +38,11 @@
           },
           "class": "dashscope_chat",
           "typenode": false,
-          "inputs": {},
+          "inputs": {
+          },
           "outputs": {},
           "pos_x": 339,
-          "pos_y": 23
+          "pos_y": 268
         },
         "4": {
           "id": 4,
@@ -70,7 +91,12 @@
           "typenode": false,
           "inputs": {
             "input_1": {
-              "connections": []
+              "connections": [
+                {
+                  "node": "0",
+                  "input": "output_1"
+                }
+              ]
             }
           },
           "outputs": {
@@ -121,7 +147,7 @@
           "inputs": {},
           "outputs": {},
           "pos_x": 68,
-          "pos_y": 67
+          "pos_y": 267
         }
       }
     }
