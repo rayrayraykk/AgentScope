@@ -100,7 +100,7 @@ repos:
           --disable=C0302,
         ]
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.13.0
+    rev: v7.32.0
     hooks:
       - id: eslint
         files: \.(js|jsx|html)$
