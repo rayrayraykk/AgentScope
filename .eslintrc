@@ -5,6 +5,13 @@
   },
   "rules": {
     "semi": ["error", "always"],
-    "quotes": ["error", "single"]
+    "quotes": ["error", "double"],
+    "indent": ["error", 2],
+    "linebreak-style": ["error", "unix"],
+    "brace-style": ["error", "1tbs"],
+    "curly": ["error", "all"],
+    "no-eval": ["error"],
+    "prefer-const": ["error"],
+    "arrow-spacing": ["error", { "before": true, "after": true }]
   }
 }
