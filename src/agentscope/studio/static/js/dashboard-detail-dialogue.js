@@ -9,7 +9,7 @@ let randomNumberGenerator;
 
 let infoClusterize;
 
-let inputFileList = document.getElementById("chat-control-file-list");
+let inputFileList = document.getElementById('chat-control-file-list');
 
 let waitForUserInput = false;
 let userInputRequest = null;
@@ -39,8 +39,8 @@ marked.use({
             const language = infostring
                 ? hljs.getLanguage(infostring)
                     ? infostring
-                    : "plaintext"
-                : "plaintext";
+                    : 'plaintext'
+                : 'plaintext';
             // Use Highlight.js to highlight code blocks
             return `<pre><code class="hljs ${language}">${
                 hljs.highlight(code, {language}).value
@@ -65,7 +65,7 @@ function hslToHex(h, s, l) {
         const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
         return Math.round(255 * color)
             .toString(16)
-            .padStart(2, "0"); // 转换为16进制并补零
+            .padStart(2, '0'); // 转换为16进制并补零
     };
     return `#${f(0)}${f(8)}${f(4)}`;
 }
@@ -78,60 +78,60 @@ function randomSelectColor() {
 }
 
 async function loadChatTemplate() {
-    const response = await fetch("static/html/template.html");
+    const response = await fetch('static/html/template.html');
     const htmlText = await response.text();
     const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlText, "text/html");
+    const doc = parser.parseFromString(htmlText, 'text/html');
 
     // save
     chatRowOtherTemplate = doc.querySelector(
-        "#chat-row-other-template"
+        '#chat-row-other-template'
     ).content;
-    chatRowUserTemplate = doc.querySelector("#chat-row-user-template").content;
+    chatRowUserTemplate = doc.querySelector('#chat-row-user-template').content;
     chatRowSystemTemplate = doc.querySelector(
-        "#chat-row-system-template"
+        '#chat-row-system-template'
     ).content;
-    infoRowTemplate = doc.querySelector("#dialogue-info-row-template").content;
+    infoRowTemplate = doc.querySelector('#dialogue-info-row-template').content;
 }
 
 // Add a chat row according to the role field in the message
 function addChatRow(index, pMsg) {
     switch (pMsg.role.toLowerCase()) {
-        case "user":
+        case 'user':
             return _addUserChatRow(index, pMsg);
-        case "system":
+        case 'system':
             return _addSystemChatRow(index, pMsg);
-        case "assistant":
+        case 'assistant':
             return _addAssistantChatRow(index, pMsg);
         default:
-            console.error("Unknown role: " + pMsg.role);
+            console.error('Unknown role: ' + pMsg.role);
             return _addAssistantChatRow(index, pMsg);
     }
 }
 
 function _determineFileType(url) {
     // Image
-    let img_suffix = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp"];
+    let img_suffix = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg', '.webp'];
     // Video
     let video_suffix = [
-        ".mp4",
-        ".webm",
-        ".avi",
-        ".mov",
-        ".wmv",
-        ".flv",
-        ".f4v",
-        ".m4v",
-        ".rmvb",
-        ".rm",
-        ".3gp",
-        ".dat",
-        ".ts",
-        ".mts",
-        ".vob",
+        '.mp4',
+        '.webm',
+        '.avi',
+        '.mov',
+        '.wmv',
+        '.flv',
+        '.f4v',
+        '.m4v',
+        '.rmvb',
+        '.rm',
+        '.3gp',
+        '.dat',
+        '.ts',
+        '.mts',
+        '.vob',
     ];
     // Audio
-    let audio_suffix = [".mp3", ".wav", ".wma", ".ogg", ".aac", ".flac"];
+    let audio_suffix = ['.mp3', '.wav', '.wma', '.ogg', '.aac', '.flac'];
 
     const parsed_url = new URL(url);
     const path = parsed_url.pathname;
@@ -139,13 +139,13 @@ function _determineFileType(url) {
     const extension = path.split('.').pop().toLowerCase();
 
     if (img_suffix.includes('.' + extension)) {
-        return "image";
+        return 'image';
     } else if (video_suffix.includes('.' + extension)) {
-        return "video";
+        return 'video';
     } else if (audio_suffix.includes('.' + extension)) {
-        return "audio";
+        return 'audio';
     }
-    return "file";
+    return 'file';
 }
 
 function _getMultiModalComponent(url) {
@@ -154,19 +154,19 @@ function _getMultiModalComponent(url) {
 
     // If we need to fetch the url from the backend
     let src = null;
-    if (url.startsWith("http://") || url.startsWith("https://")) {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
         // Obtain the url from the backend
         src = url;
     } else {
-        src = "/api/file?path=" + url;
+        src = '/api/file?path=' + url;
     }
 
     switch (urlType) {
-        case "image":
+        case 'image':
             return `<img src=${src} alt="Image" class="chat-bubble-multimodal-item">`;
-        case "audio":
+        case 'audio':
             return `<audio src=${src} controls="controls" class="chat-bubble-multimodal-item"></audio>`;
-        case "video":
+        case 'video':
             return `<video src=${src} controls="controls" class="chat-bubble-multimodal-item"></video>`;
         default:
             return `<a href=${src} class="chat-bubble-multimodal-item">${url}</a>`;
@@ -175,36 +175,36 @@ function _getMultiModalComponent(url) {
 
 // Render multiple urls in a chat bubble
 function _renderMultiModalUrls(urls) {
-    if (urls == null || urls === "") {
-        return ""
+    if (urls == null || urls === '') {
+        return '';
     }
 
-    if (typeof urls === "string") {
-        urls = [urls]
+    if (typeof urls === 'string') {
+        urls = [urls];
     }
 
     if (Array.isArray(urls) && urls.length > 0) {
-        let innerHtml = "";
+        let innerHtml = '';
         for (let i = 0; i < urls.length; i++) {
             innerHtml += _getMultiModalComponent(urls[i]);
         }
         return innerHtml;
     } else {
-        return ""
+        return '';
     }
 }
 
 function _addUserChatRow(index, pMsg) {
     const template = chatRowUserTemplate.cloneNode(true);
     // template.querySelector('.chat-icon').
-    template.querySelector(".chat-name").textContent = pMsg.name;
-    let chatBubble = template.querySelector(".chat-bubble");
+    template.querySelector('.chat-name').textContent = pMsg.name;
+    let chatBubble = template.querySelector('.chat-bubble');
     chatBubble.textContent += pMsg.content;
     chatBubble.innerHTML += _renderMultiModalUrls(pMsg.url);
-    template.querySelector(".chat-row").setAttribute("data-index", index);
+    template.querySelector('.chat-row').setAttribute('data-index', index);
     template
-        .querySelector(".chat-row")
-        .setAttribute("data-msg", JSON.stringify(pMsg));
+        .querySelector('.chat-row')
+        .setAttribute('data-msg', JSON.stringify(pMsg));
     return template.firstElementChild;
 }
 
@@ -223,47 +223,47 @@ function _addAssistantChatRow(index, pMsg) {
         // Record the color and icon
         nameToIconAndColor[pMsg.name] = [svg_html, color];
     }
-    template.querySelector(".chat-icon").innerHTML = svg_html;
+    template.querySelector('.chat-icon').innerHTML = svg_html;
     // change the background color randomly
-    template.querySelector(".chat-icon").style.backgroundColor = color;
+    template.querySelector('.chat-icon').style.backgroundColor = color;
 
-    template.querySelector(".chat-name").textContent = pMsg.name;
-    let chatBubble = template.querySelector(".chat-bubble");
+    template.querySelector('.chat-name').textContent = pMsg.name;
+    let chatBubble = template.querySelector('.chat-bubble');
     chatBubble.innerHTML += marked.parse(pMsg.content, marked_options);
     chatBubble.innerHTML += _renderMultiModalUrls(pMsg.url);
-    template.querySelector(".chat-row").setAttribute("data-index", index);
+    template.querySelector('.chat-row').setAttribute('data-index', index);
     template
-        .querySelector(".chat-row")
-        .setAttribute("data-msg", JSON.stringify(pMsg));
+        .querySelector('.chat-row')
+        .setAttribute('data-msg', JSON.stringify(pMsg));
     return template.firstElementChild;
 }
 
 function _addSystemChatRow(index, pMsg) {
     const template = chatRowSystemTemplate.cloneNode(true);
-    template.querySelector(".chat-name").textContent = pMsg.name;
-    let chatBubble = template.querySelector(".chat-bubble");
+    template.querySelector('.chat-name').textContent = pMsg.name;
+    let chatBubble = template.querySelector('.chat-bubble');
     chatBubble.innerHTML += marked.parse(pMsg.content, marked_options);
     chatBubble.innerHTML += _renderMultiModalUrls(pMsg.url);
-    template.querySelector(".chat-row").setAttribute("data-index", index);
+    template.querySelector('.chat-row').setAttribute('data-index', index);
     template
-        .querySelector(".chat-row")
-        .setAttribute("data-msg", JSON.stringify(pMsg));
+        .querySelector('.chat-row')
+        .setAttribute('data-msg', JSON.stringify(pMsg));
 
     return template.firstElementChild;
 }
 
 function _addKeyValueInfoRow(pKey, pValue) {
     const template = infoRowTemplate.cloneNode(true);
-    template.querySelector(".dialogue-info-key").textContent =
+    template.querySelector('.dialogue-info-key').textContent =
         pKey.toUpperCase();
     // Not null
     if (pValue !== null) {
-        let infoValue = template.querySelector(".dialogue-info-value");
-        if (pKey.toLowerCase() === "url") {
-            infoValue.style.wordBreak = "break-all";
+        let infoValue = template.querySelector('.dialogue-info-value');
+        if (pKey.toLowerCase() === 'url') {
+            infoValue.style.wordBreak = 'break-all';
         }
 
-        if (typeof pValue === "object") {
+        if (typeof pValue === 'object') {
             infoValue.textContent = JSON.stringify(pValue);
         } else {
             infoValue.textContent = pValue;
@@ -273,13 +273,13 @@ function _addKeyValueInfoRow(pKey, pValue) {
 }
 
 function disableInput() {
-    document.getElementById("chat-control-url-btn").disabled = true;
-    document.getElementById("chat-control-send-btn").disabled = true;
+    document.getElementById('chat-control-url-btn').disabled = true;
+    document.getElementById('chat-control-send-btn').disabled = true;
 }
 
 function activateInput() {
-    document.getElementById("chat-control-url-btn").disabled = false;
-    document.getElementById("chat-control-send-btn").disabled = false;
+    document.getElementById('chat-control-url-btn').disabled = false;
+    document.getElementById('chat-control-send-btn').disabled = false;
 }
 
 function _showInfoInDialogueDetailContent(data) {
@@ -289,15 +289,15 @@ function _showInfoInDialogueDetailContent(data) {
     }
 
     let priorityKeys = [
-        "run_id",
-        "id",
-        "project",
-        "name",
-        "timestamp",
-        "role",
-        "url",
-        "metadata",
-        "content",
+        'run_id',
+        'id',
+        'project',
+        'name',
+        'timestamp',
+        'role',
+        'url',
+        'metadata',
+        'content',
     ];
     // Deal with the priority keys first
     let infoRows = priorityKeys
@@ -324,7 +324,7 @@ function _obtainAllUrlFromFileList() {
 function addFileListItem(url) {
     let svg;
     switch (_determineFileType(url)) {
-        case "image":
+        case 'image':
             svg = `<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" >
                 <path d="M160 0h512l256 256v704c0 35.3472-28.6528 64-64 64H160c-35.3472 0-64-28.6528-64-64V64c0-35.3472 28.6528-64 64-64z" fill="#F6AD00"></path>
                 <path d="M258.528 742.0672L351.8336 604.928a14.5024 14.5024 0 0 1 22.1696-2.1824l61.664 60.416 135.296-212.064a14.5024 14.5024 0 0 1 24.8064 0.5568l168.1024 291.328a14.5024 14.5024 0 0 1-12.5696 21.7664H270.528a14.5024 14.5024 0 0 1-12.0064-22.6816z" fill="#FFF7F7"></path>
@@ -332,31 +332,31 @@ function addFileListItem(url) {
                 <path d="M672 0l256 256h-192c-35.3472 0-64-28.6528-64-64V0z" fill="#FBDE99"></path>
             </svg>`;
             break;
-        case "video":
+        case 'video':
             svg = `<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
                 <path d="M160 0h512l256 256v704c0 35.3472-28.6528 64-64 64H160c-35.3472 0-64-28.6528-64-64V64c0-35.3472 28.6528-64 64-64z" fill="#7C8EEE"></path>
                 <path d="M702.2976 579.2896l-298.5664 177.984c-19.9488 12.0192-45.3312-2.4128-45.3312-25.856v-355.968c0-22.848 25.3824-37.2736 45.3312-25.856l298.56 177.984c19.3408 12.032 19.3408 40.288 0 51.712z" fill="#FFFFFF"></path>
                 <path d="M672 0l256 256h-192c-35.3472 0-64-28.6528-64-64V0z" fill="#CAD1F8"></path>
             </svg>`;
             break;
-        case "audio":
-            svg = `<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M160 0h512l256 256v704c0 35.3472-28.6528 64-64 64H160c-35.3472 0-64-28.6528-64-64V64c0-35.3472 28.6528-64 64-64z" fill="#F16C00" p-id="1463"></path><path d="M727.8016 510.9952a58.7456 58.7456 0 0 1-8.8 21.1392c-3.4944 5.312-7.04 8.8704-10.592 7.0656-3.4944 0-5.2992-22.944-6.9952-26.5024a68.5376 68.5376 0 0 1-5.2928-19.392c-1.7536-14.1184-7.0464-26.5472-15.8976-31.808-8.7936-7.0592-21.0816-12.3712-36.9728-15.936a116.0896 116.0896 0 0 1-47.5776-21.1328c-14.0864-10.624-29.9264-19.4368-38.72-30.0608-8.8512-8.8128-15.8976-10.624-19.392-8.8128-5.2992 1.7536-7.0464 7.0656-7.0464 12.3712v328.48c0 8.8704-1.7472 19.4368-5.2992 30.0608-3.4944 10.624-5.2992 21.184-14.0928 31.7568-8.7936 10.624-21.1328 17.6832-36.9728 24.7488-15.8976 7.0656-35.232 10.624-56.4224 12.3712a127.7184 127.7184 0 0 1-63.4112-12.3712 126.4384 126.4384 0 0 1-44.0256-33.568c-10.592-14.1248-15.8912-28.2496-15.8912-45.9392 0-15.872 7.104-31.7568 22.9376-45.888 14.0928-14.1248 29.9328-24.7424 47.5712-30.0544 17.5936-5.312 33.4848-8.8128 49.3248-8.8128 15.8912 0 40.5248 0 52.864 3.552 12.2944 3.5072 21.1456 5.312 28.1856 7.0656V346.688c0-10.624 3.5008-19.392 8.8-26.4512 5.2928-7.0656 14.0864-10.624 22.88-12.3712 8.8512-1.7536 15.8976 0 21.1904 5.312 5.2992 3.5008 0 10.6176 6.9952 17.6256 5.2992 7.0656 12.3456 15.936 21.1904 26.5024 8.7936 10.624 19.3344 19.4368 33.4272 28.256 12.3456 8.8128 22.9376 14.1248 31.7312 19.4368 8.8 3.5072 17.6448 7.0656 24.6912 10.624 7.04 3.5008 15.84 7.008 22.8864 12.32 7.04 5.312 15.8912 12.3712 24.6336 22.9952 8.8448 10.624 14.0928 19.3856 15.8912 30.0032 0 10.624 0 21.1904-1.7984 30.0096v0.0512z" fill="#FFFFFF" p-id="1464"></path><path d="M672 0l256 256h-192c-35.3472 0-64-28.6528-64-64V0z" fill="#F9C499" p-id="1465"></path></svg>`;
+        case 'audio':
+            svg = '<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M160 0h512l256 256v704c0 35.3472-28.6528 64-64 64H160c-35.3472 0-64-28.6528-64-64V64c0-35.3472 28.6528-64 64-64z" fill="#F16C00" p-id="1463"></path><path d="M727.8016 510.9952a58.7456 58.7456 0 0 1-8.8 21.1392c-3.4944 5.312-7.04 8.8704-10.592 7.0656-3.4944 0-5.2992-22.944-6.9952-26.5024a68.5376 68.5376 0 0 1-5.2928-19.392c-1.7536-14.1184-7.0464-26.5472-15.8976-31.808-8.7936-7.0592-21.0816-12.3712-36.9728-15.936a116.0896 116.0896 0 0 1-47.5776-21.1328c-14.0864-10.624-29.9264-19.4368-38.72-30.0608-8.8512-8.8128-15.8976-10.624-19.392-8.8128-5.2992 1.7536-7.0464 7.0656-7.0464 12.3712v328.48c0 8.8704-1.7472 19.4368-5.2992 30.0608-3.4944 10.624-5.2992 21.184-14.0928 31.7568-8.7936 10.624-21.1328 17.6832-36.9728 24.7488-15.8976 7.0656-35.232 10.624-56.4224 12.3712a127.7184 127.7184 0 0 1-63.4112-12.3712 126.4384 126.4384 0 0 1-44.0256-33.568c-10.592-14.1248-15.8912-28.2496-15.8912-45.9392 0-15.872 7.104-31.7568 22.9376-45.888 14.0928-14.1248 29.9328-24.7424 47.5712-30.0544 17.5936-5.312 33.4848-8.8128 49.3248-8.8128 15.8912 0 40.5248 0 52.864 3.552 12.2944 3.5072 21.1456 5.312 28.1856 7.0656V346.688c0-10.624 3.5008-19.392 8.8-26.4512 5.2928-7.0656 14.0864-10.624 22.88-12.3712 8.8512-1.7536 15.8976 0 21.1904 5.312 5.2992 3.5008 0 10.6176 6.9952 17.6256 5.2992 7.0656 12.3456 15.936 21.1904 26.5024 8.7936 10.624 19.3344 19.4368 33.4272 28.256 12.3456 8.8128 22.9376 14.1248 31.7312 19.4368 8.8 3.5072 17.6448 7.0656 24.6912 10.624 7.04 3.5008 15.84 7.008 22.8864 12.32 7.04 5.312 15.8912 12.3712 24.6336 22.9952 8.8448 10.624 14.0928 19.3856 15.8912 30.0032 0 10.624 0 21.1904-1.7984 30.0096v0.0512z" fill="#FFFFFF" p-id="1464"></path><path d="M672 0l256 256h-192c-35.3472 0-64-28.6528-64-64V0z" fill="#F9C499" p-id="1465"></path></svg>';
             break;
         default:
-            svg = `<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M160 0h512l256 256v704c0 35.3472-28.6528 64-64 64H160c-35.3472 0-64-28.6528-64-64V64c0-35.3472 28.6528-64 64-64z" fill="#CCCCCC" p-id="1633"></path><path d="M672 0l256 256h-192c-35.3472 0-64-28.6528-64-64V0z" fill="#EAEAEA" p-id="1634"></path><path d="M384 499.2c0-25.6 5.12-46.08 10.24-58.88 5.12-12.8 15.36-25.6 28.16-35.84 12.8-12.8 25.6-20.48 43.52-25.6 15.36-5.12 30.72-7.68 48.64-7.68 35.84 0 64 10.24 89.6 30.72C627.2 422.4 640 448 640 481.28c0 15.36-5.12 28.16-10.24 40.96s-17.92 28.16-38.4 46.08-28.16 30.72-35.84 38.4c-7.68 7.68-10.24 17.92-15.36 28.16-5.12 10.24-2.56 17.92-2.56 43.52h-51.2c0-25.6 2.56-38.4 5.12-51.2s7.68-23.04 15.36-33.28 15.36-23.04 33.28-40.96c17.92-17.92 30.72-30.72 35.84-38.4 5.12-7.68 10.24-20.48 10.24-38.4s-7.68-30.72-20.48-43.52-30.72-20.48-53.76-20.48c-51.2 0-76.8 35.84-76.8 87.04h-51.2z m153.6 281.6h-51.2v-51.2h51.2v51.2z" fill="#FFFFFF" p-id="1635"></path></svg>`;
+            svg = '<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M160 0h512l256 256v704c0 35.3472-28.6528 64-64 64H160c-35.3472 0-64-28.6528-64-64V64c0-35.3472 28.6528-64 64-64z" fill="#CCCCCC" p-id="1633"></path><path d="M672 0l256 256h-192c-35.3472 0-64-28.6528-64-64V0z" fill="#EAEAEA" p-id="1634"></path><path d="M384 499.2c0-25.6 5.12-46.08 10.24-58.88 5.12-12.8 15.36-25.6 28.16-35.84 12.8-12.8 25.6-20.48 43.52-25.6 15.36-5.12 30.72-7.68 48.64-7.68 35.84 0 64 10.24 89.6 30.72C627.2 422.4 640 448 640 481.28c0 15.36-5.12 28.16-10.24 40.96s-17.92 28.16-38.4 46.08-28.16 30.72-35.84 38.4c-7.68 7.68-10.24 17.92-15.36 28.16-5.12 10.24-2.56 17.92-2.56 43.52h-51.2c0-25.6 2.56-38.4 5.12-51.2s7.68-23.04 15.36-33.28 15.36-23.04 33.28-40.96c17.92-17.92 30.72-30.72 35.84-38.4 5.12-7.68 10.24-20.48 10.24-38.4s-7.68-30.72-20.48-43.52-30.72-20.48-53.76-20.48c-51.2 0-76.8 35.84-76.8 87.04h-51.2z m153.6 281.6h-51.2v-51.2h51.2v51.2z" fill="#FFFFFF" p-id="1635"></path></svg>';
             break;
     }
 
-    let newItem = document.createElement("div");
-    newItem.classList.add("chat-control-file-item");
+    let newItem = document.createElement('div');
+    newItem.classList.add('chat-control-file-item');
     newItem.innerHTML = svg;
     newItem.title = url;
 
     // Delete btn
-    const deleteBtn = document.createElement("div");
-    deleteBtn.classList.add("chat-control-file-delete");
+    const deleteBtn = document.createElement('div');
+    deleteBtn.classList.add('chat-control-file-delete');
     // deleteBtn.innerHTML = `<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M470.4256 524.8L280.064 334.4384A38.4512 38.4512 0 0 1 334.4384 280.064l190.3616 190.3616 190.3616-190.3616a38.4512 38.4512 0 1 1 54.3744 54.3744l-190.3616 190.3616 190.3616 190.3616a38.4512 38.4512 0 0 1-54.3744 54.3744l-190.3616-190.3616-190.3616 190.3616a38.4512 38.4512 0 0 1-54.3744-54.3744l190.3616-190.3616z"></path></svg>`;
-    deleteBtn.innerHTML = `<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M643.18 513.392 993.102 176.172c34.278-33.03 34.278-86.586 0-119.616l-15.514-14.952c-34.278-33.03-89.848-33.03-124.126 0L512.124 370.552 170.784 41.604c-34.276-33.03-89.848-33.03-124.122 0l-15.518 14.952c-34.274 33.03-34.274 86.586 0 119.616L380.84 513.172 30.918 850.39c-34.274 33.03-34.274 86.586 0 119.616l15.514 14.956c34.278 33.028 89.85 33.028 124.126 0l341.338-328.946 341.34 328.946c34.276 33.028 89.848 33.028 124.122 0l15.518-14.956c34.274-33.03 34.274-86.586 0-119.616L643.18 513.392z"></path></svg>`;
+    deleteBtn.innerHTML = '<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M643.18 513.392 993.102 176.172c34.278-33.03 34.278-86.586 0-119.616l-15.514-14.952c-34.278-33.03-89.848-33.03-124.126 0L512.124 370.552 170.784 41.604c-34.276-33.03-89.848-33.03-124.122 0l-15.518 14.952c-34.274 33.03-34.274 86.586 0 119.616L380.84 513.172 30.918 850.39c-34.274 33.03-34.274 86.586 0 119.616l15.514 14.956c34.278 33.028 89.85 33.028 124.126 0l341.338-328.946 341.34 328.946c34.276 33.028 89.848 33.028 124.122 0l15.518-14.956c34.274-33.03 34.274-86.586 0-119.616L643.18 513.392z"></path></svg>';
     deleteBtn.onclick = function () {
         inputFileList.removeChild(newItem);
     };
@@ -373,19 +373,19 @@ function _turnDom2HTML(domList) {
 }
 
 function _showUrlPrompt() {
-    const userInput = prompt("Please enter a local or web URL:", "");
+    const userInput = prompt('Please enter a local or web URL:', '');
 
-    if (userInput !== null && userInput !== "") {
+    if (userInput !== null && userInput !== '') {
         addFileListItem(userInput);
     }
 }
 
 function _isMacOS() {
-    return navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+    return navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 }
 
 function initializeDashboardDetailDialoguePage(pRuntimeInfo) {
-    console.log("Initialize with runtime id: " + pRuntimeInfo.run_id);
+    console.log('Initialize with runtime id: ' + pRuntimeInfo.run_id);
 
     // Initialize the random seed generator by run_id
     randomNumberGenerator = new SeededRand(_hashStringToSeed(pRuntimeInfo.run_id));
@@ -397,39 +397,39 @@ function initializeDashboardDetailDialoguePage(pRuntimeInfo) {
     nameToIconAndColor = {};
 
     let sendBtn = document.getElementById(
-        "chat-control-send-btn"
+        'chat-control-send-btn'
     );
 
     let inputTextArea = document.getElementById(
-        "chat-input-textarea"
-    )
+        'chat-input-textarea'
+    );
 
-    inputTextArea.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) {
+    inputTextArea.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
             e.preventDefault();
 
             if (sendBtn.disabled === false) {
                 sendBtn.click();
             }
-        } else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
             e.preventDefault();
 
             let cursorPosition = inputTextArea.selectionStart;
             let textBeforeCursor = inputTextArea.value.substring(0, cursorPosition);
             let textAfterCursor = inputTextArea.value.substring(cursorPosition);
 
-            inputTextArea.value = textBeforeCursor + "\n" + textAfterCursor;
+            inputTextArea.value = textBeforeCursor + '\n' + textAfterCursor;
 
             // Update the cursor position
             inputTextArea.selectionStart = inputTextArea.selectionEnd = cursorPosition + 1;
         }
-    })
+    });
 
     // Set the placeholder according to the platform
     if (_isMacOS()) {
-        inputTextArea.placeholder = "Input message here, ⌘ + Enter for new line";
+        inputTextArea.placeholder = 'Input message here, ⌘ + Enter for new line';
     } else {
-        inputTextArea.placeholder = "Input message here, Ctrl + Enter for new line";
+        inputTextArea.placeholder = 'Input message here, Ctrl + Enter for new line';
     }
 
     // Load the chat template
@@ -441,22 +441,22 @@ function initializeDashboardDetailDialoguePage(pRuntimeInfo) {
             currentAgentInfo = null;
 
             infoClusterize = new Clusterize({
-                scrollId: "chat-detail",
-                contentId: "dialogue-detail-content",
+                scrollId: 'chat-detail',
+                contentId: 'dialogue-detail-content',
             });
 
             disableInput();
 
             // Fetch the chat history from backend
             fetch(
-                "/api/messages/run/" +
+                '/api/messages/run/' +
                 pRuntimeInfo.run_id +
-                "?run_dir=" +
+                '?run_dir=' +
                 pRuntimeInfo.run_dir
             )
                 .then((response) => {
                     if (!response.ok) {
-                        throw new Error("Failed to fetch messages data");
+                        throw new Error('Failed to fetch messages data');
                     }
                     return response.json();
                 })
@@ -467,11 +467,11 @@ function initializeDashboardDetailDialoguePage(pRuntimeInfo) {
                     );
                     var clusterize = new Clusterize({
                         rows: _turnDom2HTML(chatRows),
-                        scrollId: "chat-box",
-                        contentId: "chat-box-content",
+                        scrollId: 'chat-box',
+                        contentId: 'chat-box-content',
                     });
-                    document.getElementById("chat-box-content");
-                    addEventListener("click", function (event) {
+                    document.getElementById('chat-box-content');
+                    addEventListener('click', function (event) {
                         let target = event.target;
 
                         while (
@@ -479,14 +479,14 @@ function initializeDashboardDetailDialoguePage(pRuntimeInfo) {
                             target !== this &&
                             target instanceof Element
                         ) {
-                            if (target.matches(".chat-row")) {
+                            if (target.matches('.chat-row')) {
                                 // Record the current message
                                 currentMsgInfo = JSON.parse(
-                                    target.getAttribute("data-msg")
+                                    target.getAttribute('data-msg')
                                 );
 
                                 // Update web ui
-                                showInDetail("Message");
+                                showInDetail('Message');
                                 break;
                             }
                             target = target.parentNode;
@@ -495,26 +495,26 @@ function initializeDashboardDetailDialoguePage(pRuntimeInfo) {
                     // Load the detail content in the right panel
                     // traverse all the keys in pRuntimeInfo and create a key-value row
                     currentRuntimeInfo = pRuntimeInfo;
-                    showInDetail("Runtime");
+                    showInDetail('Runtime');
 
                     var socket = io();
-                    socket.on("connect", () => {
+                    socket.on('connect', () => {
                         // Tell flask server the web ui is ready
-                        socket.emit("join", {run_id: pRuntimeInfo.run_id});
+                        socket.emit('join', {run_id: pRuntimeInfo.run_id});
 
                         sendBtn.onclick = () => {
                             var message = document.getElementById(
-                                "chat-input-textarea"
+                                'chat-input-textarea'
                             ).value;
 
-                            if (message === "") {
-                                alert("Please input a message!");
+                            if (message === '') {
+                                alert('Please input a message!');
                                 return;
                             }
 
                             // Send the message to the flask server according to the current request
                             let url = _obtainAllUrlFromFileList();
-                            socket.emit("user_input_ready", {
+                            socket.emit('user_input_ready', {
                                 run_id: userInputRequest.run_id,
                                 agent_id: userInputRequest.agent_id,
                                 name: userInputRequest.name,
@@ -528,24 +528,24 @@ function initializeDashboardDetailDialoguePage(pRuntimeInfo) {
 
                             waitForUserInput = false;
 
-                            console.log("Studio: send user_input_ready");
+                            console.log('Studio: send user_input_ready');
 
                             document.getElementById(
-                                "chat-input-textarea"
-                            ).value = "";
+                                'chat-input-textarea'
+                            ).value = '';
                             disableInput();
                         };
                     });
-                    socket.on("display_message", (data) => {
+                    socket.on('display_message', (data) => {
                         if (data.run_id === pRuntimeInfo.run_id) {
-                            console.log("Studio: receive display_message");
+                            console.log('Studio: receive display_message');
 
                             // Check the chatRows list in the reverse order to
                             // save time
                             let found = false;
                             for (let index = chatRows.length - 1; index >= 0; index--) {
                                 const row = chatRows[index];
-                                let rowDataMsg = JSON.parse(row.getAttribute("data-msg"));
+                                let rowDataMsg = JSON.parse(row.getAttribute('data-msg'));
                                 if (rowDataMsg.id === data.id) {
                                     // Update the row
                                     chatRows[index] = addChatRow(index, data);
@@ -569,13 +569,13 @@ function initializeDashboardDetailDialoguePage(pRuntimeInfo) {
                             }
 
                             var scrollElem =
-                                document.getElementById("chat-box");
+                                document.getElementById('chat-box');
                             scrollElem.scrollTop = scrollElem.scrollHeight;
                         }
                     });
-                    socket.on("enable_user_input", (data) => {
+                    socket.on('enable_user_input', (data) => {
                         // Require user input in web ui
-                        console.log("Studio: receive enable_user_input");
+                        console.log('Studio: receive enable_user_input');
 
                         // If already waiting for user input, just abort the request
                         if (!waitForUserInput) {
@@ -585,41 +585,41 @@ function initializeDashboardDetailDialoguePage(pRuntimeInfo) {
                             userInputRequest = data;
                             activateInput();
                             document.getElementById(
-                                "chat-input-name"
+                                'chat-input-name'
                             ).textContent = data.name;
                         }
                     });
                 })
                 .catch((error) => {
-                    console.error("Failed to fetch messages data:", error);
+                    console.error('Failed to fetch messages data:', error);
                 });
         })
         .catch((error) => {
-            console.error("Failed to load chat template:", error);
+            console.error('Failed to load chat template:', error);
         });
 }
 
 function showInDetail(detailType) {
-    document.getElementById("dialogue-info-title").innerHTML =
+    document.getElementById('dialogue-info-title').innerHTML =
         detailType.toUpperCase();
 
-    document.getElementById("runtimeSwitchBtn").classList.remove("selected");
-    document.getElementById("msgSwitchBtn").classList.remove("selected");
-    document.getElementById("agentSwitchBtn").classList.remove("selected");
+    document.getElementById('runtimeSwitchBtn').classList.remove('selected');
+    document.getElementById('msgSwitchBtn').classList.remove('selected');
+    document.getElementById('agentSwitchBtn').classList.remove('selected');
 
     switch (detailType.toLowerCase()) {
-        case "runtime":
+        case 'runtime':
             document
-                .getElementById("runtimeSwitchBtn")
-                .classList.add("selected");
+                .getElementById('runtimeSwitchBtn')
+                .classList.add('selected');
             _showInfoInDialogueDetailContent(currentRuntimeInfo);
             break;
-        case "message":
-            document.getElementById("msgSwitchBtn").classList.add("selected");
+        case 'message':
+            document.getElementById('msgSwitchBtn').classList.add('selected');
             _showInfoInDialogueDetailContent(currentMsgInfo);
             break;
-        case "agent":
-            document.getElementById("agentSwitchBtn").classList.add("selected");
+        case 'agent':
+            document.getElementById('agentSwitchBtn').classList.add('selected');
             _showInfoInDialogueDetailContent(currentAgentInfo);
             break;
     }

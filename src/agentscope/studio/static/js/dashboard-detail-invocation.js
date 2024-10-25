@@ -4,15 +4,15 @@ function initializeDashboardDetailInvocationPage(runDir) {
     // load monaco editor
     require.config({
         paths: {
-            vs: "https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs",
+            vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs',
         },
     });
-    require(["vs/editor/editor.main"], function () {
+    require(['vs/editor/editor.main'], function () {
         invocationEditor = monaco.editor.create(
-            document.getElementById("invocation-content"),
+            document.getElementById('invocation-content'),
             {
-                language: "json",
-                theme: "vs-light",
+                language: 'json',
+                theme: 'vs-light',
                 minimap: {
                     enabled: false,
                 },
@@ -23,45 +23,45 @@ function initializeDashboardDetailInvocationPage(runDir) {
     });
 
     // fetch data from server
-    fetch("/api/invocation?run_dir=" + runDir)
+    fetch('/api/invocation?run_dir=' + runDir)
         .then((response) => {
             if (response.ok) {
                 return response.json();
             } else {
-                throw new Error("Failed to fetch invocation detail");
+                throw new Error('Failed to fetch invocation detail');
             }
         })
         .then((data) => {
             console.log(data);
-            var invocationTable = new Tabulator("#invocation-list", {
+            var invocationTable = new Tabulator('#invocation-list', {
                 data: data,
                 columns: [
                     {
-                        title: "Model Wrapper",
-                        field: "model_class",
+                        title: 'Model Wrapper',
+                        field: 'model_class',
                         editor: false,
-                        vertAlign: "middle",
+                        vertAlign: 'middle',
                     },
                     {
-                        title: "Timestamp",
-                        field: "timestamp",
+                        title: 'Timestamp',
+                        field: 'timestamp',
                         editor: false,
-                        vertAlign: "middle",
+                        vertAlign: 'middle',
                     },
                 ],
-                layout: "fitColumns",
+                layout: 'fitColumns',
                 placeholder:
-                    "<div class='content-placeholder'>No invocation records available.</div>",
+                    '<div class=\'content-placeholder\'>No invocation records available.</div>',
                 initialSort: [
                     {
-                        column: "timestamp",
-                        dir: "asc",
+                        column: 'timestamp',
+                        dir: 'asc',
                     },
                 ],
             });
 
             // Set up row click event
-            invocationTable.on("rowClick", function (e, row) {
+            invocationTable.on('rowClick', function (e, row) {
                 // Jump to the run detail page
                 console.log(row.getData());
                 invocationEditor.setValue(

@@ -954,7 +954,6 @@ function initializeMonacoEditor(nodeId) {
 }
 
 
-
 function updateSampleRate(nodeId) {
     const newNode = document.getElementById(`node-${nodeId}`);
     if (!newNode) {
@@ -2949,7 +2948,7 @@ function setCookie(name, value, days) {
     document.cookie = name + "=" + (value || "") + expires + "; path=/";
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     showTab('tab1');
 });
 
@@ -2975,6 +2974,7 @@ function showEditorTab() {
     document.getElementById('col-right2').style.display = 'none';
     console.log('Show Editor');
 }
+
 function importGalleryWorkflow(data) {
     try {
         const parsedData = JSON.parse(data);
@@ -3075,21 +3075,21 @@ function showGalleryWorkflowList(tabId) {
         },
         body: JSON.stringify({})
     })
-    .then(response => response.json())
-    .then(data => {
-        galleryWorkflows = data.json || []; // 存储获取到的工作流数据
-        galleryWorkflows.forEach((workflow, index) => {
-            const meta = workflow.meta;
-            const title = meta.title;
-            const author = meta.author;
-            const time = meta.time;
-            const thumbnail = meta.thumbnail || generateThumbnailFromContent(meta);
-            createGridItem(title, container, thumbnail, author, time, false, index); // 将index传递给createGridItem
+        .then(response => response.json())
+        .then(data => {
+            galleryWorkflows = data.json || []; // 存储获取到的工作流数据
+            galleryWorkflows.forEach((workflow, index) => {
+                const meta = workflow.meta;
+                const title = meta.title;
+                const author = meta.author;
+                const time = meta.time;
+                const thumbnail = meta.thumbnail || generateThumbnailFromContent(meta);
+                createGridItem(title, container, thumbnail, author, time, false, index); // 将index传递给createGridItem
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching gallery workflows:', error);
         });
-    })
-    .catch(error => {
-        console.error('Error fetching gallery workflows:', error);
-    });
 }
 
 function createGridItem(workflowName, container, thumbnail, author = '', time = '', showDeleteButton = false, index) {

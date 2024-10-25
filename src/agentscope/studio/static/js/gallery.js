@@ -1,29 +1,29 @@
 showTab('tab1');
 
 function showTab(tabId) {
-    var tabs = document.getElementsByClassName("tab");
+    var tabs = document.getElementsByClassName('tab');
     for (var i = 0; i < tabs.length; i++) {
-        tabs[i].classList.remove("active");
-        tabs[i].style.display = "none";
+        tabs[i].classList.remove('active');
+        tabs[i].style.display = 'none';
     }
     var tab = document.getElementById(tabId);
     if (tab) {
-        tab.classList.add("active");
-        tab.style.display = "block";
+        tab.classList.add('active');
+        tab.style.display = 'block';
         console.log(`Activated tab with ID: ${tab.id}`);
 
-        var tabButtons = document.getElementsByClassName("tab-button");
+        var tabButtons = document.getElementsByClassName('tab-button');
         for (var j = 0; j < tabButtons.length; j++) {
-            tabButtons[j].classList.remove("active");
+            tabButtons[j].classList.remove('active');
         }
         var activeTabButton = document.querySelector(`.tab-button[onclick*="${tabId}"]`);
         if (activeTabButton) {
-            activeTabButton.classList.add("active");
+            activeTabButton.classList.add('active');
         }
 
-        if (tabId === "tab2") {
+        if (tabId === 'tab2') {
             showLoadWorkflowList(tabId);
-        } else if (tabId === "tab1") {
+        } else if (tabId === 'tab1') {
             console.log('Loading Gallery Workflow List');
             showGalleryWorkflowList(tabId);
         }

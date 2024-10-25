@@ -1,7 +1,7 @@
 // Search functionality for runs table
 function allColumnFilter(data) {
     let searchValue = document
-        .getElementById("runs-search-input")
+        .getElementById('runs-search-input')
         .value.toLowerCase();
 
     for (var field in data) {
@@ -22,13 +22,13 @@ function allColumnFilter(data) {
 function renderIconInRunsTable(cell, formatterParams, onRendered) {
     let value = cell.getValue();
     switch (value) {
-        case "running":
+        case 'running':
             return '<div class="runs-table-status-tag running"><svg class="runs-table-status-svg" viewBox="0 0 1027 1024" xmlns="http://www.w3.org/2000/svg"><path d="M770.879148 64.221893h159.70676a31.99895 31.99895 0 0 0 0-63.9979h-319.989501v320.629479a31.99895 31.99895 0 1 0 63.9979 0V93.052947A458.864943 458.864943 0 0 1 963.704821 510.863237 447.9853 447.9853 0 1 1 450.601657 64.221893h31.99895a31.99895 31.99895 0 0 0 0-63.9979h-31.99895A513.83914 513.83914 0 1 0 1027.702721 510.863237a534.382466 534.382466 0 0 0-256.823573-446.641344z"></path></svg>running</div>';
 
-        case "waiting":
+        case 'waiting':
             return '<div class="runs-table-status-tag waiting"><svg class="runs-table-status-svg" viewBox="0 0 1027 1024" xmlns="http://www.w3.org/2000/svg"><path d="M770.879148 64.221893h159.70676a31.99895 31.99895 0 0 0 0-63.9979h-319.989501v320.629479a31.99895 31.99895 0 1 0 63.9979 0V93.052947A458.864943 458.864943 0 0 1 963.704821 510.863237 447.9853 447.9853 0 1 1 450.601657 64.221893h31.99895a31.99895 31.99895 0 0 0 0-63.9979h-31.99895A513.83914 513.83914 0 1 0 1027.702721 510.863237a534.382466 534.382466 0 0 0-256.823573-446.641344z"></path></svg>waiting</div>';
 
-        case "finished":
+        case 'finished':
             return '<div class="runs-table-status-tag finished"><svg class="runs-table-status-svg" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M468.712727 676.421818a28.974545 28.974545 0 0 1-20.48-8.494545L264.145455 485.003636a29.090909 29.090909 0 1 1 40.96-41.309091l163.607272 162.909091 261.585455-260.421818a29.090909 29.090909 0 1 1 40.96 41.309091L488.727273 667.927273a28.974545 28.974545 0 0 1-20.014546 8.494545z"></path><path d="M512 1000.727273a488.727273 488.727273 0 1 1 488.727273-488.727273 488.727273 488.727273 0 0 1-488.727273 488.727273z m0-919.272728a430.545455 430.545455 0 1 0 430.545455 430.545455A430.545455 430.545455 0 0 0 512 81.454545z"></path></svg>finished</div>';
 
         default:
@@ -38,57 +38,57 @@ function renderIconInRunsTable(cell, formatterParams, onRendered) {
 
 function initializeDashboardRunsPage() {
     //TODO: fetch runs data from server
-    fetch("/api/runs/all")
+    fetch('/api/runs/all')
         .then((response) => {
             if (!response.ok) {
-                throw new Error("Failed to fetch runs data");
+                throw new Error('Failed to fetch runs data');
             }
             return response.json();
         })
         .then((data) => {
-            var runsTable = new Tabulator("#runs-table", {
+            var runsTable = new Tabulator('#runs-table', {
                 data: data,
                 columns: [
                     {
-                        title: "Status",
-                        field: "status",
+                        title: 'Status',
+                        field: 'status',
                         editor: false,
-                        vertAlign: "middle",
+                        vertAlign: 'middle',
                         formatter: renderIconInRunsTable,
                     },
                     {
-                        title: "ID",
-                        field: "run_id",
+                        title: 'ID',
+                        field: 'run_id',
                         editor: false,
-                        vertAlign: "middle",
+                        vertAlign: 'middle',
                     },
                     {
-                        title: "Project",
-                        field: "project",
+                        title: 'Project',
+                        field: 'project',
                         editor: false,
-                        vertAlign: "middle",
+                        vertAlign: 'middle',
                     },
                     {
-                        title: "Name",
-                        field: "name",
+                        title: 'Name',
+                        field: 'name',
                         editor: false,
-                        vertAlign: "middle",
+                        vertAlign: 'middle',
                     },
                     {
-                        title: "Timestamp",
-                        field: "timestamp",
+                        title: 'Timestamp',
+                        field: 'timestamp',
                         editor: false,
-                        vertAlign: "middle",
+                        vertAlign: 'middle',
                     },
                 ],
-                layout: "fitColumns",
-                initialSort: [{ column: "timestamp", dir: "desc" }],
+                layout: 'fitColumns',
+                initialSort: [{ column: 'timestamp', dir: 'desc' }],
             });
 
             // Search logic
             document
-                .getElementById("runs-search-input")
-                .addEventListener("input", function (e) {
+                .getElementById('runs-search-input')
+                .addEventListener('input', function (e) {
                     let searchValue = e.target.value;
                     if (searchValue) {
                         // Filter the table
@@ -100,11 +100,11 @@ function initializeDashboardRunsPage() {
                 });
 
             // Set up row click event
-            runsTable.on("rowClick", function (e, row) {
+            runsTable.on('rowClick', function (e, row) {
                 // Jump to the run detail page
                 loadDetailPageInDashboardContent(
-                    "static/html/dashboard-detail.html",
-                    "static/js/dashboard-detail.js",
+                    'static/html/dashboard-detail.html',
+                    'static/js/dashboard-detail.js',
                     row.getData()
                 );
             });
