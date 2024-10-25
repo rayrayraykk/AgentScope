@@ -41,10 +41,10 @@ class ASDiGraph(nx.DiGraph):
     """
 
     def __init__(
-        self,
-        only_compile: bool = True,
-        *args: Any,
-        **kwargs: Any,
+            self,
+            only_compile: bool = True,
+            *args: Any,
+            **kwargs: Any,
     ) -> None:
         """
         Initialize the ASDiGraph instance.
@@ -107,9 +107,9 @@ class ASDiGraph(nx.DiGraph):
                 raise ValueError("Too many predecessors!")
 
     def compile(  # type: ignore[no-untyped-def]
-        self,
-        compiled_filename: str = "",
-        **kwargs,
+            self,
+            compiled_filename: str = "",
+            **kwargs,
     ) -> str:
         """Compile DAG to a runnable python code"""
 
@@ -162,11 +162,11 @@ class ASDiGraph(nx.DiGraph):
 
     # pylint: disable=R0912
     def add_as_node(
-        self,
-        node_id: str,
-        node_info: dict,
-        config: dict,
-        only_compile: bool = True,
+            self,
+            node_id: str,
+            node_info: dict,
+            config: dict,
+            only_compile: bool = True,
     ) -> Any:
         """
         Add a node to the graph based on provided node information and
@@ -296,11 +296,11 @@ class ASDiGraph(nx.DiGraph):
         return labels
 
     def label_nodes(
-        self,
-        current: str,
-        label: str,
-        labels: dict,
-        parent: Optional[str] = None,
+            self,
+            current: str,
+            label: str,
+            labels: dict,
+            parent: Optional[str] = None,
     ) -> None:
         """recursively label nodes allowing for multiple parents"""
         if parent:
@@ -406,6 +406,19 @@ def sanitize_node_data(raw_info: dict) -> dict:
     return raw_info
 
 
+def check_config_node(config: dict) -> dict:
+    """
+    """
+    if 'drawflow' in config:
+        config = config['drawflow']["Home"]["data"]
+    new_config = {}
+    for node_id, node_info in config.items():
+        if node_info["name"] == "readme":
+            continue
+        new_config[node_id] = node_info
+    return new_config
+
+
 def build_dag(config: dict, only_compile: bool = True) -> ASDiGraph:
     """
     Construct a Directed Acyclic Graph (DAG) from the provided configuration.
@@ -423,6 +436,7 @@ def build_dag(config: dict, only_compile: bool = True) -> ASDiGraph:
     Raises:
         ValueError: If the resulting graph is not acyclic.
     """
+    config = check_config_node(config)
     dag = ASDiGraph(only_compile=only_compile)
 
     for node_id, node_info in config.items():
@@ -431,8 +445,8 @@ def build_dag(config: dict, only_compile: bool = True) -> ASDiGraph:
     # Add and init model nodes first
     for node_id, node_info in config.items():
         if (
-            NODE_NAME_MAPPING[node_info["name"]].node_type
-            == WorkflowNodeType.MODEL
+                NODE_NAME_MAPPING[node_info["name"]].node_type
+                == WorkflowNodeType.MODEL
         ):
             dag.add_as_node(
                 node_id,
@@ -444,8 +458,8 @@ def build_dag(config: dict, only_compile: bool = True) -> ASDiGraph:
     # Add and init non-model nodes
     for node_id, node_info in config.items():
         if (
-            NODE_NAME_MAPPING[node_info["name"]].node_type
-            != WorkflowNodeType.MODEL
+                NODE_NAME_MAPPING[node_info["name"]].node_type
+                != WorkflowNodeType.MODEL
         ):
             dag.add_as_node(
                 node_id,
