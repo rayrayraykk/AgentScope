@@ -44,31 +44,31 @@ let nameToHtmlFile = {
     // 'IF/ELSE': 'tool-if-else.html',
     'ImageMotion': 'tool-image-motion.html',
     'VideoComposition': 'tool-video-composition.html',
-}
+};
 
 const ModelNames48k = [
     'sambert-zhinan-v1',
-    "sambert-zhiqi-v1",
-    "sambert-zhichu-v1",
-    "sambert-zhide-v1",
-    "sambert-zhijia-v1",
-    "sambert-zhiru-v1",
-    "sambert-zhiqian-v1",
-    "sambert-zhixiang-v1",
-    "sambert-zhiwei-v1",
-]
+    'sambert-zhiqi-v1',
+    'sambert-zhichu-v1',
+    'sambert-zhide-v1',
+    'sambert-zhijia-v1',
+    'sambert-zhiru-v1',
+    'sambert-zhiqian-v1',
+    'sambert-zhixiang-v1',
+    'sambert-zhiwei-v1',
+];
 
 // Cache the loaded html files
 let htmlCache = {};
 
 // When clicking the sidebar item, it will expand/collapse the next content
 function onClickSidebarSubItem(element) {
-    element.classList.toggle("active");
+    element.classList.toggle('active');
     let content = element.nextElementSibling;
-    if (content.style.display === "block") {
-        content.style.display = "none";
+    if (content.style.display === 'block') {
+        content.style.display = 'none';
     } else {
-        content.style.display = "block";
+        content.style.display = 'block';
     }
 }
 
@@ -88,9 +88,9 @@ async function fetchHtml(fileName) {
 }
 
 async function initializeWorkstationPage() {
-    console.log("Initialize Workstation Page")
+    console.log('Initialize Workstation Page');
     // Initialize the Drawflow editor
-    let id = document.getElementById("drawflow");
+    let id = document.getElementById('drawflow');
     editor = new Drawflow(id);
     editor.reroute = true;
     editor.createCurvature = function createCurvature(start_pos_x, start_pos_y, end_pos_x, end_pos_y, curvature_value, type) {
@@ -137,7 +137,7 @@ async function initializeWorkstationPage() {
 
                 return ' M ' + line_x + ' ' + line_y + ' C ' + hx1 + ' ' + line_y + ' ' + hx2 + ' ' + y + ' ' + x + '  ' + y + ' M ' + (x - 11) + ' ' + y + ' L' + (x - 20) + ' ' + (y - 5) + '  L' + (x - 20) + ' ' + (y + 5) + 'Z';
         }
-    }
+    };
     editor.start();
     editor.zoom_out();
 
@@ -146,7 +146,7 @@ async function initializeWorkstationPage() {
     setupNodeListeners(welcomeID);
 
     editor.on('nodeCreated', function (id) {
-        console.log("Node created " + id);
+        console.log('Node created ' + id);
         disableButtons();
         makeNodeTop(id);
         setupNodeListeners(id);
@@ -154,85 +154,85 @@ async function initializeWorkstationPage() {
         addEventListenersToNumberInputs(id);
         setupTextInputListeners(id);
         reloadi18n();
-    })
+    });
 
     editor.on('nodeRemoved', function (id) {
-        console.log("Node removed " + id);
+        console.log('Node removed ' + id);
         disableButtons();
         Object.keys(editor.drawflow.drawflow[editor.module].data).forEach(nodeKey => {
             var node = editor.drawflow.drawflow[editor.module].data[nodeKey];
             var nodeData =
                 editor.drawflow.drawflow[editor.module].data[nodeKey].data;
-            console.log("nodeKey", nodeKey);
-            console.log("node", node);
-            console.log("nodeData", nodeData);
-            console.log("id", id);
+            console.log('nodeKey', nodeKey);
+            console.log('node', node);
+            console.log('nodeData', nodeData);
+            console.log('id', id);
 
             if (nodeData && nodeData.copies) {
-                console.log("Array.isArray(nodeData.copies)", Array.isArray(nodeData.copies))
+                console.log('Array.isArray(nodeData.copies)', Array.isArray(nodeData.copies));
                 if (nodeData.copies.includes(id)) {
-                    console.log("nodeData.copies", nodeData.copies);
-                    console.log("nodeData.copies.includes(id)",
+                    console.log('nodeData.copies', nodeData.copies);
+                    console.log('nodeData.copies.includes(id)',
                         nodeData.copies.includes(id));
                     var index = nodeData.copies.indexOf(id);
-                    console.log("index", index);
+                    console.log('index', index);
                     if (index > -1) {
                         nodeData.copies.splice(index, 1);
                         editor.updateNodeDataFromId(nodeKey, nodeData);
                     }
                 }
             }
-        })
-    })
+        });
+    });
 
     editor.on('nodeSelected', function (id) {
-        console.log("Node selected " + id);
+        console.log('Node selected ' + id);
         makeNodeTop(id);
-    })
+    });
 
     editor.on('moduleCreated', function (name) {
-        console.log("Module Created " + name);
-    })
+        console.log('Module Created ' + name);
+    });
 
     editor.on('moduleChanged', function (name) {
-        console.log("Module Changed " + name);
-    })
+        console.log('Module Changed ' + name);
+    });
 
     editor.on('connectionCreated', function (connection) {
         console.log('Connection created');
         console.log(connection);
         disableButtons();
-    })
+    });
 
     editor.on('connectionRemoved', function (connection) {
         console.log('Connection removed');
         console.log(connection);
         disableButtons();
-    })
+    });
 
     editor.on('mouseMove', function (position) {
         // console.log('Position mouse x:' + position.x + ' y:' + position.y);
-    })
+    });
 
     editor.on('zoom', function (zoom) {
         console.log('Zoom level ' + zoom);
-    })
+    });
 
     editor.on('translate', function (position) {
         console.log('Translate x:' + position.x + ' y:' + position.y);
-    })
+    });
 
     editor.on('addReroute', function (id) {
-        console.log("Reroute added " + id);
-    })
+        console.log('Reroute added ' + id);
+    });
 
     editor.on('removeReroute', function (id) {
-        console.log("Reroute removed " + id);
-    })
+        console.log('Reroute removed ' + id);
+    });
 
     editor.selectNode = function (id) {
         if (this.node_selected != null) {
-            this.node_selected.classList.remove("selected");
+            this.node_selected.classList.remove('selected');
             if (this.node_selected !== this.ele_selected) {
                 this.dispatch('nodeUnselected', true);
             }
@@ -240,33 +240,33 @@ async function initializeWorkstationPage() {
         const element = document.querySelector(`#node-${id}`);
         this.ele_selected = element;
         this.node_selected = element;
-        this.node_selected.classList.add("selected");
+        this.node_selected.classList.add('selected');
         if (this.node_selected !== this.ele_selected) {
             this.node_selected = element;
             this.node_selected.classList.add('selected');
             this.dispatch('nodeSelected', this.ele_selected.id.slice(5));
         }
-        console.log(id)
-    }
+        console.log(id);
+    };
 
     let last_x = 0;
     let last_y = 0;
     let dragElementHover = null;
 
-    editor.on("mouseMove", ({x, y}) => {
+    editor.on('mouseMove', ({x, y}) => {
         const hoverEles = document.elementsFromPoint(x, y);
         const nextGroup = hoverEles.find(ele => ele.classList.contains('GROUP') && (!editor.node_selected || ele.id !== editor.node_selected.id));
 
         if (nextGroup) {
             if (dragElementHover !== nextGroup) {
                 if (dragElementHover) {
-                    dragElementHover.classList.remove("hover-drop");
+                    dragElementHover.classList.remove('hover-drop');
                 }
                 dragElementHover = nextGroup;
-                dragElementHover.classList.add("hover-drop");
+                dragElementHover.classList.add('hover-drop');
             }
         } else if (dragElementHover) {
-            dragElementHover.classList.remove("hover-drop");
+            dragElementHover.classList.remove('hover-drop');
             dragElementHover = null;
         }
 
@@ -275,12 +275,12 @@ async function initializeWorkstationPage() {
             var dx = Math.ceil((last_x - x) * editor.precanvas.clientWidth / (editor.precanvas.clientWidth * editor.zoom));
             var dy = Math.ceil((last_y - y) * editor.precanvas.clientHeight / (editor.precanvas.clientHeight * editor.zoom));
 
-            if (editor.node_selected.classList.contains("GROUP")) {
+            if (editor.node_selected.classList.contains('GROUP')) {
                 moveGroupNodes(selectedNodeId, -dx, -dy);
             }
         } else {
             if (dragElementHover) {
-                dragElementHover.classList.remove("hover-drop");
+                dragElementHover.classList.remove('hover-drop');
                 dragElementHover = null;
             }
         }
@@ -289,13 +289,13 @@ async function initializeWorkstationPage() {
         last_y = y;
     });
 
-    editor.on("nodeMoved", (id) => {
+    editor.on('nodeMoved', (id) => {
         const dragNode = id;
         if (dragElementHover !== null) {
             const dropNode = dragElementHover.id.slice(5);
             if (dragNode !== dropNode) {
                 removeOfGroupNode(dragNode);
-                dragElementHover.classList.remove("hover-drop");
+                dragElementHover.classList.remove('hover-drop');
                 const dropNodeInfo = editor.getNodeFromId(dropNode);
                 const dropNodeInfoData = dropNodeInfo.data;
                 if (dropNodeInfoData.elements.indexOf(dragNode) === -1) {
@@ -306,7 +306,7 @@ async function initializeWorkstationPage() {
                     // Hide the ports when node is inside the group
                     togglePortsDisplay(dragNode, 'none');
                     const dragNodeData = editor.getNodeFromId(dragNode);
-                    if (dragNodeData.class !== "GROUP") {
+                    if (dragNodeData.class !== 'GROUP') {
                         collapseNode(dragNode);
                     }
                 }
@@ -318,9 +318,9 @@ async function initializeWorkstationPage() {
             removeOfGroupNode(dragNode);
         }
         disableButtons();
-    })
+    });
 
-    editor.on("nodeRemoved", (id) => {
+    editor.on('nodeRemoved', (id) => {
         removeOfGroupNode(id);
     });
 
@@ -342,7 +342,7 @@ async function initializeWorkstationPage() {
     currentImportIndex = 0;
     accumulatedImportData = {};
     descriptionStep = [];
-    console.log("importQueue", importQueue)
+    console.log('importQueue', importQueue);
 
     document.getElementById('surveyButton').addEventListener('click', function () {
         window.open('https://survey.aliyun.com/apps/zhiliao/vgpTppn22', '_blank');
@@ -366,7 +366,7 @@ function makeNodeTop(id) {
     const nodeInfo = editor.getNodeFromId(id);
 
     if (nodeInfo) {
-        console.log("currentZIndex: " + currentZIndex);
+        console.log('currentZIndex: ' + currentZIndex);
         currentZIndex += 1;
         node.style.zIndex = currentZIndex;
 
@@ -391,8 +391,8 @@ function moveGroupNodes(groupId, dx, dy) {
             const newPosX = nodeData.pos_x + dx;
             const newPosY = nodeData.pos_y + dy;
 
-            eleNode.style.left = newPosX + "px";
-            eleNode.style.top = newPosY + "px";
+            eleNode.style.left = newPosX + 'px';
+            eleNode.style.top = newPosY + 'px';
 
             if (editor.drawflow.drawflow[editor.module] &&
                 editor.drawflow.drawflow[editor.module].data &&
@@ -404,7 +404,7 @@ function moveGroupNodes(groupId, dx, dy) {
             editor.updateConnectionNodes(`node-${eleId}`);
         }
 
-        if (eleNodeInfo.class && eleNodeInfo.class === "GROUP") {
+        if (eleNodeInfo.class && eleNodeInfo.class === 'GROUP') {
             moveGroupNodes(eleId, dx, dy);
         }
     });
@@ -417,7 +417,7 @@ function collapseNode(nodeId) {
     const toggleArrow = nodeElement.querySelector('.toggle-arrow');
 
     contentBox.classList.add('hidden');
-    toggleArrow.textContent = "\u25BC";
+    toggleArrow.textContent = '\u25BC';
 }
 
 
@@ -438,13 +438,13 @@ function togglePortsDisplay(nodeId, displayStyle) {
 
 function removeOfGroupNode(id) {
     Object.keys(editor.drawflow.drawflow[editor.module].data).forEach(ele => {
-        if (editor.drawflow.drawflow[editor.module].data[ele].class === "GROUP") {
+        if (editor.drawflow.drawflow[editor.module].data[ele].class === 'GROUP') {
             const findIndex = editor.drawflow.drawflow[editor.module].data[ele].data.elements.indexOf(id);
             if (findIndex !== -1) {
                 editor.drawflow.drawflow[editor.module].data[ele].data.elements.splice(findIndex, 1);
             }
         }
-    })
+    });
 }
 
 
@@ -459,24 +459,24 @@ function allowDrop(ev) {
 
 
 function drag(ev) {
-    if (ev.type === "touchstart") {
-        mobile_item_selec = ev.target.closest(".workstation-sidebar-dragitem").getAttribute('data-node');
+    if (ev.type === 'touchstart') {
+        mobile_item_selec = ev.target.closest('.workstation-sidebar-dragitem').getAttribute('data-node');
     } else {
-        ev.dataTransfer.setData("node", ev.target.getAttribute('data-node'));
+        ev.dataTransfer.setData('node', ev.target.getAttribute('data-node'));
     }
 }
 
 
 function drop(ev) {
-    if (ev.type === "touchend") {
-        var parentdrawflow = document.elementFromPoint(mobile_last_move.touches[0].clientX, mobile_last_move.touches[0].clientY).closest("#drawflow");
+    if (ev.type === 'touchend') {
+        var parentdrawflow = document.elementFromPoint(mobile_last_move.touches[0].clientX, mobile_last_move.touches[0].clientY).closest('#drawflow');
         if (parentdrawflow != null) {
             addNodeToDrawFlow(mobile_item_selec, mobile_last_move.touches[0].clientX, mobile_last_move.touches[0].clientY);
         }
         mobile_item_selec = '';
     } else {
         ev.preventDefault();
-        var data = ev.dataTransfer.getData("node");
+        var data = ev.dataTransfer.getData('node');
         addNodeToDrawFlow(data, ev.clientX, ev.clientY);
     }
 
@@ -498,14 +498,14 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             editor.addNode('dashscope_chat', 0, 0, pos_x,
                 pos_y,
                 'dashscope_chat', {
-                    "args":
+                    'args':
                         {
-                            "config_name": '',
-                            "model_name": '',
-                            "api_key": '',
-                            "temperature": 0.0,
-                            "seed": 0,
-                            "model_type": 'dashscope_chat'
+                            'config_name': '',
+                            'model_name': '',
+                            'api_key': '',
+                            'temperature': 0.0,
+                            'seed': 0,
+                            'model_type': 'dashscope_chat'
                         }
                 },
                 htmlSourceCode);
@@ -515,14 +515,14 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             editor.addNode('openai_chat', 0, 0, pos_x,
                 pos_y,
                 'openai_chat', {
-                    "args":
+                    'args':
                         {
-                            "config_name": '',
-                            "model_name": '',
-                            "api_key": '',
-                            "temperature": 0.0,
-                            "seed": 0,
-                            "model_type": 'openai_chat'
+                            'config_name': '',
+                            'model_name': '',
+                            'api_key': '',
+                            'temperature': 0.0,
+                            'seed': 0,
+                            'model_type': 'openai_chat'
                         }
                 },
                 htmlSourceCode);
@@ -531,21 +531,21 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         case 'post_api_chat':
             editor.addNode('post_api_chat', 0, 0, pos_x, pos_y,
                 'post_api_chat', {
-                    "args":
+                    'args':
                         {
-                            "config_name": '',
-                            "api_url": '',
-                            "headers": {
-                                "content_type": 'application/json',
-                                "authorization": '',
+                            'config_name': '',
+                            'api_url': '',
+                            'headers': {
+                                'content_type': 'application/json',
+                                'authorization': '',
                             },
-                            "json_args": {
-                                "model": '',
-                                "temperature": 0.0,
-                                "seed": 0,
+                            'json_args': {
+                                'model': '',
+                                'temperature': 0.0,
+                                'seed': 0,
                             },
-                            "model_type": 'post_api_chat',
-                            "messages_key": 'messages'
+                            'model_type': 'post_api_chat',
+                            'messages_key': 'messages'
                         }
                 },
                 htmlSourceCode);
@@ -556,23 +556,23 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                 0,
                 pos_x, pos_y,
                 'post_api_dall_e', {
-                    "args":
+                    'args':
                         {
-                            "config_name": '',
-                            "api_url": '',
-                            "headers": {
-                                "content_type": 'application/json',
-                                "authorization": '',
+                            'config_name': '',
+                            'api_url': '',
+                            'headers': {
+                                'content_type': 'application/json',
+                                'authorization': '',
                             },
-                            "json_args": {
-                                "model": '',
-                                "n": 1,
-                                "size": "",
-                                "temperature": 0.0,
-                                "seed": 0,
+                            'json_args': {
+                                'model': '',
+                                'n': 1,
+                                'size': '',
+                                'temperature': 0.0,
+                                'seed': 0,
                             },
-                            "model_type": 'post_api_dall_e',
-                            "messages_key": 'prompt'
+                            'model_type': 'post_api_dall_e',
+                            'messages_key': 'prompt'
                         }
                 },
                 htmlSourceCode);
@@ -583,17 +583,17 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                 0,
                 pos_x, pos_y,
                 'dashscope_image_synthesis', {
-                    "args":
+                    'args':
                         {
-                            "config_name": '',
-                            "model_name": '',
-                            "generate_args": {
-                                "n": 1,
-                                "size": "",
-                                "temperature": 0.0,
-                                "seed": 0,
+                            'config_name': '',
+                            'model_name': '',
+                            'generate_args': {
+                                'n': 1,
+                                'size': '',
+                                'temperature': 0.0,
+                                'seed': 0,
                             },
-                            "model_type": 'dashscope_image_synthesis'
+                            'model_type': 'dashscope_image_synthesis'
                         }
                 }, htmlSourceCode);
             break;
@@ -602,11 +602,11 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         case 'Message':
             editor.addNode('Message', 1, 1, pos_x,
                 pos_y, 'Message', {
-                    "args":
+                    'args':
                         {
-                            "name": '',
-                            "content": '',
-                            "url": ''
+                            'name': '',
+                            'content': '',
+                            'url': ''
                         }
                 }, htmlSourceCode);
             break;
@@ -617,10 +617,10 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                 pos_x,
                 pos_y,
                 'DialogAgent', {
-                    "args": {
-                        "name": '',
-                        "sys_prompt": '',
-                        "model_config_name": ''
+                    'args': {
+                        'name': '',
+                        'sys_prompt': '',
+                        'model_config_name': ''
                     }
                 }, htmlSourceCode);
             var nodeElement = document.querySelector(`#node-${DialogAgentID} .node-id`);
@@ -632,7 +632,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         case 'UserAgent':
             const UserAgentID = editor.addNode('UserAgent', 1, 1, pos_x,
                 pos_y, 'UserAgent', {
-                    "args": {"name": 'User'}
+                    'args': {'name': 'User'}
                 }, htmlSourceCode);
             var nodeElement = document.querySelector(`#node-${UserAgentID} .node-id`);
             if (nodeElement) {
@@ -645,9 +645,9 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                 editor.addNode('TextToImageAgent', 1,
                     1, pos_x, pos_y,
                     'TextToImageAgent', {
-                        "args": {
-                            "name": '',
-                            "model_config_name": ''
+                        'args': {
+                            'name': '',
+                            'model_config_name': ''
                         }
                     }, htmlSourceCode);
             var nodeElement = document.querySelector(`#node-${TextToImageAgentID} .node-id`);
@@ -660,13 +660,13 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             const DictDialogAgentID = editor.addNode('DictDialogAgent', 1,
                 1, pos_x, pos_y,
                 'DictDialogAgent', {
-                    "args": {
-                        "name": '',
-                        "sys_prompt": '',
-                        "model_config_name": '',
-                        "parse_func": '',
-                        "fault_handler": '',
-                        "max_retries": 3,
+                    'args': {
+                        'name': '',
+                        'sys_prompt': '',
+                        'model_config_name': '',
+                        'parse_func': '',
+                        'fault_handler': '',
+                        'max_retries': 3,
                     }
                 }, htmlSourceCode);
             var nodeElement = document.querySelector(`#node-${DictDialogAgentID} .node-id`);
@@ -679,12 +679,12 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             const ReActAgentID = editor.addNode('ReActAgent', 1, 1, pos_x, pos_y,
                 'GROUP', {
                     elements: [],
-                    "args": {
-                        "name": '',
-                        "sys_prompt": '',
-                        "model_config_name": '',
-                        "max_iters": 10,
-                        "verbose": '',
+                    'args': {
+                        'name': '',
+                        'sys_prompt': '',
+                        'model_config_name': '',
+                        'max_iters': 10,
+                        'verbose': '',
                     }
                 }, htmlSourceCode);
             var nodeElement = document.querySelector(`#node-${ReActAgentID} .node-id`);
@@ -703,10 +703,10 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             editor.addNode('MsgHub', 1, 1, pos_x, pos_y,
                 'GROUP', {
                     elements: [],
-                    "args": {
-                        "announcement": {
-                            "name": '',
-                            "content": ''
+                    'args': {
+                        'announcement': {
+                            'name': '',
+                            'content': ''
                         }
                     }
                 }, htmlSourceCode);
@@ -721,10 +721,10 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             editor.addNode('ForLoopPipeline', 1, 1, pos_x, pos_y,
                 'GROUP', {
                     elements: [],
-                    "args": {
-                        "max_loop": 3,
-                        "condition_op": "",
-                        "target_value": "",
+                    'args': {
+                        'max_loop': 3,
+                        'condition_op': '',
+                        'target_value': '',
                     }
                 }, htmlSourceCode);
             break;
@@ -733,8 +733,8 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             editor.addNode('WhileLoopPipeline', 1, 1, pos_x, pos_y,
                 'GROUP', {
                     elements: [],
-                    "args": {
-                        "condition_func": ''
+                    'args': {
+                        'condition_func': ''
                     }
                 }, htmlSourceCode);
             break;
@@ -743,8 +743,8 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
             editor.addNode('IfElsePipeline', 1,
                 1, pos_x, pos_y, 'GROUP', {
                     elements: [], args: {
-                        "condition_op": "",
-                        "target_value": "",
+                        'condition_op': '',
+                        'target_value': '',
                     }
                 }, htmlSourceCode);
             break;
@@ -752,8 +752,8 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         case 'SwitchPipeline':
             const SwitchPipelineID = editor.addNode('SwitchPipeline', 1, 1, pos_x, pos_y, 'GROUP', {
                 elements: [], args: {
-                    "condition_func": '',
-                    "cases": [],
+                    'condition_func': '',
+                    'cases': [],
                 }
             }, htmlSourceCode);
             break;
@@ -762,9 +762,9 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         case 'BingSearchService':
             editor.addNode('BingSearchService', 0, 0,
                 pos_x, pos_y, 'BingSearchService', {
-                    "args": {
-                        "api_key": "",
-                        "num_results": 3,
+                    'args': {
+                        'api_key': '',
+                        'num_results': 3,
                     }
                 }, htmlSourceCode);
             break;
@@ -772,10 +772,10 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         case 'GoogleSearchService':
             editor.addNode('GoogleSearchService', 0, 0,
                 pos_x, pos_y, 'GoogleSearchService', {
-                    "args": {
-                        "api_key": "",
-                        "cse_id": "",
-                        "num_results": 3,
+                    'args': {
+                        'api_key': '',
+                        'cse_id': '',
+                        'num_results': 3,
                     }
                 }, htmlSourceCode);
             break;
@@ -798,21 +798,21 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         case 'TextToAudioService':
             const TextToAudioServiceID = editor.addNode('TextToAudioService', 0, 0,
                 pos_x, pos_y, 'TextToAudioService', {
-                    "args": {
-                        "model": "",
-                        "api_key": "",
-                        "sample_rate": ""
+                    'args': {
+                        'model': '',
+                        'api_key': '',
+                        'sample_rate': ''
                     }
                 }, htmlSourceCode);
             break;
         case 'TextToImageService':
             editor.addNode('TextToImageService', 0, 0,
                 pos_x, pos_y, 'TextToImageService', {
-                    "args": {
-                        "model": "",
-                        "api_key": "",
-                        "n": 1,
-                        "size": ""
+                    'args': {
+                        'model': '',
+                        'api_key': '',
+                        'n': 1,
+                        'size': ''
                     }
                 }, htmlSourceCode);
             break;
@@ -820,22 +820,22 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         case 'ImageComposition':
             editor.addNode('ImageComposition', 1, 1,
                 pos_x, pos_y, 'ImageComposition', {
-                    "args": {
-                        "titles": "",
-                        "output_path": "",
-                        "row": 1,
-                        "column": 1,
-                        "spacing": 10,
-                        "title_height": 100,
-                        "font_name": "PingFang",
+                    'args': {
+                        'titles': '',
+                        'output_path': '',
+                        'row': 1,
+                        'column': 1,
+                        'spacing': 10,
+                        'title_height': 100,
+                        'font_name': 'PingFang',
                     }
                 }, htmlSourceCode);
             break;
         case 'Code':
             const CodeID = editor.addNode('Code', 1, 1,
                 pos_x, pos_y, 'Code', {
-                    "args": {
-                        "code": "def function(msg1: Msg) -> Msg:\n    content1 = msg1.get(\"content\", \"\")\n    return {\n        \"role\": \"assistant\",\n        \"content\": content1,\n        \"name\": \"function\",\n    }"
+                    'args': {
+                        'code': 'def function(msg1: Msg) -> Msg:\n    content1 = msg1.get("content", "")\n    return {\n        "role": "assistant",\n        "content": content1,\n        "name": "function",\n    }'
                     }
                 }, htmlSourceCode);
             break;
@@ -852,10 +852,10 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         case 'ImageMotion':
             editor.addNode('ImageMotion', 1, 1,
                 pos_x, pos_y, 'ImageMotion', {
-                    "args": {
-                        "output_path": "",
-                        "output_format": "",
-                        "duration": "",
+                    'args': {
+                        'output_path': '',
+                        'output_format': '',
+                        'duration': '',
                     }
                 }, htmlSourceCode);
             break;
@@ -863,11 +863,11 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         case 'VideoComposition':
             editor.addNode('VideoComposition', 1, 1,
                 pos_x, pos_y, 'VideoComposition', {
-                    "args": {
-                        "output_path": "",
-                        "target_width": "",
-                        "target_height": "",
-                        "fps": "",
+                    'args': {
+                        'output_path': '',
+                        'target_width': '',
+                        'target_height': '',
+                        'fps': '',
                     }
                 }, htmlSourceCode);
             break;
@@ -875,14 +875,14 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         case 'Post':
             editor.addNode('Post', 1, 1,
                 pos_x, pos_y, 'Post', {
-                    "args": {
-                        "url": "",
-                        "headers": '',
-                        "data": '',
-                        "json": '',
-                        "kwargs": '',
-                        "output_path": "",
-                        "output_type": "",
+                    'args': {
+                        'url': '',
+                        'headers': '',
+                        'data': '',
+                        'json': '',
+                        'kwargs': '',
+                        'output_path': '',
+                        'output_type': '',
                     }
                 }, htmlSourceCode);
             break;
@@ -895,11 +895,11 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
 function initializeMonacoEditor(nodeId) {
     require.config({
         paths: {
-            vs: "https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs",
+            vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs',
         },
     });
 
-    require(["vs/editor/editor.main"], function () {
+    require(['vs/editor/editor.main'], function () {
         const parentSelector = `#node-${nodeId}`;
         const parentNode = document.querySelector(parentSelector);
 
@@ -908,7 +908,7 @@ function initializeMonacoEditor(nodeId) {
             return;
         }
 
-        const codeContentElement = parentNode.querySelector(`.code-content`);
+        const codeContentElement = parentNode.querySelector('.code-content');
         if (!codeContentElement) {
             return;
         }
@@ -921,12 +921,12 @@ function initializeMonacoEditor(nodeId) {
 
         const editorInstance = monaco.editor.create(codeContentElement, {
             value: node.data.args.code,
-            language: "python",
-            theme: "vs-light",
+            language: 'python',
+            theme: 'vs-light',
             minimap: {
                 enabled: false,
             },
-            wordWrap: "on",
+            wordWrap: 'on',
             lineNumbersMinChars: 1,
             scrollBeyondLastLine: false,
             readOnly: false,
@@ -949,7 +949,7 @@ function initializeMonacoEditor(nodeId) {
         });
 
     }, function (error) {
-        console.error("Error encountered while loading monaco editor: ", error);
+        console.error('Error encountered while loading monaco editor: ', error);
     });
 }
 
@@ -967,9 +967,9 @@ function updateSampleRate(nodeId) {
         const modelName = modelNameInput ? modelNameInput.value : '';
 
         if (ModelNames48k.includes(modelName)) {
-            sampleRate = 48000
+            sampleRate = 48000;
         } else {
-            sampleRate = 16000
+            sampleRate = 16000;
         }
 
         const sampleRateInput = newNode.querySelector('#sample_rate');
@@ -977,13 +977,13 @@ function updateSampleRate(nodeId) {
         if (sampleRateInput) {
             sampleRateInput.value = sampleRate;
             var nodeData = editor.getNodeFromId(nodeId).data;
-            nodeData.args.sample_rate = sampleRate
-            nodeData.args.model = modelName
+            nodeData.args.sample_rate = sampleRate;
+            nodeData.args.model = modelName;
             editor.updateNodeDataFromId(nodeId, nodeData);
 
             console.log(`${modelName} sample rate updated to: ${sampleRate}`);
         } else {
-            console.log(`Sample Rate input not found.`);
+            console.log('Sample Rate input not found.');
         }
     }
 
@@ -1009,10 +1009,10 @@ function setupTextInputListeners(nodeId) {
 
 function toggleAdvanced() {
     var advancedBox = document.querySelector('.advanced-box');
-    if (advancedBox.style.display === "none") {
-        advancedBox.style.display = "block";
+    if (advancedBox.style.display === 'none') {
+        advancedBox.style.display = 'block';
     } else {
-        advancedBox.style.display = "none";
+        advancedBox.style.display = 'none';
     }
 }
 
@@ -1033,7 +1033,7 @@ function handleInputChange(event) {
             dataAttributes.forEach(attr => {
                 const attrName = attr.name;
                 if (attrName.startsWith('df-args-json_args-')) {
-                    const dataAttribute = attrName.substring(18)
+                    const dataAttribute = attrName.substring(18);
                     if
                     (node.data.args.json_args.hasOwnProperty(dataAttribute)) {
                         node.data.args.json_args[dataAttribute] = floatValue;
@@ -1048,7 +1048,7 @@ function handleInputChange(event) {
                 }
             });
         } else {
-            console.error("Invalid input value:", value);
+            console.error('Invalid input value:', value);
         }
     }
 }
@@ -1111,7 +1111,7 @@ document.addEventListener('input', function (event) {
     }
 
     if (input.getAttribute('df-args-duration') !== null) {
-        validateDuration(input)
+        validateDuration(input);
     }
 });
 
@@ -1132,13 +1132,13 @@ function updateReadmeAndTrimExtrasInHTML(htmlString, nodeId) {
 function updateReadmeContent(containerDiv, nodeId) {
     const readmeDiv = containerDiv.querySelector('.readme');
     if (readmeDiv) {
-        console.log("readmeDiv", readmeDiv);
+        console.log('readmeDiv', readmeDiv);
 
         let newDiv = document.createElement('div');
         newDiv.innerHTML = `Copy from Node ID: ${nodeId}`;
         readmeDiv.appendChild(newDiv);
 
-        console.log("readmeDiv after", readmeDiv);
+        console.log('readmeDiv after', readmeDiv);
     }
 }
 
@@ -1173,7 +1173,7 @@ function copyNode(originalNodeId) {
     const newNodeHTML = createNodeHTML(originalNode, true, originalNodeId);
     const [posX, posY] = [originalNode.pos_x + 30, originalNode.pos_y + 30];
 
-    editor.addNode("CopyNode",
+    editor.addNode('CopyNode',
         Object.keys(originalNode.inputs).length,
         Object.keys(originalNode.outputs).length,
         posX, posY, 'node-' + originalNode.name, {elements: [originalNodeId.toString()]},
@@ -1269,10 +1269,10 @@ function setupNodeListeners(nodeId) {
                 contentBox.classList.toggle('hidden');
 
                 if (contentBox.classList.contains('hidden')) {
-                    toggleArrow.textContent = "\u25BC";
+                    toggleArrow.textContent = '\u25BC';
                     hideShowGroupNodes(nodeId, false);
                 } else {
-                    toggleArrow.textContent = "\u25B2";
+                    toggleArrow.textContent = '\u25B2';
                     hideShowGroupNodes(nodeId, true);
                 }
                 editor.updateConnectionNodes('node-' + nodeId);
@@ -1344,7 +1344,7 @@ function setupSwitchPipelineListeners(nodeId) {
 
         var inputElement = document.createElement('input');
         inputElement.type = 'text';
-        inputElement.placeholder = `Case Pattern`;
+        inputElement.placeholder = 'Case Pattern';
 
         inputElement.dataset.caseIndex = caseCount;
 
@@ -1353,9 +1353,9 @@ function setupSwitchPipelineListeners(nodeId) {
 
         inputElement.addEventListener('input', function (e) {
             var nodeData = editor.getNodeFromId(nodeId).data;
-            console.log("nodeData", nodeData);
+            console.log('nodeData', nodeData);
             var index = e.target.dataset.caseIndex;
-            console.log("index", index);
+            console.log('index', index);
             nodeData.args.cases[index] = e.target.value;
             editor.updateNodeDataFromId(nodeId, nodeData);
         });
@@ -1404,7 +1404,7 @@ function setupSwitchPipelineListeners(nodeId) {
 
         var inputElement = document.createElement('input');
         inputElement.type = 'text';
-        inputElement.placeholder = `Case Pattern`;
+        inputElement.placeholder = 'Case Pattern';
         inputElement.value = cases[caseCount];
 
         inputElement.dataset.caseIndex = caseCount;
@@ -1414,9 +1414,9 @@ function setupSwitchPipelineListeners(nodeId) {
 
         inputElement.addEventListener('input', function (e) {
             var nodeData = editor.getNodeFromId(nodeId).data;
-            console.log("nodeData", nodeData);
+            console.log('nodeData', nodeData);
             var index = e.target.dataset.caseIndex;
-            console.log("index", index);
+            console.log('index', index);
             nodeData.args.cases[index] = e.target.value;
             editor.updateNodeDataFromId(nodeId, nodeData);
         });
@@ -1427,23 +1427,23 @@ function setupSwitchPipelineListeners(nodeId) {
 function addDefaultCase(caseContainer) {
     var defaultCaseElement = document.createElement('div');
     defaultCaseElement.classList.add('case-placeholder', 'default-case');
-    defaultCaseElement.textContent = `Default Case`;
+    defaultCaseElement.textContent = 'Default Case';
     caseContainer.appendChild(defaultCaseElement);
 }
 
 
 function closemodal(e) {
-    e.target.closest(".drawflow-node").style.zIndex = "2";
-    e.target.parentElement.parentElement.style.display = "none";
+    e.target.closest('.drawflow-node').style.zIndex = '2';
+    e.target.parentElement.parentElement.style.display = 'none';
     editor.precanvas.style.transform = transform;
     editor.precanvas.style.left = '0px';
     editor.precanvas.style.top = '0px';
-    editor.editor_mode = "edit";
+    editor.editor_mode = 'edit';
 }
 
 
 function changeModule(event) {
-    var all = document.querySelectorAll(".menu ul li");
+    var all = document.querySelectorAll('.menu ul li');
     for (var i = 0; i < all.length; i++) {
         all[i].classList.remove('selected');
     }
@@ -1580,20 +1580,20 @@ function checkConditions() {
 
     for (let nodeId in nodesData) {
         let node = nodesData[nodeId];
-        console.log("node", node);
-        console.log("node.inputs", node.inputs);
+        console.log('node', node);
+        console.log('node.inputs', node.inputs);
 
         let nodeElement = document.getElementById('node-' + nodeId);
         const requiredInputs = nodeElement.querySelectorAll('input[data-required="true"]');
 
         let titleBox = nodeElement.querySelector('.title-box');
 
-        let titleText = titleBox.getAttribute("data-class");
+        let titleText = titleBox.getAttribute('data-class');
 
         for (const input of requiredInputs) {
             if (input.value.trim() === '') {
                 let inputLabel = input.previousElementSibling;
-                if (inputLabel && inputLabel.tagName.toLowerCase() === "label") {
+                if (inputLabel && inputLabel.tagName.toLowerCase() === 'label') {
                     let labelText = inputLabel.textContent.trim();
 
                     Swal.fire({
@@ -1610,11 +1610,11 @@ function checkConditions() {
         if (node.data && node.data.args && node.data.args.model_type) {
             hasModelTypeError = false;
             modelConfigNames.add(node.data.args.config_name);
-            if (node.data.args.api_key === "") {
+            if (node.data.args.api_key === '') {
                 isApiKeyEmpty = isApiKeyEmpty || true;
             }
         }
-        if (node.name.includes('Agent') && "model_config_name" in node.data.args) {
+        if (node.name.includes('Agent') && 'model_config_name' in node.data.args) {
             hasAgentError = false;
             if (node.data && node.data.args) {
                 agentModelConfigNames.add(node.data.args.model_config_name);
@@ -1623,12 +1623,12 @@ function checkConditions() {
         if (node.name === 'ReActAgent') {
             const elements = node.data.elements;
             for (const nodeId of elements) {
-                const childNode = nodesData[nodeId]
+                const childNode = nodesData[nodeId];
                 if (!childNode || !childNode.name.includes('Service')) {
                     Swal.fire({
                         title: 'Invalid ReActAgent Configuration',
                         text:
-                            `ReActAgent must only contain Tool nodes as child nodes.`,
+                            'ReActAgent must only contain Tool nodes as child nodes.',
                         icon: 'error',
                         confirmButtonText: 'Ok'
                     });
@@ -1689,9 +1689,9 @@ function checkConditions() {
     }
 
     let unmatchedConfigNames = [...agentModelConfigNames].filter(name => !modelConfigNames.has(name));
-    console.log("modelConfigNames", modelConfigNames);
-    console.log("agentModelConfigNames", agentModelConfigNames);
-    console.log("unmatchedConfigNames", unmatchedConfigNames);
+    console.log('modelConfigNames', modelConfigNames);
+    console.log('agentModelConfigNames', agentModelConfigNames);
+    console.log('unmatchedConfigNames', unmatchedConfigNames);
     if (hasModelTypeError) {
         Swal.fire({
             title: 'Error!',
@@ -1703,7 +1703,7 @@ function checkConditions() {
     } else if (hasAgentError) {
         Swal.fire({
             title: 'No Agent Nodes Found',
-            text: "Error: At least one Agent node must be present.",
+            text: 'Error: At least one Agent node must be present.',
             icon: 'error',
             confirmButtonText: 'Ok'
         });
@@ -1711,7 +1711,7 @@ function checkConditions() {
         Swal.fire({
             title: 'Configuration Mismatch',
             html:
-                "Each Agent's 'Model config name' must match a Model node's 'Config Name'.<br> Unmatched: " + unmatchedConfigNames.join(', '),
+                'Each Agent\'s \'Model config name\' must match a Model node\'s \'Config Name\'.<br> Unmatched: ' + unmatchedConfigNames.join(', '),
             icon: 'error',
             confirmButtonText: 'Ok'
         });
@@ -1719,7 +1719,7 @@ function checkConditions() {
         Swal.fire({
             title: 'API KEY Missing',
             text:
-                "API KEY is missing in your model nodes. Please either enter the API KEY in the corresponding position, or enter a random bit of content and replace it with the real value in the exported files.",
+                'API KEY is missing in your model nodes. Please either enter the API KEY in the corresponding position, or enter a random bit of content and replace it with the real value in the exported files.',
             icon: 'error',
             confirmButtonText: 'Ok'
         });
@@ -1734,7 +1734,7 @@ function showCheckPopup() {
     if (checkConditions()) {
         Swal.fire({
             title: 'Validation Success',
-            text: "All checks are passed!",
+            text: 'All checks are passed!',
             icon: 'success',
             confirmButtonText: 'Great!'
         });
@@ -1779,7 +1779,7 @@ function showExportPyPopup() {
             text: 'Please wait.',
             allowOutsideClick: false,
             willOpen: () => {
-                Swal.showLoading()
+                Swal.showLoading();
             }
         });
 
@@ -1854,7 +1854,7 @@ function showExportPyPopup() {
 
 
 function showExportRunPopup(version) {
-    if (version === "local") {
+    if (version === 'local') {
         showExportRunLocalPopup();
     } else {
         showExportRunMSPopup();
@@ -1876,7 +1876,7 @@ function showExportRunLocalPopup() {
             text: 'Please wait.',
             allowOutsideClick: false,
             willOpen: () => {
-                Swal.showLoading()
+                Swal.showLoading();
             }
         });
 
@@ -1968,10 +1968,10 @@ function showExportRunMSPopup() {
         Swal.fire({
             title: 'Are you sure to run the workflow in ModelScope Studio?',
             text:
-                "You are about to navigate to another page. " +
-                "Please make sure all the configurations are set " +
-                "besides your api-key " +
-                "(your api-key should be set in ModelScope Studio page).",
+                'You are about to navigate to another page. ' +
+                'Please make sure all the configurations are set ' +
+                'besides your api-key ' +
+                '(your api-key should be set in ModelScope Studio page).',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -1986,14 +1986,14 @@ function showExportRunMSPopup() {
                     return;
                 }
                 const filteredData = reorganizeAndFilterConfigForAgentScope(rawData);
-                filterOutApiKey(filteredData)
+                filterOutApiKey(filteredData);
 
                 Swal.fire({
                     title: 'Processing...',
                     text: 'Please wait.',
                     allowOutsideClick: false,
                     willOpen: () => {
-                        Swal.showLoading()
+                        Swal.showLoading();
                     }
                 });
                 fetch('/upload-to-oss', {
@@ -2009,8 +2009,8 @@ function showExportRunMSPopup() {
                     .then(data => {
                         const params = {'CONFIG_URL': data.config_url};
                         const paramsStr = encodeURIComponent(JSON.stringify(params));
-                        const org = "agentscope";
-                        const fork_repo = "agentscope_workstation";
+                        const org = 'agentscope';
+                        const fork_repo = 'agentscope_workstation';
                         const url = `https://www.modelscope.cn/studios/fork?target=${org}/${fork_repo}&overwriteEnv=${paramsStr}`;
                         window.open(url, '_blank');
                         Swal.fire('Success!', '', 'success');
@@ -2020,7 +2020,7 @@ function showExportRunMSPopup() {
                         Swal.fire('Failed', data.message || 'An error occurred while uploading to oss', 'error');
                     });
             }
-        })
+        });
     }
 }
 
@@ -2101,7 +2101,7 @@ function showImportHTMLPopup() {
     Swal.fire({
         title: 'Import Workflow Data',
         html:
-            "<p>Please paste your HTML data below. Ensure that the source of the HTML data is trusted, as importing HTML from unknown or untrusted sources may pose security risks.</p>",
+            '<p>Please paste your HTML data below. Ensure that the source of the HTML data is trusted, as importing HTML from unknown or untrusted sources may pose security risks.</p>',
         input: 'textarea',
         inputLabel: 'Paste your HTML data here:',
         inputPlaceholder:
@@ -2170,7 +2170,7 @@ function showSaveWorkflowPopup() {
 
 function saveWorkflow(fileName) {
     const rawData = editor.export();
-    filterOutApiKey(rawData)
+    filterOutApiKey(rawData);
 
     // Remove the html attribute from the nodes to avoid inconsistencies in html
     removeHtmlFromUsers(rawData);
@@ -2188,7 +2188,7 @@ function saveWorkflow(fileName) {
         })
     }).then(response => response.json())
         .then(data => {
-            if (data.message === "Workflow file saved successfully") {
+            if (data.message === 'Workflow file saved successfully') {
                 Swal.fire('Success', data.message, 'success');
             } else {
                 Swal.fire('Error', data.message || 'An error occurred while saving the workflow.', 'error');
@@ -2239,7 +2239,7 @@ function showLoadWorkflowPopup() {
                 } else if (result.isDenied) {
                     Swal.fire({
                         title: `Are you sure to delete ${selectedFilename}?`,
-                        text: "This operation cannot be undone!",
+                        text: 'This operation cannot be undone!',
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#d33',
@@ -2275,12 +2275,12 @@ function loadWorkflow(fileName) {
             if (data.error) {
                 Swal.fire('Error', data.error, 'error');
             } else {
-                console.log(data)
+                console.log(data);
                 try {
                     // Add html source code to the nodes data
                     addHtmlAndReplacePlaceHolderBeforeImport(data)
                         .then(() => {
-                            console.log(data)
+                            console.log(data);
                             editor.clear();
                             editor.import(data);
                             importSetupNodes(data);
@@ -2350,16 +2350,16 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
     for (const nodeId of Object.keys(data.drawflow.Home.data)) {
         const node = data.drawflow.Home.data[nodeId];
         if (!node.html) {
-            if (node.name === "readme") {
+            if (node.name === 'readme') {
                 // Remove the node if its name is "readme"
                 delete data.drawflow.Home.data[nodeId];
                 continue; // Skip to the next iteration
             }
-            console.log(node.name)
+            console.log(node.name);
             const sourceCode = await fetchHtmlSourceCodeByName(node.name);
 
             // Add new html attribute to the node
-            console.log(sourceCode)
+            console.log(sourceCode);
             node.html = sourceCode.replace(idPlaceholderRegex, nodeId);
         }
     }
@@ -2388,14 +2388,14 @@ function importSetupNodes(dataToImport) {
 
 
 function copyToClipboard(contentToCopy) {
-    var tempTextarea = document.createElement("textarea");
+    var tempTextarea = document.createElement('textarea');
     tempTextarea.value = contentToCopy;
     document.body.appendChild(tempTextarea);
     tempTextarea.select();
     tempTextarea.setSelectionRange(0, 99999);
 
     try {
-        var successful = document.execCommand("copy");
+        var successful = document.execCommand('copy');
         if (successful) {
             Swal.fire('Copied!', '', 'success');
         } else {
@@ -2451,7 +2451,7 @@ function importExample(index) {
                 });
                 reloadi18n();
             });
-    })
+    });
 }
 
 
@@ -2464,10 +2464,10 @@ function importExample_step(index) {
         const dataToImportStep = data.json;
         addHtmlAndReplacePlaceHolderBeforeImport(dataToImportStep).then(() => {
             clearModuleSelected();
-            descriptionStep = ["Readme", "Model", "UserAgent",
-                "DialogAgent"];
+            descriptionStep = ['Readme', 'Model', 'UserAgent',
+                'DialogAgent'];
             initializeImport(dataToImportStep);
-        })
+        });
     });
 }
 
@@ -2477,7 +2477,7 @@ function updateImportButtons() {
         <= 1;
     document.getElementById('import-next').disabled = currentImportIndex >= importQueue.length;
     document.getElementById('import-skip').disabled = currentImportIndex >= importQueue.length;
-    reloadi18n()
+    reloadi18n();
 }
 
 
@@ -2589,12 +2589,12 @@ function updateStepInfo() {
 function clearModuleSelected() {
     editor.clearModuleSelected();
 
-    let importButtonsDiv = document.getElementById("import-buttons");
+    let importButtonsDiv = document.getElementById('import-buttons');
     if (importButtonsDiv) {
         importButtonsDiv.remove();
     }
 
-    let stepWarningDiv = document.getElementById("step-warning");
+    let stepWarningDiv = document.getElementById('step-warning');
     if (stepWarningDiv) {
         stepWarningDiv.remove();
     }
@@ -2608,28 +2608,28 @@ function clearModuleSelected() {
 
 function getCookie(name) {
     var matches = document.cookie.match(new RegExp(
-        "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+        '(?:^|; )' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'
     ));
     return matches ? decodeURIComponent(matches[1]) : undefined;
 }
 
 
 function showSurveyModal() {
-    document.getElementById("surveyModal").style.display = "block";
+    document.getElementById('surveyModal').style.display = 'block';
 }
 
 
 function hideSurveyModal() {
-    document.getElementById("surveyModal").style.display = "none";
+    document.getElementById('surveyModal').style.display = 'none';
 }
 
 function reloadi18n() {
     let currentLang = getCookie('locale') || 'en';
-    $("[i18n]").i18n({
+    $('[i18n]').i18n({
         defaultLang: currentLang,
-        filePath: "../static/i18n/",
-        filePrefix: "i18n_",
-        fileSuffix: "",
+        filePath: '../static/i18n/',
+        filePrefix: 'i18n_',
+        fileSuffix: '',
         forever: true,
         callback: function () {
         }
@@ -2638,7 +2638,7 @@ function reloadi18n() {
 
 window.addEventListener('storage', function (event) {
     if (event.key === 'locale') {
-        reloadi18n()
+        reloadi18n();
     }
 }, false);
 
@@ -2665,8 +2665,8 @@ function getElementCoordinates(targetElement) {
 
 function positionElementRightOf(element, targetElement) {
     const targetCoordinates = getElementCoordinates(targetElement);
-    const mask = document.querySelector(".overlay");
-    mask.style.display = "block";
+    const mask = document.querySelector('.overlay');
+    mask.style.display = 'block';
     element.style.position = 'absolute';
     element.style.display = 'block';
     element.style.left = `${targetCoordinates.x + targetCoordinates.right}px`;
@@ -2674,20 +2674,22 @@ function positionElementRightOf(element, targetElement) {
 }
 
 function skipGuide() {
-    const element = document.querySelector(".tour-guide");
-    const mask = document.querySelector(".overlay");
+    const element = document.querySelector('.tour-guide');
+    const mask = document.querySelector('.overlay');
     localStorage.setItem('firstGuide', 'true');
     if (element) {
-        element.style.display = "none";
+        element.style.display = 'none';
         element.remove();
-        mask.style.display = "none";
+        mask.style.display = 'none';
         mask.remove();
     }
 }
 
 class Notification {
-    static count = 0;
-    static instances = [];
+    static initStatics() {
+        this.count = 0;
+        this.instances = [];
+    }
 
     static clearInstances() {
         Notification.count = 0;
@@ -2709,47 +2711,44 @@ class Notification {
         this.cancelBtn = false;
         this.pause = true;
         this.reduceNumber = 0;
+
+        // 绑定 this
+        this.destroyAll = this.destroyAll.bind(this);
+        this.onCancelCallback = this.onCancelCallback.bind(this);
+        this.onConfirmCallback = this.onConfirmCallback.bind(this);
+
         this.init(props);
     }
 
     init(props) {
         this.setDefaultValues(props);
         this.element = document.createElement('div');
-        // init notification-box css
         this.element.className = 'notification';
-        // render title
-        this.title && this.renderTitle(getCookie("locale") == "zh" ? props.i18nTitle : this.title);
-        // render closeButtion
+        this.title && this.renderTitle(getCookie('locale') == 'zh' ? props.i18nTitle : this.title);
         this.closeBtn && this.renderCloseButton();
-        // render content
-        this.content && this.renderContent(getCookie("locale") == "zh" ? props.i18nContent : this.content);
-        // render confirmBtn
+        this.content && this.renderContent(getCookie('locale') == 'zh' ? props.i18nContent : this.content);
         (this.confirmBtn || this.cancelBtn) && this.renderClickButton();
         this.progress && this.renderProgressBar();
-        // set position
         this.setPosition(this.position);
         document.body.appendChild(this.element);
         setTimeout(() => {
             this.show();
-        }, 10)
+        }, 10);
     }
 
-    // check if string is HTML
     isHTMLString(string) {
         const doc = new DOMParser().parseFromString(string, 'text/html');
         return Array.from(doc.body.childNodes).some(node => node.nodeType === 1);
     }
 
-    // render closeButtion
     renderCloseButton() {
         this.closeBtn = document.createElement('span');
         this.closeBtn.className = 'notification-close';
         this.closeBtn.innerText = 'X';
-        this.closeBtn.onclick = this.destroyAll.bind(this);
+        this.closeBtn.onclick = this.destroyAll;
         this.title.appendChild(this.closeBtn);
     }
 
-    // render title string or HTML
     renderTitle(component) {
         if (this.isHTMLString(component)) {
             this.title = document.createElement('div');
@@ -2766,7 +2765,6 @@ class Notification {
         this.element.appendChild(this.title);
     }
 
-    // render content string or HTML
     renderContent(component) {
         if (this.isHTMLString(component)) {
             this.content = document.createElement('div');
@@ -2780,7 +2778,6 @@ class Notification {
         this.element.appendChild(this.content);
     }
 
-    // render clickbtn
     renderClickButton() {
         if (this.confirmBtn || this.cancelBtn) {
             this.clickBottonBox = document.createElement('div');
@@ -2789,53 +2786,49 @@ class Notification {
         if (this.confirmBtn) {
             this.confirmBotton = document.createElement('button');
             this.confirmBotton.className = 'notification-btn confirmBotton';
-            this.confirmBotton.innerText = getCookie("locale") == "zh" ? this.i18nConfirmBtn : this.confirmBtn;
-            this.confirmBotton.onclick = this.onConfirmCallback.bind(this);
+            this.confirmBotton.innerText = getCookie('locale') == 'zh' ? this.i18nConfirmBtn : this.confirmBtn;
+            this.confirmBotton.onclick = this.onConfirmCallback;
             this.clickBottonBox.appendChild(this.confirmBotton);
         }
         if (this.cancelBtn) {
             this.cancelBotton = document.createElement('button');
             this.cancelBotton.className = 'notification-btn cancelBotton';
-            this.cancelBotton.innerText = getCookie("locale") == "zh" ? this.i18nCancelBtn : this.cancelBtn;
-            this.cancelBotton.onclick = this.onCancelCallback.bind(this);
+            this.cancelBotton.innerText = getCookie('locale') == 'zh' ? this.i18nCancelBtn : this.cancelBtn;
+            this.cancelBotton.onclick = this.onCancelCallback;
             this.clickBottonBox.appendChild(this.cancelBotton);
         }
         this.element.appendChild(this.clickBottonBox);
     }
 
-    // render progress bar
     renderProgressBar() {
         this.progressBar = document.createElement('div');
         this.progressBar.className = 'notification-progress';
         this.element.appendChild(this.progressBar);
     }
 
-    // stepProgressBar
     stepProgressBar(callback) {
         let startTime = performance.now();
         const step = (timestamp) => {
             const progress = Math.min((timestamp + this.reduceNumber - startTime) / this.intervalTime, 1);
             this.progressBar.style.width = (1 - progress) * 100 + '%';
-            if (progress < 1 && this.pause == false) {
-                requestAnimationFrame(step)
+            if (progress < 1 && this.pause === false) {
+                requestAnimationFrame(step);
             } else {
-                this.reduceNumber = timestamp + this.reduceNumber - startTime
+                this.reduceNumber = timestamp + this.reduceNumber - startTime;
             }
-            if (progress == 1) {
-                this.pause == true;
+            if (progress === 1) {
+                this.pause = true;
                 this.reduceNumber = 0;
                 callback();
                 this.removeChild();
             }
-        }
+        };
         requestAnimationFrame(step);
     }
 
     setDefaultValues(props) {
         for (const key in props) {
-            if (props[key] === undefined) {
-                return;
-            } else {
+            if (props[key] !== undefined) {
                 this[key] = props[key];
             }
         }
@@ -2884,9 +2877,6 @@ class Notification {
         }
     }
 
-    // hide() {
-    //     // this.element.style.display = 'none';
-    // }
     destroyAll() {
         for (const instance of Notification.instances) {
             document.body.removeChild(instance.element);
@@ -2923,29 +2913,32 @@ class Notification {
 
     onConfirmCallback() {
         if (typeof this.onConfirm === 'function') {
-            this.pause = !this.pause
+            this.pause = !this.pause;
             if (!this.pause) {
                 this.stepProgressBar(this.onConfirm);
-                this.confirmBotton.innerText = getCookie("locale") == "zh" ? '暂停' : 'pause'
+                this.confirmBotton.innerText = getCookie('locale') === 'zh' ? '暂停' : 'pause';
             } else {
-                this.confirmBotton.innerText = this.confirmBtn
+                this.confirmBotton.innerText = this.confirmBtn;
             }
         }
     }
 }
+
+// 初始化静态属性
+Notification.initStatics();
 
 function createNotification(props) {
     new Notification(props);
 }
 
 function setCookie(name, value, days) {
-    var expires = "";
+    var expires = '';
     if (days) {
         var date = new Date();
         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires=" + date.toUTCString();
+        expires = '; expires=' + date.toUTCString();
     }
-    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    document.cookie = name + '=' + (value || '') + expires + '; path=/';
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -3001,7 +2994,7 @@ function importGalleryWorkflow(data) {
 function deleteWorkflow(fileName) {
     Swal.fire({
         title: 'Are you sure?',
-        text: "Workflow will be deleted!",
+        text: 'Workflow will be deleted!',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
@@ -3036,28 +3029,28 @@ function deleteWorkflow(fileName) {
 
 
 function showTab(tabId) {
-    var tabs = document.getElementsByClassName("tab");
+    var tabs = document.getElementsByClassName('tab');
     for (var i = 0; i < tabs.length; i++) {
-        tabs[i].classList.remove("active");
-        tabs[i].style.display = "none";
+        tabs[i].classList.remove('active');
+        tabs[i].style.display = 'none';
     }
     var tab = document.getElementById(tabId);
     if (tab) {
-        tab.classList.add("active");
-        tab.style.display = "block";
+        tab.classList.add('active');
+        tab.style.display = 'block';
 
-        var tabButtons = document.getElementsByClassName("tab-button");
+        var tabButtons = document.getElementsByClassName('tab-button');
         for (var j = 0; j < tabButtons.length; j++) {
-            tabButtons[j].classList.remove("active");
+            tabButtons[j].classList.remove('active');
         }
         var activeTabButton = document.querySelector(`.tab-button[onclick*="${tabId}"]`);
         if (activeTabButton) {
-            activeTabButton.classList.add("active");
+            activeTabButton.classList.add('active');
         }
 
-        if (tabId === "tab2") {
+        if (tabId === 'tab2') {
             showLoadWorkflowList(tabId);
-        } else if (tabId === "tab1") {
+        } else if (tabId === 'tab1') {
             showGalleryWorkflowList(tabId);
         }
     }
