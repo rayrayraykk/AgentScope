@@ -1313,6 +1313,7 @@ function setupNodeListeners(nodeId) {
 
       function doDragSE(e) {
         newNode.style.width = "auto";
+        newNode.style.height= "auto";
 
         const newWidth = (startWidth + e.clientX - startX);
         if (newWidth > 200) {
@@ -2195,10 +2196,16 @@ function showSaveWorkflowPopup() {
 function saveWorkflow(fileName) {
   const rawData = editor.export();
   filterOutApiKey(rawData);
+  Object.keys(rawData.drawflow.Home.data).forEach((nodeId) => {
+    const nodeElement = document.getElementById(`node-${nodeId}`);
+    if (nodeElement) {
+      const node = rawData.drawflow.Home.data[nodeId];
+      node.width = nodeElement.offsetWidth + "px";
+      node.height = nodeElement.offsetHeight + "px";
+    }
+  });
 
-  // Remove the html attribute from the nodes to avoid inconsistencies in html
   removeHtmlFromUsers(rawData);
-
   const exportData = JSON.stringify(rawData, null, 4);
   fetch("/save-workflow", {
     method: "POST",
@@ -2299,15 +2306,27 @@ function loadWorkflow(fileName) {
       if (data.error) {
         Swal.fire("Error", data.error, "error");
       } else {
-        console.log(data);
         try {
-          // Add html source code to the nodes data
           addHtmlAndReplacePlaceHolderBeforeImport(data)
             .then(() => {
-              console.log(data);
               editor.clear();
               editor.import(data);
               importSetupNodes(data);
+              Object.keys(data.drawflow.Home.data).forEach((nodeId) => {
+                const nodeElement = document.getElementById(`node-${nodeId}`);
+                const nodeData = data.drawflow.Home.data[nodeId];
+                if (nodeData.width && nodeData.height && nodeElement) {
+                  nodeElement.style.width = nodeData.width;
+                  nodeElement.style.height = nodeData.height;
+                }
+              });
+
+              //   Swal.fire("Imported!", "", "success").then((result) => {
+              //     if (result.isConfirmed) {
+              //       showEditorTab();
+              //     }
+              //   });
+              // });
               Swal.fire("Imported!", "", "success").then(() => {
                 setTimeout(() => {
                   updateImportNodes();
@@ -2318,38 +2337,14 @@ function loadWorkflow(fileName) {
         } catch (error) {
           Swal.showValidationMessage(`Import error: ${error}`);
         }
-        Swal.fire("Success", "Workflow loaded successfully", "success");
+        // Swal.fire("Success", "Workflow loaded successfully", "success");
       }
-    })
-    .catch(error => {
-      console.error("Error:", error);
-      Swal.fire("Error", "An error occurred while loading the workflow.", "error");
     });
+  // .catch(error => {
+  //   console.error("Error:", error);
+  //   Swal.fire("Error", "An error occurred while loading the workflow.", "error");
+  // });
 }
-
-function deleteWorkflow(fileName) {
-  fetch("/delete-workflow", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      filename: fileName,
-    })
-  }).then(response => response.json())
-    .then(data => {
-      if (data.error) {
-        Swal.fire("Error", data.error, "error");
-      } else {
-        Swal.fire("Deleted!", "Workflow has been deleted.", "success");
-      }
-    })
-    .catch(error => {
-      console.error("Error:", error);
-      Swal.fire("Error", "An error occurred while deleting the workflow.", "error");
-    });
-}
-
 
 function removeHtmlFromUsers(data) {
   Object.keys(data.drawflow.Home.data).forEach((nodeId) => {
@@ -2377,8 +2372,8 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
   const idPlaceholderRegex = /ID_PLACEHOLDER/g;
   const namePlaceholderRegex = /NAME_PLACEHOLDER/g;
   const readmePlaceholderRegex = /README_PLACEHOLDER/g;
+  const boxDivRegex = /<div class="box"(.*?)>/;
   allimportNodeId = [];
-
   const classToReadmeDescription = {
     "node-DialogAgent": "A dialog agent that can interact with users or other agents",
     "node-UserAgent": "A proxy agent for user",
@@ -2389,26 +2384,42 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
 
   for (const nodeId of Object.keys(data.drawflow.Home.data)) {
     const node = data.drawflow.Home.data[nodeId];
-
     if (!node.html) {
       if (node.name === "readme") {
         delete data.drawflow.Home.data[nodeId];
         continue;
       }
+      console.log(node.name);
       allimportNodeId.push(nodeId);
-      node.html = await fetchHtmlSourceCodeByName(node.name);
+
+      let sourceCode = await fetchHtmlSourceCodeByName(node.name);
 
       if (node.name === "CopyNode") {
-        node.html = node.html.replace(idPlaceholderRegex, node.data.elements[0]);
-        node.html = node.html.replace(namePlaceholderRegex, node.class.split("-").slice(-1)[0]);
-
+        // 特殊处理 CopyNode
+        sourceCode = sourceCode.replace(idPlaceholderRegex, node.data.elements[0]);
+        sourceCode = sourceCode.replace(namePlaceholderRegex, node.class.split("-").slice(-1)[0]);
         const readmeDescription = classToReadmeDescription[node.class];
         if (readmeDescription) {
-          node.html = node.html.replace(readmePlaceholderRegex, readmeDescription);
+          sourceCode = sourceCode.replace(readmePlaceholderRegex, readmeDescription);
         }
       } else {
-        node.html = node.html.replace(idPlaceholderRegex, nodeId);
+        // 替换其他节点的ID占位符
+        sourceCode = sourceCode.replace(idPlaceholderRegex, nodeId);
       }
+
+      // 设置样式
+      let styleString = "";
+      if (node.width) {
+        styleString += `width: ${node.width}; `;
+      }
+      if (node.height) {
+        styleString += `height: ${node.height}; `;
+      }
+      if (styleString) {
+        sourceCode = sourceCode.replace(boxDivRegex, `<div class="box" style="${styleString}"$1>`);
+      }
+
+      node.html = sourceCode;
     }
   }
 }
@@ -2419,19 +2430,17 @@ function updateImportNodes() {
   });
 }
 
-function importSetupNodes(dataToImport) {
-  Object.keys(dataToImport.drawflow.Home.data).forEach((nodeId) => {
-    // import the node use addNode function
-    disableButtons();
-    makeNodeTop(nodeId);
+function importSetupNodes(data) {
+  Object.keys(data.drawflow.Home.data).forEach((nodeId) => {
     setupNodeListeners(nodeId);
-    setupNodeCopyListens(nodeId);
-    addEventListenersToNumberInputs(nodeId);
-    setupTextInputListeners(nodeId);
-    reloadi18n();
     const nodeElement = document.getElementById(`node-${nodeId}`);
     if (nodeElement) {
-      const copyButton = nodeElement.querySelector(".button.copy-button");
+      const nodeData = data.drawflow.Home.data[nodeId];
+      if (nodeData.width && nodeData.height) {
+        nodeElement.style.width = nodeData.width;
+        nodeElement.style.height = nodeData.height;
+      }
+      const copyButton = nodeElement.querySelector(".copy-button");
       if (copyButton) {
         setupNodeCopyListens(nodeId);
       }
@@ -2999,19 +3008,38 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-function sendWorkflow(fileName) {
-  Swal.fire({
-    text: "Are you sure you want to import this workflow?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Yes, import it!",
-    cancelButtonText: "Cancel"
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const workstationUrl = "/workstation?filename=" + encodeURIComponent(fileName);
-      window.location.href = workstationUrl;
-    }
-  });
+function loadWorkLocalflow(fileName) {
+  fetch("/load-workflow", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      filename: fileName,
+    })
+  }).then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        Swal.fire("Error", data.error, "error");
+      } else {
+        try {
+          addHtmlAndReplacePlaceHolderBeforeImport(data)
+            .then(() => {
+              editor.clear();
+              editor.import(data);
+              importSetupNodes(data);
+              Swal.fire("Imported!", "", "success");
+            });
+        } catch (error) {
+          Swal.showValidationMessage(`Import error: ${error}`);
+        }
+        Swal.fire("Success", "Workflow loaded successfully", "success");
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      Swal.fire("Error", "An error occurred while loading the workflow.", "error");
+    });
 }
 
 
@@ -3020,7 +3048,6 @@ function showEditorTab() {
   document.getElementById("col-right2").style.display = "none";
   console.log("Show Editor");
 }
-
 function importGalleryWorkflow(data) {
   try {
     const parsedData = JSON.parse(data);
@@ -3037,9 +3064,6 @@ function importGalleryWorkflow(data) {
           if (result.isConfirmed) {
             showEditorTab();
           }
-          setTimeout(() => {
-            updateImportNodes();
-          }, 200);
         });
       });
   } catch (error) {
@@ -3197,7 +3221,7 @@ function createGridItem(workflowName, container, thumbnail, author = "", time = 
   button.onclick = function (e) {
     e.preventDefault();
     if (showDeleteButton) {
-      sendWorkflow(workflowName);
+      loadWorkflow(workflowName);
     } else {
       const workflowData = galleryWorkflows[index];
       importGalleryWorkflow(JSON.stringify(workflowData));
@@ -3259,14 +3283,11 @@ function showLoadWorkflowList(tabId) {
       if (!Array.isArray(data.files)) {
         throw new TypeError("The return data is not an array");
       }
-
       const container = document.getElementById(tabId).querySelector(".grid-container");
       container.innerHTML = "";
-
-      data.files.forEach(workflowName => {
-        const title = workflowName.replace(/\.json$/, "");
-        const thumbnail = generateThumbnailFromContent({title});
-        createGridItem(title, container, thumbnail, "", "", true);
+      data.files.forEach(fileName => {
+        const thumbnail = generateThumbnailFromContent({title: fileName});
+        createGridItem(fileName, container, thumbnail, "", "", true); // 传递完整的文件名
       });
     })
     .catch(error => {
