@@ -12,7 +12,6 @@ from agentscope import msghub
 from agentscope.agents import (
     DialogAgent,
     UserAgent,
-    TextToImageAgent,
     DictDialogAgent,
     ReActAgent,
 )
@@ -48,8 +47,10 @@ from agentscope.studio.tools.image_composition import stitch_images_with_grid
 from agentscope.studio.tools.image_motion import create_video_or_gif_from_image
 from agentscope.studio.tools.video_composition import merge_videos
 from agentscope.studio.tools.condition_operator import eval_condition_operator
+from agentscope.studio.tools.image_synthesis import image_synthesis
 
 from agentscope.studio.tools.web_post import web_post
+from agentscope.studio.tools.broadcast_agent import BroadcastAgent
 
 DEFAULT_FLOW_VAR = "flow"
 
@@ -229,30 +230,6 @@ class UserAgentNode(WorkflowNode):
         }
 
 
-class TextToImageAgentNode(WorkflowNode):
-    """
-    A node representing a TextToImageAgent within a workflow.
-    """
-
-    node_type = WorkflowNodeType.AGENT
-
-    def _post_init(self) -> None:
-        super()._post_init()
-        self.pipeline = TextToImageAgent(**self.opt_kwargs)
-
-    def __call__(self, x: dict = None) -> dict:
-        return self.pipeline(x)
-
-    def compile(self) -> dict:
-        return {
-            "imports": "from agentscope.agents import TextToImageAgent",
-            "inits": f"{self.var_name} = TextToImageAgent("
-            f"{kwarg_converter(self.opt_kwargs)})",
-            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
-            f"({DEFAULT_FLOW_VAR})",
-        }
-
-
 class DictDialogAgentNode(WorkflowNode):
     """
     A node representing a DictDialogAgent within a workflow.
@@ -313,6 +290,31 @@ class ReActAgentNode(WorkflowNode):
             f"    {self.var_name} = ReActAgent"
             f"({kwarg_converter(self.opt_kwargs)}, service_toolkit"
             f"={self.var_name}_service_toolkit)",
+            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
+            f"([{DEFAULT_FLOW_VAR}])",
+        }
+
+
+class BroadcastAgentNode(WorkflowNode):
+    """
+    A node representing a BroadcastAgent within a workflow.
+    """
+
+    node_type = WorkflowNodeType.AGENT
+
+    def _post_init(self) -> None:
+        super()._post_init()
+        self.pipeline = BroadcastAgent(**self.opt_kwargs)
+
+    def __call__(self, x: dict = None) -> dict:
+        return self.pipeline(x)
+
+    def compile(self) -> dict:
+        return {
+            "imports": "from agentscope.studio.tools.broadcast_agent "
+            "import BroadcastAgent",
+            "inits": f"{self.var_name} = BroadcastAgent("
+            f"{kwarg_converter(self.opt_kwargs)})",
             "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
             f"([{DEFAULT_FLOW_VAR}])",
         }
@@ -851,6 +853,29 @@ class TextToImageServiceNode(WorkflowNode):
         }
 
 
+class ImageSynthesisNode(WorkflowNode):
+    """
+    Text to Image Tool Node
+    """
+
+    node_type = WorkflowNodeType.TOOL
+
+    def _post_init(self) -> None:
+        super()._post_init()
+        self.pipeline = partial(image_synthesis, **self.opt_kwargs)
+
+    def compile(self) -> dict:
+        return {
+            "imports": "from agentscope.studio.tools.image_synthesis import "
+            "image_synthesis\n"
+            "from functools import partial\n",
+            "inits": f"{self.var_name} = partial(image_synthesis,"
+            f" {kwarg_converter(self.opt_kwargs)})",
+            "execs": f"{DEFAULT_FLOW_VAR} = {self.var_name}"
+            f"({DEFAULT_FLOW_VAR})",
+        }
+
+
 class ImageCompositionNode(WorkflowNode):
     """
     Image Composition Node
@@ -1030,9 +1055,9 @@ NODE_NAME_MAPPING = {
     "Message": MsgNode,
     "DialogAgent": DialogAgentNode,
     "UserAgent": UserAgentNode,
-    "TextToImageAgent": TextToImageAgentNode,
     "DictDialogAgent": DictDialogAgentNode,
     "ReActAgent": ReActAgentNode,
+    "BroadcastAgent": BroadcastAgentNode,
     "Placeholder": PlaceHolderNode,
     "MsgHub": MsgHubNode,
     "SequentialPipeline": SequentialPipelineNode,
@@ -1049,6 +1074,7 @@ NODE_NAME_MAPPING = {
     "Post": PostNode,
     "TextToAudioService": TextToAudioServiceNode,
     "TextToImageService": TextToImageServiceNode,
+    "ImageSynthesis": ImageSynthesisNode,
     "ImageComposition": ImageCompositionNode,
     "Code": CodeNode,
     "ImageMotion": ImageMotionNode,

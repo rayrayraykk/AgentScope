@@ -21,9 +21,10 @@ const nameToHtmlFile = {
   "Message": "message-msg.html",
   "DialogAgent": "agent-dialogagent.html",
   "UserAgent": "agent-useragent.html",
-  "TextToImageAgent": "agent-texttoimageagent.html",
+  "ImageSynthesis": "tool-image-synthesis.html",
   "DictDialogAgent": "agent-dictdialogagent.html",
   "ReActAgent": "agent-reactagent.html",
+  "BroadcastAgent": "agent-broadcastagent.html",
   "Placeholder": "pipeline-placeholder.html",
   "MsgHub": "pipeline-msghub.html",
   "SequentialPipeline": "pipeline-sequentialpipeline.html",
@@ -44,6 +45,7 @@ const nameToHtmlFile = {
   // 'IF/ELSE': 'tool-if-else.html',
   "ImageMotion": "tool-image-motion.html",
   "VideoComposition": "tool-video-composition.html",
+  "CopyNode": "agent-copyagent.html"
 };
 
 const ModelNames48k = [
@@ -611,6 +613,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
       }, htmlSourceCode);
     break;
 
+
     // Workflow-Agent
   case "DialogAgent":
     const DialogAgentID = editor.addNode("DialogAgent", 1, 1,
@@ -637,22 +640,6 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     var nodeElement = document.querySelector(`#node-${UserAgentID} .node-id`);
     if (nodeElement) {
       nodeElement.textContent = UserAgentID;
-    }
-    break;
-
-  case "TextToImageAgent":
-    const TextToImageAgentID =
-                editor.addNode("TextToImageAgent", 1,
-                  1, pos_x, pos_y,
-                  "TextToImageAgent", {
-                    "args": {
-                      "name": "",
-                      "model_config_name": ""
-                    }
-                  }, htmlSourceCode);
-    var nodeElement = document.querySelector(`#node-${TextToImageAgentID} .node-id`);
-    if (nodeElement) {
-      nodeElement.textContent = TextToImageAgentID;
     }
     break;
 
@@ -690,6 +677,34 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     var nodeElement = document.querySelector(`#node-${ReActAgentID} .node-id`);
     if (nodeElement) {
       nodeElement.textContent = ReActAgentID;
+    }
+    break;
+
+  case "BroadcastAgent":
+    const BroadcastAgentID = editor.addNode("BroadcastAgent", 1, 1,
+      pos_x,
+      pos_y,
+      "BroadcastAgent", {
+        "args": {
+          "name": "",
+          "content": ""
+        }
+      }, htmlSourceCode);
+    var nodeElement = document.querySelector(`#node-${BroadcastAgentID} .node-id`);
+    if (nodeElement) {
+      nodeElement.textContent = BroadcastAgentID;
+    }
+    break;
+
+  case "CopyNode":
+    const CopyNodeID = editor.addNode("CopyNode", 1, 1,
+      pos_x,
+      pos_y,
+      "CopyNode", {
+      }, htmlSourceCode);
+    var nodeElement = document.querySelector(`#node-${CopyNodeID} .node-id`);
+    if (nodeElement) {
+      nodeElement.textContent = nodeElement;
     }
     break;
 
@@ -817,6 +832,19 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
       }, htmlSourceCode);
     break;
 
+  case "ImageSynthesis":
+    editor.addNode("ImageSynthesis", 1, 1,
+      pos_x, pos_y, "ImageSynthesis", {
+        "args": {
+          "model": "",
+          "api_key": "",
+          "n": 1,
+          "size": "",
+          "save_dir": ""
+        }
+      }, htmlSourceCode);
+    break;
+
   case "ImageComposition":
     editor.addNode("ImageComposition", 1, 1,
       pos_x, pos_y, "ImageComposition", {
@@ -839,15 +867,6 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         }
       }, htmlSourceCode);
     break;
-    // case 'IF/ELSE':
-    //     const IfelseID = editor.addNode('IF/ELSE', 1, 2,
-    //         pos_x, pos_y, 'IF/ELSE', {
-    //             "args": {
-    //                 "condition_op": "",
-    //                 "target_value": "",
-    //             }
-    //         }, htmlSourceCode);
-    //     break;
 
   case "ImageMotion":
     editor.addNode("ImageMotion", 1, 1,
@@ -947,7 +966,6 @@ function initializeMonacoEditor(nodeId) {
     parentNode.addEventListener("DOMNodeRemoved", function () {
       resizeObserver.disconnect();
     });
-
   }, function (error) {
     console.error("Error encountered while loading monaco editor: ", error);
   });
@@ -2031,7 +2049,6 @@ function showExportRunMSPopup() {
 function showExportHTMLPopup() {
   const rawData = editor.export();
 
-  // Remove the html attribute from the nodes to avoid inconsistencies in html
   removeHtmlFromUsers(rawData);
   const hasError = sortElementsByPosition(rawData);
   if (hasError) {
@@ -2366,6 +2383,7 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
     }
   }
 }
+
 
 
 function importSetupNodes(data) {
