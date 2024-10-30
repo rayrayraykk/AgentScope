@@ -2049,14 +2049,23 @@ function showExportRunMSPopup() {
 function showExportHTMLPopup() {
   const rawData = editor.export();
 
-  removeHtmlFromUsers(rawData);
+  Object.keys(rawData.drawflow.Home.data).forEach((nodeId) => {
+    const nodeElement = document.getElementById(`node-${nodeId}`);
+    const nodeData = rawData.drawflow.Home.data[nodeId];
+    if (nodeElement) {
+      nodeData.width = nodeElement.offsetWidth + "px";
+      nodeData.height = nodeElement.offsetHeight + "px";
+    }
+  });
+
   const hasError = sortElementsByPosition(rawData);
   if (hasError) {
     return;
   }
 
-  const exportData = JSON.stringify(rawData, null, 4);
+  removeHtmlFromUsers(rawData);
 
+  const exportData = JSON.stringify(rawData, null, 4);
   const escapedExportData = exportData
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
@@ -2073,21 +2082,17 @@ function showExportHTMLPopup() {
     confirmButtonText: "Copy",
     cancelButtonText: "Close",
     willOpen: (element) => {
-      // Find the code element inside the Swal content
       const codeElement = element.querySelector("code");
-
-      // Now highlight the code element with Prism
       Prism.highlightElement(codeElement);
 
-      // Copy to clipboard logic
-      const content = codeElement.textContent;
       const copyButton = Swal.getConfirmButton();
       copyButton.addEventListener("click", () => {
-        copyToClipboard(content);
+        copyToClipboard(codeElement.textContent);
       });
     }
   });
 }
+
 
 
 function isValidDataStructure(data) {
