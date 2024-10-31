@@ -9,7 +9,7 @@ let dataToImportStep;
 let currentImportIndex;
 let accumulatedImportData;
 let descriptionStep;
-
+let allimportNodeId = [];
 
 const nameToHtmlFile = {
   "welcome": "welcome.html",
@@ -2166,7 +2166,12 @@ function showImportHTMLPopup() {
             editor.clear();
             editor.import(parsedData);
             importSetupNodes(parsedData);
-            Swal.fire("Imported!", "", "success");
+            Swal.fire("Imported!", "", "success")
+              .then(() => {
+                setTimeout(() => {
+                  updateImportNodes();
+                }, 200);
+              });;
           });
 
       } catch (error) {
@@ -2325,6 +2330,9 @@ function loadWorkflow(fileName) {
                 if (result.isConfirmed) {
                   showEditorTab();
                 }
+                setTimeout(() => {
+                  updateImportNodes();
+                }, 200);
               });
             });
         } catch (error) {
@@ -2363,7 +2371,20 @@ async function fetchHtmlSourceCodeByName(name) {
 
 async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
   const idPlaceholderRegex = /ID_PLACEHOLDER/g;
+  const namePlaceholderRegex = /NAME_PLACEHOLDER/g;
+  const readmePlaceholderRegex = /README_PLACEHOLDER/g;
   const boxDivRegex = /<div class="box"(.*?)>/;
+  allimportNodeId = [];
+
+  const classToReadmeDescription = {
+    "node-DialogAgent": "A dialog agent that can interact with users or other agents",
+    "node-UserAgent": "A proxy agent for user",
+    "node-DictDialogAgent": "Agent that generates response in a dict format",
+    "node-ReActAgent": "Agent for ReAct (reasoning and acting) with tools",
+    "node-BroadcastAgent": "A broadcast agent that only broadcasts the messages it receives"
+  };
+
+
   for (const nodeId of Object.keys(data.drawflow.Home.data)) {
     const node = data.drawflow.Home.data[nodeId];
     if (!node.html) {
@@ -2371,9 +2392,18 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
         delete data.drawflow.Home.data[nodeId];
         continue;
       }
-      console.log(node.name);
-      let sourceCode = await fetchHtmlSourceCodeByName(node.name);
-      sourceCode = sourceCode.replace(idPlaceholderRegex, nodeId);
+      allimportNodeId.push(nodeId);
+      node.html = await fetchHtmlSourceCodeByName(node.name);
+      if (node.name === "CopyNode") {
+        node.html = node.html.replace(idPlaceholderRegex, node.data.elements[0]);
+        node.html = node.html.replace(namePlaceholderRegex, node.class.split("-").slice(-1)[0]);
+        const readmeDescription = classToReadmeDescription[node.class];
+        if (readmeDescription) {
+          node.html = node.html.replace(readmePlaceholderRegex, readmeDescription);
+        }
+      } else {
+        node.html = node.html.replace(idPlaceholderRegex, nodeId);
+      }
       let styleString = "";
       if (node.width) {
         styleString += `width: ${node.width}; `;
@@ -2382,14 +2412,19 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
         styleString += `height: ${node.height}; `;
       }
       if (styleString) {
-        sourceCode = sourceCode.replace(boxDivRegex, `<div class="box" style="${styleString}"$1>`);
+        node.html = node.html.replace(boxDivRegex, `<div class="box" style="${styleString}"$1>`);
       }
-      node.html = sourceCode;
+
+      node.html = node.html;
     }
   }
 }
 
-
+function updateImportNodes() {
+  allimportNodeId.forEach((nodeId) => {
+    editor.updateConnectionNodes(`node-${nodeId}`);
+  });
+}
 
 function importSetupNodes(data) {
   Object.keys(data.drawflow.Home.data).forEach((nodeId) => {
@@ -3026,6 +3061,9 @@ function importGalleryWorkflow(data) {
           if (result.isConfirmed) {
             showEditorTab();
           }
+          setTimeout(() => {
+            updateImportNodes();
+          }, 200);
         });
       });
   } catch (error) {
