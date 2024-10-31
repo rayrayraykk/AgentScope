@@ -10,6 +10,7 @@ let currentImportIndex;
 let accumulatedImportData;
 let descriptionStep;
 let allimportNodeId = [];
+let imporTempData = [];
 
 const nameToHtmlFile = {
   "welcome": "welcome.html",
@@ -1469,6 +1470,7 @@ function changeModule(event) {
     all[i].classList.remove("selected");
   }
   event.target.classList.add("selected");
+  importSetupNodes(imporTempData);
 }
 
 
@@ -2320,18 +2322,12 @@ function loadWorkflow(fileName) {
               Object.keys(data.drawflow.Home.data).forEach((nodeId) => {
                 const nodeElement = document.getElementById(`node-${nodeId}`);
                 const nodeData = data.drawflow.Home.data[nodeId];
-                if (nodeData.width && nodeData.height && nodeElement) {
+                if (nodeData.width && nodeElement) {
                   nodeElement.style.width = nodeData.width;
-                  nodeElement.style.height = nodeData.height;
                 }
               });
 
-              //   Swal.fire("Imported!", "", "success").then((result) => {
-              //     if (result.isConfirmed) {
-              //       showEditorTab();
-              //     }
-              //   });
-              // });
+
               Swal.fire("Imported!", "", "success").then(() => {
                 setTimeout(() => {
                   updateImportNodes();
@@ -2342,13 +2338,8 @@ function loadWorkflow(fileName) {
         } catch (error) {
           Swal.showValidationMessage(`Import error: ${error}`);
         }
-        // Swal.fire("Success", "Workflow loaded successfully", "success");
       }
     });
-  // .catch(error => {
-  //   console.error("Error:", error);
-  //   Swal.fire("Error", "An error occurred while loading the workflow.", "error");
-  // });
 }
 
 function removeHtmlFromUsers(data) {
@@ -2429,16 +2420,22 @@ function updateImportNodes() {
     editor.updateConnectionNodes(`node-${nodeId}`);
   });
 }
-
 function importSetupNodes(data) {
+  imporTempData = data;
   Object.keys(data.drawflow.Home.data).forEach((nodeId) => {
+    disableButtons();
+    makeNodeTop(nodeId);
+    setupNodeCopyListens(nodeId);
+    addEventListenersToNumberInputs(nodeId);
+    setupTextInputListeners(nodeId);
+    reloadi18n();
     setupNodeListeners(nodeId);
     const nodeElement = document.getElementById(`node-${nodeId}`);
     if (nodeElement) {
       const nodeData = data.drawflow.Home.data[nodeId];
-      if (nodeData.width && nodeData.height) {
+      if (nodeData.width) {
         nodeElement.style.width = nodeData.width;
-        nodeElement.style.height = nodeData.height;
+        // nodeElement.style.height = nodeData.height;
       }
       const copyButton = nodeElement.querySelector(".copy-button");
       if (copyButton) {
@@ -3150,14 +3147,14 @@ function showGalleryWorkflowList(tabId) {
   })
     .then(response => response.json())
     .then(data => {
-      galleryWorkflows = data.json || []; // 存储获取到的工作流数据
+      galleryWorkflows = data.json || [];
       galleryWorkflows.forEach((workflow, index) => {
         const meta = workflow.meta;
         const title = meta.title;
         const author = meta.author;
         const time = meta.time;
         const thumbnail = meta.thumbnail || generateThumbnailFromContent(meta);
-        createGridItem(title, container, thumbnail, author, time, false, index); // 将index传递给createGridItem
+        createGridItem(title, container, thumbnail, author, time, false, index);
       });
     })
     .catch(error => {
@@ -3287,7 +3284,7 @@ function showLoadWorkflowList(tabId) {
       container.innerHTML = "";
       data.files.forEach(fileName => {
         const thumbnail = generateThumbnailFromContent({title: fileName});
-        createGridItem(fileName, container, thumbnail, "", "", true); // 传递完整的文件名
+        createGridItem(fileName, container, thumbnail, "", "", true);
       });
     })
     .catch(error => {

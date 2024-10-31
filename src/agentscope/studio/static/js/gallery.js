@@ -252,7 +252,7 @@ function showLoadWorkflowList(tabId) {
       container.innerHTML = "";
       data.files.forEach(fileName => {
         const thumbnail = generateThumbnailFromContent({title: fileName});
-        createGridItem(fileName, container, thumbnail, "", "", true); // 传递完整的文件名
+        createGridItem(fileName, container, thumbnail, "", "", true);
       });
     })
     .catch(error => {
