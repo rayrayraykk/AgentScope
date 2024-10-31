@@ -2379,6 +2379,7 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
   const readmePlaceholderRegex = /README_PLACEHOLDER/g;
   const boxDivRegex = /<div class="box"(.*?)>/;
   allimportNodeId = [];
+
   const classToReadmeDescription = {
     "node-DialogAgent": "A dialog agent that can interact with users or other agents",
     "node-UserAgent": "A proxy agent for user",
@@ -2387,6 +2388,7 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
     "node-BroadcastAgent": "A broadcast agent that only broadcasts the messages it receives"
   };
 
+
   for (const nodeId of Object.keys(data.drawflow.Home.data)) {
     const node = data.drawflow.Home.data[nodeId];
     if (!node.html) {
@@ -2394,25 +2396,18 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
         delete data.drawflow.Home.data[nodeId];
         continue;
       }
-      console.log(node.name);
       allimportNodeId.push(nodeId);
-
-      let sourceCode = await fetchHtmlSourceCodeByName(node.name);
-
+      node.html = await fetchHtmlSourceCodeByName(node.name);
       if (node.name === "CopyNode") {
-        // 特殊处理 CopyNode
-        sourceCode = sourceCode.replace(idPlaceholderRegex, node.data.elements[0]);
-        sourceCode = sourceCode.replace(namePlaceholderRegex, node.class.split("-").slice(-1)[0]);
+        node.html = node.html.replace(idPlaceholderRegex, node.data.elements[0]);
+        node.html = node.html.replace(namePlaceholderRegex, node.class.split("-").slice(-1)[0]);
         const readmeDescription = classToReadmeDescription[node.class];
         if (readmeDescription) {
-          sourceCode = sourceCode.replace(readmePlaceholderRegex, readmeDescription);
+          node.html = node.html.replace(readmePlaceholderRegex, readmeDescription);
         }
       } else {
-        // 替换其他节点的ID占位符
-        sourceCode = sourceCode.replace(idPlaceholderRegex, nodeId);
+        node.html = node.html.replace(idPlaceholderRegex, nodeId);
       }
-
-      // 设置样式
       let styleString = "";
       if (node.width) {
         styleString += `width: ${node.width}; `;
@@ -2421,10 +2416,10 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
         styleString += `height: ${node.height}; `;
       }
       if (styleString) {
-        sourceCode = sourceCode.replace(boxDivRegex, `<div class="box" style="${styleString}"$1>`);
+        node.html = node.html.replace(boxDivRegex, `<div class="box" style="${styleString}"$1>`);
       }
 
-      node.html = sourceCode;
+      node.html = node.html;
     }
   }
 }
