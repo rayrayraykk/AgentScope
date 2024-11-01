@@ -2326,21 +2326,22 @@ function loadWorkflow(fileName) {
                   nodeElement.style.width = nodeData.width;
                 }
               });
-
-
-              Swal.fire("Imported!", "", "success").then(() => {
+              Swal.fire("Imported!", "", "success").then((result) => {
+                if (result.isConfirmed) {
+                  showEditorTab();
+                }
                 setTimeout(() => {
                   updateImportNodes();
                 }, 200);
               });
             });
-
         } catch (error) {
           Swal.showValidationMessage(`Import error: ${error}`);
         }
       }
     });
 }
+
 
 function removeHtmlFromUsers(data) {
   Object.keys(data.drawflow.Home.data).forEach((nodeId) => {
