@@ -10,7 +10,7 @@ let currentImportIndex;
 let accumulatedImportData;
 let descriptionStep;
 let allimportNodeId = [];
-let imporTempData = [];
+let imporTempData;
 
 const nameToHtmlFile = {
   "welcome": "welcome.html",
@@ -1470,7 +1470,7 @@ function changeModule(event) {
     all[i].classList.remove("selected");
   }
   event.target.classList.add("selected");
-  importSetupNodes(imporTempData);
+  importSetupNodes(editor.drawflow);
 }
 
 
@@ -2420,9 +2420,9 @@ function updateImportNodes() {
     editor.updateConnectionNodes(`node-${nodeId}`);
   });
 }
-function importSetupNodes(data) {
-  imporTempData = data;
-  Object.keys(data.drawflow.Home.data).forEach((nodeId) => {
+function importSetupNodes(dataToImport) {
+  imporTempData = dataToImport;
+  Object.keys(dataToImport.drawflow.Home.data).forEach((nodeId) => {
     disableButtons();
     makeNodeTop(nodeId);
     setupNodeCopyListens(nodeId);
@@ -2432,7 +2432,7 @@ function importSetupNodes(data) {
     setupNodeListeners(nodeId);
     const nodeElement = document.getElementById(`node-${nodeId}`);
     if (nodeElement) {
-      const nodeData = data.drawflow.Home.data[nodeId];
+      const nodeData = dataToImport.drawflow.Home.data[nodeId];
       if (nodeData.width) {
         nodeElement.style.width = nodeData.width;
         // nodeElement.style.height = nodeData.height;
