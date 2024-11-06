@@ -2055,11 +2055,11 @@ function showExportHTMLPopup() {
     const nodeElement = document.getElementById(`node-${nodeId}`);
     const nodeData = rawData.drawflow.Home.data[nodeId];
     if (nodeElement) {
-      nodeData.width = nodeElement.offsetWidth + "px";
-      nodeData.height = nodeElement.offsetHeight + "px";
+      const rect = nodeElement.getBoundingClientRect();
+      nodeData.width = rect.width + "px";
+      nodeData.height = rect.height + "px";
     }
   });
-
   const hasError = sortElementsByPosition(rawData);
   if (hasError) {
     return;
@@ -2205,10 +2205,11 @@ function saveWorkflow(fileName) {
   filterOutApiKey(rawData);
   Object.keys(rawData.drawflow.Home.data).forEach((nodeId) => {
     const nodeElement = document.getElementById(`node-${nodeId}`);
+    const nodeData = rawData.drawflow.Home.data[nodeId];
     if (nodeElement) {
-      const node = rawData.drawflow.Home.data[nodeId];
-      node.width = nodeElement.offsetWidth + "px";
-      node.height = nodeElement.offsetHeight + "px";
+      const rect = nodeElement.getBoundingClientRect();
+      nodeData.width = rect.width + "px";
+      nodeData.height = rect.height + "px";
     }
   });
 
@@ -2380,7 +2381,6 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
     "node-BroadcastAgent": "A broadcast agent that only broadcasts the messages it receives"
   };
 
-
   for (const nodeId of Object.keys(data.drawflow.Home.data)) {
     const node = data.drawflow.Home.data[nodeId];
     if (!node.html) {
@@ -2388,11 +2388,14 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
         delete data.drawflow.Home.data[nodeId];
         continue;
       }
+
       allimportNodeId.push(nodeId);
       node.html = await fetchHtmlSourceCodeByName(node.name);
+
       if (node.name === "CopyNode") {
         node.html = node.html.replace(idPlaceholderRegex, node.data.elements[0]);
         node.html = node.html.replace(namePlaceholderRegex, node.class.split("-").slice(-1)[0]);
+
         const readmeDescription = classToReadmeDescription[node.class];
         if (readmeDescription) {
           node.html = node.html.replace(readmePlaceholderRegex, readmeDescription);
@@ -2400,21 +2403,23 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
       } else {
         node.html = node.html.replace(idPlaceholderRegex, nodeId);
       }
+
       let styleString = "";
       if (node.width) {
         styleString += `width: ${node.width}; `;
       }
       if (node.height) {
-        styleString += `height: ${node.height}; `;
+        const originalHeight = parseInt(node.height, 10);
+        const adjustedHeight = originalHeight - 47;
+        styleString += `height: ${adjustedHeight}px; `;
       }
-      if (styleString) {
+      if (styleString !== "") {
         node.html = node.html.replace(boxDivRegex, `<div class="box" style="${styleString}"$1>`);
       }
-
-      node.html = node.html;
     }
   }
 }
+
 
 function updateImportNodes() {
   allimportNodeId.forEach((nodeId) => {
