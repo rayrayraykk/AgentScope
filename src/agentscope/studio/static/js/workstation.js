@@ -2418,10 +2418,12 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
       let styleString = "";
       if (node.width) {
         styleString += `width: ${node.width}; `;
+        const adjustedWidth = originalWidth - 22;
+        styleString += `width: ${adjustedWidth}px; `;
       }
       if (node.height) {
         const originalHeight = parseInt(node.height, 10);
-        const adjustedHeight = originalHeight - 47;
+        const adjustedHeight = originalHeight - 91;
         styleString += `height: ${adjustedHeight}px; `;
       }
       if (styleString !== "") {
