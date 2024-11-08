@@ -2050,14 +2050,15 @@ function showExportRunMSPopup() {
 
 function showExportHTMLPopup() {
   const rawData = editor.export();
+  const currentZoom = editor.zoom;
 
   Object.keys(rawData.drawflow.Home.data).forEach((nodeId) => {
     const nodeElement = document.getElementById(`node-${nodeId}`);
     const nodeData = rawData.drawflow.Home.data[nodeId];
     if (nodeElement) {
       const rect = nodeElement.getBoundingClientRect();
-      nodeData.width = rect.width + "px";
-      nodeData.height = rect.height + "px";
+      nodeData.width = (rect.width / currentZoom) + "px";
+      nodeData.height = (rect.height / currentZoom) + "px";
     }
   });
   const hasError = sortElementsByPosition(rawData);
@@ -2202,17 +2203,19 @@ function showSaveWorkflowPopup() {
 
 function saveWorkflow(fileName) {
   const rawData = editor.export();
+  const currentZoom = editor.zoom;
   filterOutApiKey(rawData);
   Object.keys(rawData.drawflow.Home.data).forEach((nodeId) => {
     const nodeElement = document.getElementById(`node-${nodeId}`);
     const nodeData = rawData.drawflow.Home.data[nodeId];
     if (nodeElement) {
       const rect = nodeElement.getBoundingClientRect();
-      nodeData.width = rect.width + "px";
-      nodeData.height = rect.height + "px";
+      nodeData.width = (rect.width / currentZoom) + "px";
+      nodeData.height = (rect.height / currentZoom) + "px";
     }
   });
 
+  rawData.zoomLevel = currentZoom;
   removeHtmlFromUsers(rawData);
   const exportData = JSON.stringify(rawData, null, 4);
   fetch("/save-workflow", {
@@ -2309,17 +2312,22 @@ function loadWorkflow(fileName) {
     body: JSON.stringify({
       filename: fileName,
     })
-  }).then(response => response.json())
+  })
+    .then(response => response.json())
     .then(data => {
       if (data.error) {
         Swal.fire("Error", data.error, "error");
       } else {
         try {
+          editor.zoom = data.zoomLevel || 1;
+          adjustZoom();
+
           addHtmlAndReplacePlaceHolderBeforeImport(data)
             .then(() => {
               editor.clear();
               editor.import(data);
               importSetupNodes(data);
+
               Object.keys(data.drawflow.Home.data).forEach((nodeId) => {
                 const nodeElement = document.getElementById(`node-${nodeId}`);
                 const nodeData = data.drawflow.Home.data[nodeId];
@@ -2327,13 +2335,10 @@ function loadWorkflow(fileName) {
                   nodeElement.style.width = nodeData.width;
                 }
               });
-              Swal.fire("Imported!", "", "success").then((result) => {
-                if (result.isConfirmed) {
-                  showEditorTab();
-                }
-                setTimeout(() => {
-                  updateImportNodes();
-                }, 200);
+
+              Swal.fire("Imported!", "", "success").then(() => {
+                showEditorTab();
+                setTimeout(updateImportNodes, 200);
               });
             });
         } catch (error) {
@@ -2343,6 +2348,11 @@ function loadWorkflow(fileName) {
     });
 }
 
+
+function adjustZoom() {
+  editor.precanvas.style.transform = `scale(${editor.zoom})`;
+  editor.zoom_refresh();
+}
 
 function removeHtmlFromUsers(data) {
   Object.keys(data.drawflow.Home.data).forEach((nodeId) => {
@@ -2403,7 +2413,8 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
       } else {
         node.html = node.html.replace(idPlaceholderRegex, nodeId);
       }
-
+      //TODO: fix height and width
+      // Adjust the height of the box div
       let styleString = "";
       if (node.width) {
         styleString += `width: ${node.width}; `;
