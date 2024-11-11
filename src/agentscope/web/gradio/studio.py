@@ -33,7 +33,7 @@ from agentscope.web.gradio.utils import (
     cycle_dots,
     check_user_signal,
 )
-from agentscope.web.gradio.constants import _SPEAK
+from agentscope.web.gradio.constants import _SPEAK, _CUSTOM_CSS_STR
 
 MAX_NUM_DISPLAY_MSG = 20
 FAIL_COUNT_DOWN = 30
@@ -141,7 +141,7 @@ def set_user_input_state(uid: str) -> Tuple:
     placeholder = (
         "Say something here"
         if signal
-        else "🚫 Input disabled (Not your turn yet)"
+        else "Input disabled (Not your turn yet)"
     )
     return (
         gr.update(interactive=signal),
@@ -264,7 +264,7 @@ def run_app() -> None:
             )
             run_thread.start()
 
-    with gr.Blocks() as demo:
+    with gr.Blocks(css=_CUSTOM_CSS_STR) as demo:
         warning_html_code = """
                         <div class="hint" style="text-align:
                         center;background-color: rgba(255, 255, 0, 0.15);
@@ -291,10 +291,10 @@ def run_app() -> None:
                 label="user_chat_input",
                 placeholder="Say something here",
                 show_label=False,
+                interactive=False,
+                elem_id="user_input",
             )
-            user_chat_input.interactive = False
-            send_button = gr.Button(value="📣Send")
-            send_button.interactive = False
+            send_button = gr.Button(value="📣Send", interactive=False)
         with gr.Row():
             audio = gr.Accordion("Audio input", open=False)
             with audio:
