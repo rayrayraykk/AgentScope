@@ -453,8 +453,6 @@ class ForLoopPipelineNode(WorkflowNode):
             loop_body_operators=self.dep_opts[0],
             **self.opt_kwargs,
         )
-        print(self.opt_kwargs, f"self.condition_op: {self.condition_op}")
-        raise ValueError
 
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
