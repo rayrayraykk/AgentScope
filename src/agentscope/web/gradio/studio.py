@@ -6,7 +6,7 @@ import sys
 import threading
 import time
 from collections import defaultdict
-from typing import Optional, Callable
+from typing import Optional, Callable, Tuple
 import traceback
 
 try:
@@ -31,6 +31,7 @@ from agentscope.web.gradio.utils import (
     send_reset_msg,
     thread_local_data,
     cycle_dots,
+    check_user_signal,
 )
 from agentscope.web.gradio.constants import _SPEAK
 
@@ -125,6 +126,28 @@ def fn_choice(data: gr.EventData, uid: str) -> None:
     uid = check_uuid(uid)
     # pylint: disable=protected-access
     send_player_input(data._data["value"], uid=uid)
+
+
+def set_user_input_state(uid: str) -> Tuple:
+    """
+    Sets the state of user input fields based on the provided user ID.
+
+    This function checks the validity of the user ID and determines whether
+    the user is allowed to provide input at the current time. It updates the
+    interactivity and placeholder of input fields accordingly.
+    """
+    uid = check_uuid(uid)
+    signal = check_user_signal(uid)
+    placeholder = (
+        "Say something here"
+        if signal
+        else "🚫 Input disabled (Not your turn yet)"
+    )
+    return (
+        gr.update(interactive=signal),
+        gr.update(placeholder=placeholder),
+        gr.update(interactive=signal),
+    )
 
 
 def import_function_from_path(
@@ -269,7 +292,9 @@ def run_app() -> None:
                 placeholder="Say something here",
                 show_label=False,
             )
+            user_chat_input.interactive = False
             send_button = gr.Button(value="📣Send")
+            send_button.interactive = False
         with gr.Row():
             audio = gr.Accordion("Audio input", open=False)
             with audio:
@@ -322,6 +347,13 @@ def run_app() -> None:
         demo.load(
             check_for_new_session,
             inputs=[uuid],
+            every=0.5,
+        )
+
+        demo.load(
+            set_user_input_state,
+            inputs=[uuid],
+            outputs=[send_button, user_chat_input, user_chat_input],
             every=0.5,
         )
 
