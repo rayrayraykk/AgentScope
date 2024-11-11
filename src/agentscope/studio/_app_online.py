@@ -430,4 +430,4 @@ if __name__ == "__main__":
         except ValueError:
             print(f"Invalid port number. Using default port {PORT}.")
 
-    _app.run(host="127.0.0.1", port=PORT)
+    _app.run(debug=True, host="127.0.0.1", port=PORT)
