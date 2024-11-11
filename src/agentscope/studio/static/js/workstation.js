@@ -3080,6 +3080,9 @@ function importGalleryWorkflow(data) {
           if (result.isConfirmed) {
             showEditorTab();
           }
+          setTimeout(() => {
+            updateImportNodes();
+          }, 200);
         });
       });
   } catch (error) {
