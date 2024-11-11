@@ -2352,10 +2352,18 @@ function loadWorkflow(fileName) {
                 }
               });
 
-              Swal.fire("Imported!", "", "success").then(() => {
-                showEditorTab();
-                setTimeout(updateImportNodes, 200);
+              Swal.fire({
+                title: "Imported!",
+                icon: "success",
+                showConfirmButton: true
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  showEditorTab();
+                }
               });
+              setTimeout(() => {
+                updateImportNodes();
+              }, 200);
             });
         } catch (error) {
           Swal.showValidationMessage(`Import error: ${error}`);
@@ -2457,7 +2465,7 @@ function updateImportNodes() {
 }
 function importSetupNodes(dataToImport) {
   imporTempData = dataToImport;
-  Object.keys(dataToImport.drawflow.Home.data).forEach((nodeId) => {
+  Object.entries(dataToImport.drawflow.Home.data).forEach(([nodeId,nodeValue]) => {
     disableButtons();
     makeNodeTop(nodeId);
     setupNodeCopyListens(nodeId);
@@ -3055,7 +3063,8 @@ function loadWorkLocalflow(fileName) {
     body: JSON.stringify({
       filename: fileName,
     })
-  }).then(response => response.json())
+  })
+    .then(response => response.json())
     .then(data => {
       if (data.error) {
         Swal.fire("Error", data.error, "error");
@@ -3066,7 +3075,14 @@ function loadWorkLocalflow(fileName) {
               editor.clear();
               editor.import(data);
               importSetupNodes(data);
-              Swal.fire("Imported!", "", "success");
+              Swal.fire("Imported!", "", "success").then((result) => {
+                if (result.isConfirmed) {
+                  showEditorTab();
+                }
+                setTimeout(() => {
+                  updateImportNodes();
+                }, 200);
+              });
             });
         } catch (error) {
           Swal.showValidationMessage(`Import error: ${error}`);
@@ -3263,6 +3279,7 @@ function createGridItem(workflowName, container, thumbnail, author = "", time = 
     e.preventDefault();
     if (showDeleteButton) {
       loadWorkflow(workflowName);
+      showEditorTab();
     } else {
       const workflowData = galleryWorkflows[index];
       importGalleryWorkflow(JSON.stringify(workflowData));
