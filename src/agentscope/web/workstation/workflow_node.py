@@ -611,7 +611,7 @@ class SwitchPipelineNode(WorkflowNode):
             )
 
         for key, value, var in zip(
-            self.opt_kwargs["cases"],
+            self.opt_kwargs["cases"].values(),
             self.dep_opts,
             self.dep_vars,
         ):
