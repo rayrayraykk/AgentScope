@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Workflow node opt."""
 import ast
+import copy
 from abc import ABC, abstractmethod
 from enum import IntEnum
 from functools import partial
@@ -93,7 +94,7 @@ class WorkflowNode(ABC):
         self.only_compile = only_compile
 
         self.node_id = node_id
-        self.opt_kwargs = opt_kwargs
+        self.opt_kwargs = copy.deepcopy(opt_kwargs)
         self.source_kwargs = source_kwargs
         self.dep_opts = dep_opts
         self.dep_vars = [opt.var_name for opt in self.dep_opts]
@@ -452,6 +453,8 @@ class ForLoopPipelineNode(WorkflowNode):
             loop_body_operators=self.dep_opts[0],
             **self.opt_kwargs,
         )
+        print(self.opt_kwargs, f"self.condition_op: {self.condition_op}")
+        raise ValueError
 
     def __call__(self, x: dict = None) -> dict:
         return self.pipeline(x)
