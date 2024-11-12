@@ -2393,12 +2393,18 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
       // Adjust the height of the box div
       let styleString = "";
       if (node.width) {
-        styleString += `width: ${node.width}px; `;
+        const originalWidth = parseInt(node.width, 10);
+        if (!isNaN(originalWidth)) {
+          const adjustedWidth = originalWidth - 31; // Consistently applying width reduction
+          styleString += `width: ${adjustedWidth}px; `;
+        }
       }
       if (node.height) {
         const originalHeight = parseInt(node.height, 10);
-        const adjustedHeight = originalHeight - 91;
-        styleString += `height: ${adjustedHeight}px; `;
+        if (!isNaN(originalHeight)) {
+          const adjustedHeight = originalHeight - 91; // Consistently applying height reduction
+          styleString += `height: ${adjustedHeight}px; `;
+        }
       }
       if (styleString !== "") {
         node.html = node.html.replace(boxDivRegex, `<div class="box" style="${styleString}"$1>`);
@@ -2433,7 +2439,13 @@ function importSetupNodes(dataToImport) {
           const adjustedWidth = originalWidth - 31;
           nodeElement.style.width = `${adjustedWidth}px`;
         }
-
+      }
+      if (nodeData.height) {
+        const originalHeight = parseInt(nodeData.height, 10);
+        if (!isNaN(originalHeight)) {
+          const adjustedHeight = originalHeight - 31;
+          nodeElement.style.height = `${adjustedHeight}px`;
+        }
       }
       const copyButton = nodeElement.querySelector(".copy-button");
       if (copyButton) {
