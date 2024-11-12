@@ -57,6 +57,7 @@ extra_service_requires = [
     "isort",
     "playwright",
     "markdownify",
+    "opencv-python-headless",
 ]
 
 extra_distribute_requires = [
@@ -84,7 +85,7 @@ extra_dev_requires = [
 ]
 
 extra_gradio_requires = [
-    "gradio==4.19.1",
+    "gradio==4.44.1",
     "modelscope_studio==0.0.5",
 ]
 
@@ -118,7 +119,6 @@ extra_online_requires = extra_full_requires + [
     "babel==2.15.0",
     "gunicorn",
     "numpy",
-    "opencv-python-headless",
 ]
 
 with open("README.md", "r", encoding="UTF-8") as fh:
