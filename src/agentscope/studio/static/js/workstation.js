@@ -2441,9 +2441,7 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
       // Adjust the height of the box div
       let styleString = "";
       if (node.width) {
-        styleString += `width: ${node.width}; `;
-        const adjustedWidth = originalWidth - 22;
-        styleString += `width: ${adjustedWidth}px; `;
+        styleString += `width: ${node.width}px; `;
       }
       if (node.height) {
         const originalHeight = parseInt(node.height, 10);
@@ -2478,8 +2476,12 @@ function importSetupNodes(dataToImport) {
     if (nodeElement) {
       const nodeData = dataToImport.drawflow.Home.data[nodeId];
       if (nodeData.width) {
-        nodeElement.style.width = nodeData.width;
-        // nodeElement.style.height = nodeData.height;
+        const originalWidth = parseInt(nodeData.width, 10);
+        if (!isNaN(originalWidth)) {
+          const adjustedWidth = originalWidth - 31;
+          nodeElement.style.width = `${adjustedWidth}px`;
+        }
+
       }
       const copyButton = nodeElement.querySelector(".copy-button");
       if (copyButton) {
