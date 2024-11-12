@@ -2393,7 +2393,6 @@ async function addHtmlAndReplacePlaceHolderBeforeImport(data) {
       let styleString = "";
       if (node.width) {
         const originalWidth = parseInt(node.width, 10);
-        styleString += `width: ${node.width}; `;
         const adjustedWidth = originalWidth - 22;
         styleString += `width: ${adjustedWidth}px; `;
       }
