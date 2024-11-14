@@ -85,11 +85,8 @@ else:
     IP = os.getenv("IP", "127.0.0.1")
     COPILOT_IP = os.getenv("COPILOT_IP", "127.0.0.1")
 
-PORT = os.getenv("PORT", "8080")
 COPILOT_PORT = os.getenv("COPILOT_PORT", "8081")
 
-if not is_ip(IP):
-    PORT = ""
 if not is_ip(COPILOT_IP):
     COPILOT_PORT = ""
 
@@ -195,7 +192,12 @@ def _home() -> str:
             secret_key=SECRET_KEY,
             version="online",
         )
-    return render_template("login.html", client_id=CLIENT_ID, ip=IP, port=PORT)
+    return render_template(
+        "login.html",
+        client_id=CLIENT_ID,
+        ip=IP,
+        port=_app.config["port"],
+    )
 
 
 @_app.route("/login_as_guest")
@@ -421,13 +423,25 @@ def set_locale() -> Response:
     return jsonify({"data": "success"})
 
 
+def as_workstation() -> None:
+    """Launch online workstation on CLI."""
+    _app.config["port"] = 7860
+    _app.run(host="127.0.0.1", port=7860)
+
+
 if __name__ == "__main__":
     import sys
 
+    if not is_ip(IP):
+        port = ""
+    else:
+        port = os.getenv("PORT", "8080")
+
     if len(sys.argv) > 1:
         try:
-            PORT = int(sys.argv[1])
+            port = int(sys.argv[1])
         except ValueError:
-            print(f"Invalid port number. Using default port {PORT}.")
+            print(f"Invalid port number. Using default port {port}.")
 
-    _app.run(host="127.0.0.1", port=PORT)
+    _app.config["port"] = port
+    _app.run(host="127.0.0.1", port=port)
