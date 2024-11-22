@@ -1291,7 +1291,41 @@ function setupNodeListeners(nodeId) {
       }
 
     }
+
+    const customData = newNode.querySelectorAll("kv-pair");
+
+    if(customData.length){
+      customData.forEach((kvPair) => {
+
+        kvPair.addEventListener("click",  function handleOutsideClick(event) {
+          if (!kvPair.contains(event.target) && event.target !== kvPair) {
+            kvPair.blur();
+          }
+        } );
+
+        kvPair.addEventListener("blur", (event) => {
+          editorDataChange(nodeId,kvPair);
+        });
+
+        kvPair.addEventListener("button-clicked", (e) => {
+          editorDataChange(nodeId,kvPair);
+        });
+      });
+    }
   }
+}
+
+
+async function editorDataChange(id, kvPairDom) {
+  const currentData = editor.getNodeFromId(id).data;
+  const editorKeyName =  kvPairDom.kvname;
+  currentData.args[editorKeyName] = kvPairDom.getValues().reduce((acc, item) => {
+    acc[item.key] = item.value;
+    return acc;
+  }, {});
+
+  editor.updateNodeDataFromId(id, currentData);
+
 }
 
 function setupSwitchPipelineListeners(nodeId) {
@@ -2420,8 +2454,8 @@ function updateImportNodes() {
   });
 }
 function importSetupNodes(dataToImport) {
-  imporTempData = dataToImport;
-  Object.entries(dataToImport.drawflow.Home.data).forEach(([nodeId,nodeValue]) => {
+  Object.entries(dataToImport.drawflow.Home.data).forEach(([nodeId, nodeValue]) => {
+    // import the node use addNode function
     disableButtons();
     makeNodeTop(nodeId);
     setupNodeCopyListens(nodeId);
@@ -2455,6 +2489,21 @@ function importSetupNodes(dataToImport) {
     if(nodeValue.name === "ReActAgent"){
       nodeValue.data.elements.forEach((listNode) => {
         dropNodeToDropzone(listNode,nodeElement);
+      });
+    }
+    // custom-components edit data backfill
+    const customKvpair = nodeElement.querySelectorAll("kv-pair");
+    if (customKvpair.length) {
+      customKvpair.forEach((item) => {
+        const kvName = item.getAttribute("kv-name");
+        if(nodeValue.data.args.hasOwnProperty(kvName) && Object.keys(nodeValue.data.args[kvName]).length){
+          item.setData(
+            Object.entries(nodeValue.data.args[kvName]).map(([key, value]) => ({
+              key: key,
+              value: value
+            }))
+          );
+        }
       });
     }
   });
@@ -2758,248 +2807,6 @@ function skipGuide() {
     mask.remove();
   }
 }
-
-class Notification {
-  static initStatics() {
-    this.count = 0;
-    this.instances = [];
-  }
-
-  static clearInstances() {
-    Notification.count = 0;
-    Notification.instances = [];
-  }
-
-  constructor(props) {
-    Notification.count += 1;
-    Notification.instances.push(this);
-    this.currentIndex = Notification.count;
-    this.position = "bottom-right";
-    this.title = "Notification Title";
-    this.content = "Notification Content";
-    this.element = null;
-    this.closeBtn = true;
-    this.progress = false;
-    this.intervalTime = 3000;
-    this.confirmBtn = false;
-    this.cancelBtn = false;
-    this.pause = true;
-    this.reduceNumber = 0;
-
-    // 绑定 this
-    this.destroyAll = this.destroyAll.bind(this);
-    this.onCancelCallback = this.onCancelCallback.bind(this);
-    this.onConfirmCallback = this.onConfirmCallback.bind(this);
-
-    this.init(props);
-  }
-
-  init(props) {
-    this.setDefaultValues(props);
-    this.element = document.createElement("div");
-    this.element.className = "notification";
-    this.title && this.renderTitle(getCookie("locale") == "zh" ? props.i18nTitle : this.title);
-    this.closeBtn && this.renderCloseButton();
-    this.content && this.renderContent(getCookie("locale") == "zh" ? props.i18nContent : this.content);
-    (this.confirmBtn || this.cancelBtn) && this.renderClickButton();
-    this.progress && this.renderProgressBar();
-    this.setPosition(this.position);
-    document.body.appendChild(this.element);
-    setTimeout(() => {
-      this.show();
-    }, 10);
-  }
-
-  isHTMLString(string) {
-    const doc = new DOMParser().parseFromString(string, "text/html");
-    return Array.from(doc.body.childNodes).some(node => node.nodeType === 1);
-  }
-
-  renderCloseButton() {
-    this.closeBtn = document.createElement("span");
-    this.closeBtn.className = "notification-close";
-    this.closeBtn.innerText = "X";
-    this.closeBtn.onclick = this.destroyAll;
-    this.title.appendChild(this.closeBtn);
-  }
-
-  renderTitle(component) {
-    if (this.isHTMLString(component)) {
-      this.title = document.createElement("div");
-      this.title.className = "notification-title";
-      this.title.innerHTML = component;
-    } else {
-      this.title = document.createElement("div");
-      this.titleText = document.createElement("div");
-      this.title.className = "notification-title";
-      this.titleText.className = "notification-titleText";
-      this.titleText.innerText = component;
-      this.title.appendChild(this.titleText);
-    }
-    this.element.appendChild(this.title);
-  }
-
-  renderContent(component) {
-    if (this.isHTMLString(component)) {
-      this.content = document.createElement("div");
-      this.content.className = "notification-content";
-      this.content.innerHTML = component;
-    } else {
-      this.content = document.createElement("div");
-      this.content.className = "notification-content";
-      this.content.innerText = component;
-    }
-    this.element.appendChild(this.content);
-  }
-
-  renderClickButton() {
-    if (this.confirmBtn || this.cancelBtn) {
-      this.clickBottonBox = document.createElement("div");
-      this.clickBottonBox.className = "notification-clickBotton-box";
-    }
-    if (this.confirmBtn) {
-      this.confirmBotton = document.createElement("button");
-      this.confirmBotton.className = "notification-btn confirmBotton";
-      this.confirmBotton.innerText = getCookie("locale") == "zh" ? this.i18nConfirmBtn : this.confirmBtn;
-      this.confirmBotton.onclick = this.onConfirmCallback;
-      this.clickBottonBox.appendChild(this.confirmBotton);
-    }
-    if (this.cancelBtn) {
-      this.cancelBotton = document.createElement("button");
-      this.cancelBotton.className = "notification-btn cancelBotton";
-      this.cancelBotton.innerText = getCookie("locale") == "zh" ? this.i18nCancelBtn : this.cancelBtn;
-      this.cancelBotton.onclick = this.onCancelCallback;
-      this.clickBottonBox.appendChild(this.cancelBotton);
-    }
-    this.element.appendChild(this.clickBottonBox);
-  }
-
-  renderProgressBar() {
-    this.progressBar = document.createElement("div");
-    this.progressBar.className = "notification-progress";
-    this.element.appendChild(this.progressBar);
-  }
-
-  stepProgressBar(callback) {
-    const startTime = performance.now();
-    const step = (timestamp) => {
-      const progress = Math.min((timestamp + this.reduceNumber - startTime) / this.intervalTime, 1);
-      this.progressBar.style.width = (1 - progress) * 100 + "%";
-      if (progress < 1 && this.pause === false) {
-        requestAnimationFrame(step);
-      } else {
-        this.reduceNumber = timestamp + this.reduceNumber - startTime;
-      }
-      if (progress === 1) {
-        this.pause = true;
-        this.reduceNumber = 0;
-        callback();
-        this.removeChild();
-      }
-    };
-    requestAnimationFrame(step);
-  }
-
-  setDefaultValues(props) {
-    for (const key in props) {
-      if (props[key] !== undefined) {
-        this[key] = props[key];
-      }
-    }
-  }
-
-  setPosition() {
-    switch (this.position) {
-    case "top-left":
-      this.element.style.top = "25px";
-      this.element.style.left = "-100%";
-      break;
-    case "top-right":
-      this.element.style.top = "25px";
-      this.element.style.right = "-100%";
-      break;
-    case "bottom-right":
-      this.element.style.bottom = "25px";
-      this.element.style.right = "-100%";
-      break;
-    case "bottom-left":
-      this.element.style.bottom = "25px";
-      this.element.style.left = "-100%";
-      break;
-    }
-  }
-
-  show() {
-    this.element.style.display = "flex";
-    switch (this.position) {
-    case "top-left":
-      this.element.style.top = "25px";
-      this.element.style.left = "25px";
-      break;
-    case "top-right":
-      this.element.style.top = "25px";
-      this.element.style.right = "25px";
-      break;
-    case "bottom-right":
-      this.element.style.bottom = "25px";
-      this.element.style.right = "25px";
-      break;
-    case "bottom-left":
-      this.element.style.bottom = "25px";
-      this.element.style.left = "25px";
-      break;
-    }
-  }
-
-  destroyAll() {
-    for (const instance of Notification.instances) {
-      document.body.removeChild(instance.element);
-    }
-    Notification.clearInstances();
-  }
-
-  removeChild() {
-    let removeIndex;
-    for (let i = 0; i < Notification.instances.length; i++) {
-      if (Notification.instances[i].currentIndex === this.currentIndex) {
-        removeIndex = i;
-        break;
-      }
-    }
-    if (removeIndex !== undefined) {
-      Notification.instances.splice(removeIndex, 1);
-    }
-    this.element.remove();
-  }
-
-  addCloseListener() {
-    this.closeBtn.addEventListener("click", () => {
-      this.removeChild();
-    });
-  }
-
-  onCancelCallback() {
-    if (typeof this.onCancel === "function") {
-      this.onCancel();
-      this.removeChild();
-    }
-  }
-
-  onConfirmCallback() {
-    if (typeof this.onConfirm === "function") {
-      this.pause = !this.pause;
-      if (!this.pause) {
-        this.stepProgressBar(this.onConfirm);
-        this.confirmBotton.innerText = getCookie("locale") === "zh" ? "暂停" : "pause";
-      } else {
-        this.confirmBotton.innerText = this.confirmBtn;
-      }
-    }
-  }
-}
-
-// 初始化静态属性
-Notification.initStatics();
 
 function createNotification(props) {
   new Notification(props);

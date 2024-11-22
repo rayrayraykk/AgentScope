@@ -1296,3 +1296,6 @@ pre[class*='language-'] {
   transform: translate(-50%, 20%); ;
   transition: all 0.3s ease-in-out;
 }
+.label-info{
+  display: flex;
+}
