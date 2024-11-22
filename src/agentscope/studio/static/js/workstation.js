@@ -556,7 +556,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
 
     // Message
   case "Message":
-    editor.addNode("Message", 1, 1, pos_x,
+    const MessageId = editor.addNode("Message", 1, 1, pos_x,
       pos_y, "Message", {
         "args":
                         {
@@ -565,6 +565,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
                           "url": ""
                         }
       }, htmlSourceCode);
+    setupConnectionControls(MessageId);
     break;
 
 
@@ -584,6 +585,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     if (nodeElement) {
       nodeElement.textContent = DialogAgentID;
     }
+    setupConnectionControls(DialogAgentID);
     break;
 
   case "UserAgent":
@@ -595,6 +597,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     if (nodeElement) {
       nodeElement.textContent = UserAgentID;
     }
+    setupConnectionControls(UserAgentID);
     break;
 
   case "DictDialogAgent":
@@ -614,6 +617,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     if (nodeElement) {
       nodeElement.textContent = DictDialogAgentID;
     }
+    setupConnectionControls(DictDialogAgentID);
     break;
 
   case "ReActAgent":
@@ -632,6 +636,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     if (nodeElement) {
       nodeElement.textContent = ReActAgentID;
     }
+    setupConnectionControls(ReActAgentID);
     break;
 
   case "BroadcastAgent":
@@ -648,6 +653,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     if (nodeElement) {
       nodeElement.textContent = BroadcastAgentID;
     }
+    setupConnectionControls(BroadcastAgentID);
     break;
 
   case "CopyNode":
@@ -660,16 +666,18 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     if (nodeElement) {
       nodeElement.textContent = nodeElement;
     }
+    setupConnectionControls(CopyNodeID);
     break;
 
     // Workflow-Pipeline
   case "Placeholder":
-    editor.addNode("Placeholder", 1, 1,
+    const PlaceholderId = editor.addNode("Placeholder", 1, 1,
       pos_x, pos_y, "Placeholder", {}, htmlSourceCode);
+    setupConnectionControls(PlaceholderId);
     break;
 
   case "MsgHub":
-    editor.addNode("MsgHub", 1, 1, pos_x, pos_y,
+    const MsgHubId = editor.addNode("MsgHub", 1, 1, pos_x, pos_y,
       "GROUP", {
         elements: [],
         "args": {
@@ -679,15 +687,17 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
           }
         }
       }, htmlSourceCode);
+    setupConnectionControls(MsgHubId);
     break;
 
   case "SequentialPipeline":
-    editor.addNode("SequentialPipeline", 1, 1, pos_x, pos_y,
+    const SequentialPipelineId = editor.addNode("SequentialPipeline", 1, 1, pos_x, pos_y,
       "GROUP", {elements: []}, htmlSourceCode);
+    setupConnectionControls(SequentialPipelineId);
     break;
 
   case "ForLoopPipeline":
-    editor.addNode("ForLoopPipeline", 1, 1, pos_x, pos_y,
+    const ForLoopPipelineId = editor.addNode("ForLoopPipeline", 1, 1, pos_x, pos_y,
       "GROUP", {
         elements: [],
         "args": {
@@ -696,26 +706,29 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
           "target_value": "",
         }
       }, htmlSourceCode);
+    setupConnectionControls(ForLoopPipelineId);
     break;
 
   case "WhileLoopPipeline":
-    editor.addNode("WhileLoopPipeline", 1, 1, pos_x, pos_y,
+    const WhileLoopPipelinedId = editor.addNode("WhileLoopPipeline", 1, 1, pos_x, pos_y,
       "GROUP", {
         elements: [],
         "args": {
           "condition_func": ""
         }
       }, htmlSourceCode);
+    setupConnectionControls(WhileLoopPipelinedId);
     break;
 
   case "IfElsePipeline":
-    editor.addNode("IfElsePipeline", 1,
+    const IfElsePipelineId =  editor.addNode("IfElsePipeline", 1,
       1, pos_x, pos_y, "GROUP", {
         elements: [], args: {
           "condition_op": "",
           "target_value": "",
         }
       }, htmlSourceCode);
+    setupConnectionControls(IfElsePipelineId);
     break;
 
   case "SwitchPipeline":
@@ -725,6 +738,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
         "cases": [],
       }
     }, htmlSourceCode);
+    setupConnectionControls(SwitchPipelineID);
     break;
 
     // Workflow-Service
@@ -787,7 +801,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
     break;
 
   case "ImageSynthesis":
-    editor.addNode("ImageSynthesis", 1, 1,
+    const ImageSynthesisId = editor.addNode("ImageSynthesis", 1, 1,
       pos_x, pos_y, "ImageSynthesis", {
         "args": {
           "model": "",
@@ -797,10 +811,11 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
           "save_dir": ""
         }
       }, htmlSourceCode);
+    setupConnectionControls(ImageSynthesisId);
     break;
 
   case "ImageComposition":
-    editor.addNode("ImageComposition", 1, 1,
+    const ImageCompositionId = editor.addNode("ImageComposition", 1, 1,
       pos_x, pos_y, "ImageComposition", {
         "args": {
           "titles": "",
@@ -812,6 +827,7 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
           "font_name": "PingFang",
         }
       }, htmlSourceCode);
+    setupConnectionControls(ImageCompositionId);
     break;
   case "Code":
     const CodeID = editor.addNode("Code", 1, 1,
@@ -820,10 +836,11 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
           "code": "def function(msg1: Msg) -> Msg:\n    content1 = msg1.get(\"content\", \"\")\n    return {\n        \"role\": \"assistant\",\n        \"content\": content1,\n        \"name\": \"function\",\n    }"
         }
       }, htmlSourceCode);
+    setupConnectionControls(CodeID);
     break;
 
   case "ImageMotion":
-    editor.addNode("ImageMotion", 1, 1,
+    const imageMotionId = editor.addNode("ImageMotion", 1, 1,
       pos_x, pos_y, "ImageMotion", {
         "args": {
           "output_path": "",
@@ -831,10 +848,11 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
           "duration": "",
         }
       }, htmlSourceCode);
+    setupConnectionControls(imageMotionId);
     break;
 
   case "VideoComposition":
-    editor.addNode("VideoComposition", 1, 1,
+    const videoCompositionId = editor.addNode("VideoComposition", 1, 1,
       pos_x, pos_y, "VideoComposition", {
         "args": {
           "output_path": "",
@@ -843,26 +861,138 @@ async function addNodeToDrawFlow(name, pos_x, pos_y) {
           "fps": "",
         }
       }, htmlSourceCode);
+    setupConnectionControls(videoCompositionId);
     break;
 
   case "Post":
-    editor.addNode("Post", 1, 1,
-      pos_x, pos_y, "Post", {
-        "args": {
-          "url": "",
-          "headers": "",
-          "data": "",
-          "json": "",
-          "kwargs": "",
-          "output_path": "",
-          "output_type": "",
-        }
-      }, htmlSourceCode);
+    const nodeId = editor.addNode("Post", 1, 1, pos_x, pos_y, "Post", {
+      "args": {
+        "url": "",
+        "headers": "",
+        "data": "",
+        "json": "",
+        "kwargs": "",
+        "output_path": "",
+        "output_type": "",
+      }
+    }, htmlSourceCode);
+    setupConnectionControls(nodeId);
     break;
 
   default:
   }
 }
+
+function setupConnectionControls(nodeId) {
+  const nodeElement = document.getElementById(`node-${nodeId}`);
+
+  // Inputs control
+  const inputControlContainer = document.createElement("div");
+  inputControlContainer.className = "input-control-container";
+
+  const addInputButton = document.createElement("button");
+  addInputButton.className = "add-input";
+  addInputButton.textContent = "+";
+  inputControlContainer.appendChild(addInputButton);
+
+  const inputPortsContainer = document.createElement("div");
+  inputPortsContainer.className = "input-ports";
+  const existingInputs = Array.from(nodeElement.querySelectorAll(".inputs .input"));
+  existingInputs.forEach(input => inputPortsContainer.appendChild(input.cloneNode(true)));
+  inputControlContainer.appendChild(inputPortsContainer);
+
+  const removeInputButton = document.createElement("button");
+  removeInputButton.className = "remove-input";
+  removeInputButton.textContent = "-";
+  inputControlContainer.appendChild(removeInputButton);
+
+  nodeElement.querySelector(".inputs").parentNode.insertBefore(inputControlContainer, nodeElement.querySelector(".inputs"));
+  nodeElement.querySelector(".inputs").style.display = "none"; // Hide original ports
+
+  // Outputs control
+  const outputControlContainer = document.createElement("div");
+  outputControlContainer.className = "output-control-container";
+
+  const addOutputButton = document.createElement("button");
+  addOutputButton.className = "add-output";
+  addOutputButton.textContent = "+";
+  outputControlContainer.appendChild(addOutputButton);
+
+  const outputPortsContainer = document.createElement("div");
+  outputPortsContainer.className = "output-ports";
+  const existingOutputs = Array.from(nodeElement.querySelectorAll(".outputs .output"));
+  existingOutputs.forEach(output => outputPortsContainer.appendChild(output.cloneNode(true)));
+  outputControlContainer.appendChild(outputPortsContainer);
+
+  const removeOutputButton = document.createElement("button");
+  removeOutputButton.className = "remove-output";
+  removeOutputButton.textContent = "-";
+  outputControlContainer.appendChild(removeOutputButton);
+
+  nodeElement.querySelector(".outputs").parentNode.insertBefore(outputControlContainer, nodeElement.querySelector(".outputs"));
+  nodeElement.querySelector(".outputs").style.display = "none"; // Hide original ports
+
+  // Add Input functionality
+  addInputButton.addEventListener("click", () => {
+    const newInputIndex = inputPortsContainer.childElementCount + 1;
+    editor.addNodeInput(nodeId, `input_${newInputIndex}`);
+    const newInput = document.createElement("div");
+    newInput.className = `input input_${newInputIndex}`;
+    inputPortsContainer.appendChild(newInput);
+    updateRemoveButtonVisibility(inputPortsContainer, removeInputButton);
+
+    // Refresh connections to ensure new port is recognized
+    editor.updateConnectionNodes(`node-${nodeId}`);
+  });
+
+  // Remove Input functionality
+  removeInputButton.addEventListener("click", () => {
+    if (inputPortsContainer.childElementCount > 1) {
+      inputPortsContainer.removeChild(inputPortsContainer.lastElementChild);
+      const inputKey = `input_${inputPortsContainer.childElementCount + 1}`;
+      editor.removeNodeInput(nodeId, inputKey);
+      updateRemoveButtonVisibility(inputPortsContainer, removeInputButton);
+
+      // Refresh connections to ensure removed port no longer registers
+      editor.updateConnectionNodes(`node-${nodeId}`);
+    }
+  });
+
+  // Add Output functionality
+  addOutputButton.addEventListener("click", () => {
+    const newOutputIndex = outputPortsContainer.childElementCount + 1;
+    editor.addNodeOutput(nodeId, `output_${newOutputIndex}`);
+    const newOutput = document.createElement("div");
+    newOutput.className = `output output_${newOutputIndex}`;
+    outputPortsContainer.appendChild(newOutput);
+    updateRemoveButtonVisibility(outputPortsContainer, removeOutputButton);
+
+    // Refresh connections to ensure new port is recognized
+    editor.updateConnectionNodes(`node-${nodeId}`);
+  });
+
+  // Remove Output functionality
+  removeOutputButton.addEventListener("click", () => {
+    if (outputPortsContainer.childElementCount > 1) {
+      outputPortsContainer.removeChild(outputPortsContainer.lastElementChild);
+      const outputKey = `output_${outputPortsContainer.childElementCount + 1}`;
+      editor.removeNodeOutput(nodeId, outputKey);
+      updateRemoveButtonVisibility(outputPortsContainer, removeOutputButton);
+
+      // Refresh connections to ensure removed port no longer registers
+      editor.updateConnectionNodes(`node-${nodeId}`);
+    }
+  });
+
+  // Initialize the state of remove buttons
+  updateRemoveButtonVisibility(inputPortsContainer, removeInputButton);
+  updateRemoveButtonVisibility(outputPortsContainer, removeOutputButton);
+}
+
+function updateRemoveButtonVisibility(container, button) {
+  button.style.display = container.childElementCount > 1 ? "inline-block" : "none";
+}
+
 
 
 function initializeMonacoEditor(nodeId) {
@@ -2029,6 +2159,11 @@ function showExportHTMLPopup() {
       nodeData.height = (rect.height / currentZoom) + "px";
     }
   });
+  Object.keys(rawData.drawflow.Home.data).forEach((nodeId) => {
+    const node = rawData.drawflow.Home.data[nodeId];
+    node.inputCount = Object.keys(node.inputs).length;
+    node.outputCount = Object.keys(node.outputs).length;
+  });
   const hasError = sortElementsByPosition(rawData);
   if (hasError) {
     return;
@@ -2181,6 +2316,11 @@ function saveWorkflow(fileName) {
       nodeData.width = (rect.width / currentZoom) + "px";
       nodeData.height = (rect.height / currentZoom) + "px";
     }
+  });
+  Object.keys(rawData.drawflow.Home.data).forEach((nodeId) => {
+    const node = rawData.drawflow.Home.data[nodeId];
+    node.inputCount = Object.keys(node.inputs).length;
+    node.outputCount = Object.keys(node.outputs).length;
   });
 
   rawData.zoomLevel = currentZoom;
@@ -2432,6 +2572,13 @@ function importSetupNodes(dataToImport) {
     setupNodeListeners(nodeId);
     const nodeElement = document.getElementById(`node-${nodeId}`);
     if (nodeElement) {
+      const inputCount = nodeValue.inputCount || 0;
+      const outputCount = nodeValue.outputCount || 0;
+
+      // 仅在有输入或输出连接点的节点上添加控制按钮
+      if (inputCount > 0 || outputCount > 0) {
+        setupConnectionControls(nodeId, inputCount, outputCount, nodeValue);
+      }
       const nodeData = dataToImport.drawflow.Home.data[nodeId];
       if (nodeData.width) {
         const originalWidth = parseInt(nodeData.width, 10);

@@ -1296,3 +1296,63 @@ pre[class*='language-'] {
   transform: translate(-50%, 20%); ;
   transition: all 0.3s ease-in-out;
 }
+
+.input-control-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  position: relative;
+}
+
+.output-control-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  position: relative;
+}
+
+.input-ports{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.output-ports {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.input-control-container button {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  border: none;
+  background-color: #eee;
+  margin: 2px 0;
+  transform: translateX(-25px);  /* 输入按钮向左移动25px */
+}
+
+.output-control-container button {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  border: none;
+  background-color: #eee;
+  margin: 2px 0;
+  transform: translateX(25px);
+}
+
+.input-control-container button:hover,
+.output-control-container button:hover {
+  background-color: #ccc;
+}
+.output-ports {
+  transform: translateX(22px);
+}
