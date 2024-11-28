@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "index": -1,
+    "title": 1,
+    "author": 1,
+    "description": 1,
+    "category": 1,
+    "time": 1,
+    "thumbnail": 1
+  },
+  "drawflow": {
+    "this is a test": "test ok!"
+  }
+}
