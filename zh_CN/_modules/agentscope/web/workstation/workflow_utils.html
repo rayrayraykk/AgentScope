@@ -1,0 +1,802 @@
+<!-- layout.html -->
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>agentscope.web.workstation.workflow_utils &mdash; AgentScope  文档</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=c9484b72" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=7d86a446"></script>
+      <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/translations.js?v=beaddf03"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../../../genindex.html" />
+    <link rel="search" title="搜索" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" > 
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            AgentScope
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="搜索文档" aria-label="搜索文档" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div> <!-- language_selector.html -->
+<div class="language-selector">
+    <a href="../../../../../en/_modules/agentscope/web/workstation/workflow_utils.html">English</a></li> |
+    <a href="../../../../../zh_CN/_modules/agentscope/web/workstation/workflow_utils.html">中文</a></li>
+</div> 
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="导航菜单">
+              <p class="caption" role="heading"><span class="caption-text">AgentScope 教程</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/quick_start.html">快速上手</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/advance.html">进阶使用</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial/contribute.html">参与贡献</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">AgentScope API 文档</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.agents.html">agentscope.agents package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.memory.html">agentscope.memory package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.models.html">agentscope.models package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.pipelines.html">agentscope.pipelines package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.service.html">agentscope.service package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.rpc.html">agentscope.rpc package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.utils.html">agentscope.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.web.html">agentscope.web package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.html">agentscope package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="移动版导航菜单" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">AgentScope</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="页面导航">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">模块代码</a></li>
+      <li class="breadcrumb-item active">agentscope.web.workstation.workflow_utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>agentscope.web.workstation.workflow_utils 源代码</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">AgentScope workstation DAG running engine.</span>
+
+<span class="sd">This module defines various workflow nodes that can be used to construct</span>
+<span class="sd">a computational DAG. Each node represents a step in the DAG and</span>
+<span class="sd">can perform certain actions when called.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">import</span> <span class="nn">agentscope</span>
+<span class="kn">from</span> <span class="nn">agentscope.agents</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AgentBase</span><span class="p">,</span>
+    <span class="n">DialogAgent</span><span class="p">,</span>
+    <span class="n">UserAgent</span><span class="p">,</span>
+    <span class="n">TextToImageAgent</span><span class="p">,</span>
+    <span class="n">DictDialogAgent</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">agentscope.pipelines.functional</span> <span class="kn">import</span> <span class="n">placeholder</span>
+<span class="kn">from</span> <span class="nn">agentscope.pipelines</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">PipelineBase</span><span class="p">,</span>
+    <span class="n">IfElsePipeline</span><span class="p">,</span>
+    <span class="n">SwitchPipeline</span><span class="p">,</span>
+    <span class="n">ForLoopPipeline</span><span class="p">,</span>
+    <span class="n">WhileLoopPipeline</span><span class="p">,</span>
+    <span class="n">SequentialPipeline</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">agentscope.msghub</span> <span class="kn">import</span> <span class="n">msghub</span>
+<span class="kn">from</span> <span class="nn">agentscope.message</span> <span class="kn">import</span> <span class="n">Msg</span>
+<span class="kn">from</span> <span class="nn">agentscope.models</span> <span class="kn">import</span> <span class="n">read_model_configs</span>
+
+
+<div class="viewcode-block" id="WorkflowNode">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.WorkflowNode">[文档]</a>
+<span class="k">class</span> <span class="nc">WorkflowNode</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract base class representing a generic node in a workflow.</span>
+
+<span class="sd">    WorkflowNode is designed to be subclassed with specific logic implemented</span>
+<span class="sd">    in the subclass methods. It provides an interface for initialization and</span>
+<span class="sd">    execution of operations when the node is called.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WorkflowNode.initialize">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.WorkflowNode.initialize">[文档]</a>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize nodes. Implement specific initialization logic in</span>
+<span class="sd">        subclasses.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs the operations of the node. Implement specific logic in</span>
+<span class="sd">        subclasses.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="ModelNode">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.ModelNode">[文档]</a>
+<span class="k">class</span> <span class="nc">ModelNode</span><span class="p">(</span><span class="n">WorkflowNode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A node that represents a model in a workflow.</span>
+
+<span class="sd">    The ModelNode can be used to load and execute a model as part of the</span>
+<span class="sd">    workflow pipeline. It initializes model configurations and performs</span>
+<span class="sd">    model-related operations when called.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ModelNode.initialize">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.ModelNode.initialize">[文档]</a>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+        <span class="n">read_model_configs</span><span class="p">([</span><span class="n">kwargs</span><span class="p">])</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="MsgNode">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.MsgNode">[文档]</a>
+<span class="k">class</span> <span class="nc">MsgNode</span><span class="p">(</span><span class="n">WorkflowNode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A node that manages messaging within a workflow.</span>
+
+<span class="sd">    MsgNode is responsible for handling messages, creating message objects,</span>
+<span class="sd">    and performing message-related operations when the node is invoked.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MsgNode.initialize">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.MsgNode.initialize">[文档]</a>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">Msg</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span></div>
+
+
+
+<div class="viewcode-block" id="PlaceHolderNode">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.PlaceHolderNode">[文档]</a>
+<span class="k">class</span> <span class="nc">PlaceHolderNode</span><span class="p">(</span><span class="n">WorkflowNode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A placeholder node within a workflow.</span>
+
+<span class="sd">    This node acts as a placeholder and can be used to pass through information</span>
+<span class="sd">    or data without performing any significant operation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">placeholder</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="MsgHubNode">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.MsgHubNode">[文档]</a>
+<span class="k">class</span> <span class="nc">MsgHubNode</span><span class="p">(</span><span class="n">WorkflowNode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A node that serves as a messaging hub within a workflow.</span>
+
+<span class="sd">    MsgHubNode is responsible for broadcasting announcements to participants</span>
+<span class="sd">    and managing the flow of messages within a workflow&#39;s pipeline.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MsgHubNode.initialize">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.MsgHubNode.initialize">[文档]</a>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">deps</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">announcement</span> <span class="o">=</span> <span class="n">Msg</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;announcement&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;Host&quot;</span><span class="p">),</span>
+            <span class="n">content</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;announcement&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="s2">&quot;Welcome!&quot;</span><span class="p">),</span>
+            <span class="n">role</span><span class="o">=</span><span class="s2">&quot;system&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">deps</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">deps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span>
+                <span class="n">deps</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s2">&quot;pipeline&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">),</span> <span class="p">(</span>
+            <span class="s2">&quot;MsgHub members must be a list of length 1, with the first &quot;</span>
+            <span class="s2">&quot;element being an instance of PipelineBaseNode&quot;</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">deps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pipeline</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">participants</span> <span class="o">=</span> <span class="n">get_all_agents</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">msghub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">participants</span><span class="p">,</span> <span class="n">announcement</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">announcement</span><span class="p">):</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span></div>
+
+
+
+<div class="viewcode-block" id="SequentialPipelineNode">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.SequentialPipelineNode">[文档]</a>
+<span class="k">class</span> <span class="nc">SequentialPipelineNode</span><span class="p">(</span><span class="n">WorkflowNode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A node representing a sequential pipeline within a workflow.</span>
+
+<span class="sd">    SequentialPipelineNode executes a series of operators or nodes in a</span>
+<span class="sd">    sequence, where the output of one node is the input to the next.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SequentialPipelineNode.initialize">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.SequentialPipelineNode.initialize">[文档]</a>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">deps</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">SequentialPipeline</span><span class="p">(</span><span class="n">operators</span><span class="o">=</span><span class="n">deps</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="ForLoopPipelineNode">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.ForLoopPipelineNode">[文档]</a>
+<span class="k">class</span> <span class="nc">ForLoopPipelineNode</span><span class="p">(</span><span class="n">WorkflowNode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A node representing a for-loop structure in a workflow.</span>
+
+<span class="sd">    ForLoopPipelineNode allows the execution of a pipeline node multiple times,</span>
+<span class="sd">    iterating over a given set of inputs or a specified range.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ForLoopPipelineNode.initialize">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.ForLoopPipelineNode.initialize">[文档]</a>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">deps</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">deps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="p">),</span> <span class="s2">&quot;ForLoopPipelineNode can only contain one Pipeline Node.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">ForLoopPipeline</span><span class="p">(</span><span class="n">loop_body_operators</span><span class="o">=</span><span class="n">deps</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="WhileLoopPipelineNode">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.WhileLoopPipelineNode">[文档]</a>
+<span class="k">class</span> <span class="nc">WhileLoopPipelineNode</span><span class="p">(</span><span class="n">WorkflowNode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A node representing a while-loop structure in a workflow.</span>
+
+<span class="sd">    WhileLoopPipelineNode enables conditional repeated execution of a pipeline</span>
+<span class="sd">    node based on a specified condition.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="WhileLoopPipelineNode.initialize">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.WhileLoopPipelineNode.initialize">[文档]</a>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">deps</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">deps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="p">),</span> <span class="s2">&quot;WhileLoopPipelineNode can only contain one Pipeline Node.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">WhileLoopPipeline</span><span class="p">(</span>
+            <span class="n">loop_body_operators</span><span class="o">=</span><span class="n">deps</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="IfElsePipelineNode">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.IfElsePipelineNode">[文档]</a>
+<span class="k">class</span> <span class="nc">IfElsePipelineNode</span><span class="p">(</span><span class="n">WorkflowNode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A node representing an if-else conditional structure in a workflow.</span>
+
+<span class="sd">    IfElsePipelineNode directs the flow of execution to different pipeline</span>
+<span class="sd">    nodes based on a specified condition.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="IfElsePipelineNode.initialize">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.IfElsePipelineNode.initialize">[文档]</a>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">deps</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="mi">0</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">deps</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span>
+        <span class="p">),</span> <span class="s2">&quot;IfElsePipelineNode must contain one or two Pipeline Node.&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">deps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">IfElsePipeline</span><span class="p">(</span><span class="n">if_body_operators</span><span class="o">=</span><span class="n">deps</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">deps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">IfElsePipeline</span><span class="p">(</span>
+                <span class="n">if_body_operators</span><span class="o">=</span><span class="n">deps</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">else_body_operators</span><span class="o">=</span><span class="n">deps</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="SwitchPipelineNode">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.SwitchPipelineNode">[文档]</a>
+<span class="k">class</span> <span class="nc">SwitchPipelineNode</span><span class="p">(</span><span class="n">WorkflowNode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A node representing a switch-case structure within a workflow.</span>
+
+<span class="sd">    SwitchPipelineNode routes the execution to different pipeline nodes</span>
+<span class="sd">    based on the evaluation of a specified key or condition.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SwitchPipelineNode.initialize">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.SwitchPipelineNode.initialize">[文档]</a>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">deps</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">deps</span><span class="p">),</span> <span class="p">(</span>
+            <span class="s2">&quot;SwitchPipelineNode must contain at least &quot;</span> <span class="s2">&quot;one Pipeline Node.&quot;</span>
+        <span class="p">)</span>
+        <span class="n">case_operators</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">deps</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;cases&quot;</span><span class="p">]):</span>
+            <span class="c1"># No default_operators provided</span>
+            <span class="n">default_operators</span> <span class="o">=</span> <span class="n">placeholder</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">deps</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;cases&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># No default_operators provided</span>
+            <span class="n">default_operators</span> <span class="o">=</span> <span class="n">deps</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;SwitchPipelineNode node </span><span class="si">{</span><span class="n">deps</span><span class="si">}</span><span class="s2"> not matches &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;cases </span><span class="si">{</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;cases&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;cases&quot;</span><span class="p">],</span> <span class="n">deps</span><span class="p">):</span>
+            <span class="n">case_operators</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;cases&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">SwitchPipeline</span><span class="p">(</span>
+            <span class="n">case_operators</span><span class="o">=</span><span class="n">case_operators</span><span class="p">,</span>
+            <span class="n">default_operators</span><span class="o">=</span><span class="n">default_operators</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="CopyNode">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.CopyNode">[文档]</a>
+<span class="k">class</span> <span class="nc">CopyNode</span><span class="p">(</span><span class="n">WorkflowNode</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A node that duplicates the output of another node in the workflow.</span>
+
+<span class="sd">    CopyNode is used to replicate the results of a parent node and can be</span>
+<span class="sd">    useful in workflows where the same output is needed for multiple</span>
+<span class="sd">    subsequent operations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="CopyNode.initialize">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.CopyNode.initialize">[文档]</a>
+    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">deps</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">deps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Copy Node can only have one parent!&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">deps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="WorkflowNodeType">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.WorkflowNodeType">[文档]</a>
+<span class="k">class</span> <span class="nc">WorkflowNodeType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enum for workflow node.&quot;&quot;&quot;</span>
+
+    <span class="n">MODEL</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">AGENT</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">PIPELINE</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">SERVICE</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">MESSAGE</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">COPY</span> <span class="o">=</span> <span class="mi">5</span></div>
+
+
+
+<span class="n">NODE_NAME_MAPPING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;dashscope_chat&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">ModelNode</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">MODEL</span><span class="p">),</span>
+    <span class="s2">&quot;openai_chat&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">ModelNode</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">MODEL</span><span class="p">),</span>
+    <span class="s2">&quot;post_api_chat&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">ModelNode</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">MODEL</span><span class="p">),</span>
+    <span class="s2">&quot;Message&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">MsgNode</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">MESSAGE</span><span class="p">),</span>
+    <span class="s2">&quot;DialogAgent&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">DialogAgent</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">AGENT</span><span class="p">),</span>
+    <span class="s2">&quot;UserAgent&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">UserAgent</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">AGENT</span><span class="p">),</span>
+    <span class="s2">&quot;TextToImageAgent&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">TextToImageAgent</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">AGENT</span><span class="p">),</span>
+    <span class="s2">&quot;DictDialogAgent&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">DictDialogAgent</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">AGENT</span><span class="p">),</span>
+    <span class="s2">&quot;Placeholder&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">PlaceHolderNode</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">PIPELINE</span><span class="p">),</span>
+    <span class="s2">&quot;MsgHub&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">MsgHubNode</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">PIPELINE</span><span class="p">),</span>
+    <span class="s2">&quot;SequentialPipeline&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">SequentialPipelineNode</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">PIPELINE</span><span class="p">),</span>
+    <span class="s2">&quot;ForLoopPipeline&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">ForLoopPipelineNode</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">PIPELINE</span><span class="p">),</span>
+    <span class="s2">&quot;WhileLoopPipeline&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">WhileLoopPipelineNode</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">PIPELINE</span><span class="p">),</span>
+    <span class="s2">&quot;IfElsePipeline&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">IfElsePipelineNode</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">PIPELINE</span><span class="p">),</span>
+    <span class="s2">&quot;SwitchPipeline&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">SwitchPipelineNode</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">PIPELINE</span><span class="p">),</span>
+    <span class="s2">&quot;CopyNode&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">CopyNode</span><span class="p">,</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">COPY</span><span class="p">),</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="ASDiGraph">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.ASDiGraph">[文档]</a>
+<span class="k">class</span> <span class="nc">ASDiGraph</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class that represents a directed graph, extending the functionality of</span>
+<span class="sd">    networkx&#39;s DiGraph to suit specific workflow requirements in AgentScope.</span>
+
+<span class="sd">    This graph supports operations such as adding nodes with associated</span>
+<span class="sd">    computations and executing these computations in a topological order.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        nodes_not_in_graph (set): A set of nodes that are not included in</span>
+<span class="sd">        the computation graph.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># type: ignore[no-untyped-def]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the ASDiGraph instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodes_not_in_graph</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ASDiGraph.run">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.ASDiGraph.run">[文档]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute the computations associated with each node in the graph.</span>
+
+<span class="sd">        The method initializes AgentScope, performs a topological sort of</span>
+<span class="sd">        the nodes, and then runs each node&#39;s computation sequentially using</span>
+<span class="sd">        the outputs from its predecessors as inputs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">agentscope</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="n">logger_level</span><span class="o">=</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">)</span>
+        <span class="n">sorted_nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">topological_sort</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">sorted_nodes</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">node_id</span>
+            <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">sorted_nodes</span>
+            <span class="k">if</span> <span class="n">node_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes_not_in_graph</span>
+        <span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sorted_nodes: </span><span class="si">{</span><span class="n">sorted_nodes</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;nodes_not_in_graph: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes_not_in_graph</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Cache output</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Run with predecessors outputs</span>
+        <span class="k">for</span> <span class="n">node_id</span> <span class="ow">in</span> <span class="n">sorted_nodes</span><span class="p">:</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">values</span><span class="p">[</span><span class="n">predecessor</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">predecessor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">inputs</span><span class="p">:</span>
+                <span class="n">values</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exec_node</span><span class="p">(</span><span class="n">node_id</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="p">):</span>
+                <span class="c1"># Note: only support exec with the first predecessor now</span>
+                <span class="n">values</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exec_node</span><span class="p">(</span><span class="n">node_id</span><span class="p">,</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Too many predecessors!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ASDiGraph.add_as_node">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.ASDiGraph.add_as_node">[文档]</a>
+    <span class="k">def</span> <span class="nf">add_as_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">node_info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a node to the graph based on provided node information and</span>
+<span class="sd">        configuration.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            node_id (str): The identifier for the node being added.</span>
+<span class="sd">            node_info (dict): A dictionary containing information about the</span>
+<span class="sd">                node.</span>
+<span class="sd">            config (dict): Configuration information for the node dependencies.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The computation object associated with the added node.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">node_cls</span><span class="p">,</span> <span class="n">node_type</span> <span class="o">=</span> <span class="n">NODE_NAME_MAPPING</span><span class="p">[</span><span class="n">node_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)]</span>
+        <span class="c1"># TODO: support all type of node</span>
+        <span class="k">if</span> <span class="n">node_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">MODEL</span><span class="p">,</span>
+            <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">AGENT</span><span class="p">,</span>
+            <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">MESSAGE</span><span class="p">,</span>
+            <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">PIPELINE</span><span class="p">,</span>
+            <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">COPY</span><span class="p">,</span>
+        <span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">node_cls</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_node</span><span class="p">(</span><span class="n">node_id</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="s2">&quot;opt&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Init dep nodes</span>
+        <span class="n">deps</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">node_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;elements&quot;</span><span class="p">,</span> <span class="p">[])]</span>
+
+        <span class="c1"># Exclude for dag when in a Group</span>
+        <span class="k">if</span> <span class="n">node_type</span> <span class="o">!=</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">COPY</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodes_not_in_graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes_not_in_graph</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">deps</span><span class="p">))</span>
+
+        <span class="n">dep_opts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">dep_node_id</span> <span class="ow">in</span> <span class="n">deps</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_node</span><span class="p">(</span><span class="n">dep_node_id</span><span class="p">):</span>
+                <span class="n">dep_node_info</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="n">dep_node_id</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_as_node</span><span class="p">(</span><span class="n">dep_node_id</span><span class="p">,</span> <span class="n">dep_node_info</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+            <span class="n">dep_opts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">dep_node_id</span><span class="p">][</span><span class="s2">&quot;opt&quot;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">deps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">node_cls</span><span class="p">(</span><span class="o">**</span><span class="n">node_info</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">node_cls</span><span class="p">(</span><span class="n">dep_opts</span><span class="p">,</span> <span class="o">**</span><span class="n">node_info</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="p">{}))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node_id</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="o">**</span><span class="n">node_info</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="ASDiGraph.exec_node">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.ASDiGraph.exec_node">[文档]</a>
+    <span class="k">def</span> <span class="nf">exec_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">x_in</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute the computation associated with a given node in the graph.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            node_id (str): The identifier of the node whose computation is</span>
+<span class="sd">                to be executed.</span>
+<span class="sd">            x_in: The input to the node&#39;s computation. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The output of the node&#39;s computation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">node_id: </span><span class="si">{</span><span class="n">node_id</span><span class="si">}</span><span class="se">\n</span><span class="s2">in_values:</span><span class="si">{</span><span class="n">x_in</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node_id</span><span class="p">][</span><span class="s2">&quot;opt&quot;</span><span class="p">]</span>
+        <span class="n">out_values</span> <span class="o">=</span> <span class="n">opt</span><span class="p">(</span><span class="n">x_in</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">node_id: </span><span class="si">{</span><span class="n">node_id</span><span class="si">}</span><span class="se">\n</span><span class="s2">out_values:</span><span class="si">{</span><span class="n">out_values</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">out_values</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="get_all_agents">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.get_all_agents">[文档]</a>
+<span class="k">def</span> <span class="nf">get_all_agents</span><span class="p">(</span>
+    <span class="n">pipeline</span><span class="p">:</span> <span class="n">PipelineBase</span><span class="p">,</span>
+    <span class="n">seen_agents</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">set</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve all unique agent objects from a pipeline.</span>
+
+<span class="sd">    Recursively traverses the pipeline to collect all distinct agent-based</span>
+<span class="sd">    participants. Prevents duplication by tracking already seen agents.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pipeline (PipelineBase): The pipeline from which to extract agents.</span>
+<span class="sd">        seen_agents (set, optional): A set of agents that have already been</span>
+<span class="sd">            seen to avoid duplication. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: A list of unique agent objects found in the pipeline.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">seen_agents</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">seen_agents</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="n">all_agents</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">participant</span> <span class="ow">in</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">participants</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">participant</span><span class="p">,</span> <span class="n">AgentBase</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">participant</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen_agents</span><span class="p">:</span>
+                <span class="n">all_agents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">participant</span><span class="p">)</span>
+                <span class="n">seen_agents</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">participant</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">participant</span><span class="p">,</span> <span class="n">PipelineBase</span><span class="p">):</span>
+            <span class="n">nested_agents</span> <span class="o">=</span> <span class="n">get_all_agents</span><span class="p">(</span><span class="n">participant</span><span class="p">,</span> <span class="n">seen_agents</span><span class="p">)</span>
+            <span class="n">all_agents</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nested_agents</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">all_agents</span></div>
+
+
+
+<div class="viewcode-block" id="sanitize_node_data">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.sanitize_node_data">[文档]</a>
+<span class="k">def</span> <span class="nf">sanitize_node_data</span><span class="p">(</span><span class="n">raw_info</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Clean and validate node data, evaluating callable expressions where</span>
+<span class="sd">    necessary.</span>
+
+<span class="sd">    Processes the raw node information, removes empty arguments, and evaluates</span>
+<span class="sd">    any callable expressions provided as string literals.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        raw_info (dict): The raw node information dictionary that may contain</span>
+<span class="sd">            callable expressions as strings.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: The sanitized node information with callable expressions</span>
+<span class="sd">            evaluated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">is_callable_expression</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">callable</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">copied_info</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">raw_info</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">copied_info</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;args&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">raw_info</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">is_callable_expression</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="n">raw_info</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;args&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">raw_info</span></div>
+
+
+
+<div class="viewcode-block" id="build_dag">
+<a class="viewcode-back" href="../../../../agentscope.web.workstation.html#agentscope.web.workstation.workflow_utils.build_dag">[文档]</a>
+<span class="k">def</span> <span class="nf">build_dag</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ASDiGraph</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construct a Directed Acyclic Graph (DAG) from the provided configuration.</span>
+
+<span class="sd">    Initializes the graph nodes based on the configuration, adds model nodes</span>
+<span class="sd">    first, then non-model nodes, and finally adds edges between the nodes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config (dict): The configuration to build the graph from, containing</span>
+<span class="sd">            node info such as name, type, arguments, and connections.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ASDiGraph: The constructed directed acyclic graph.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the resulting graph is not acyclic.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dag</span> <span class="o">=</span> <span class="n">ASDiGraph</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">node_info</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">config</span><span class="p">[</span><span class="n">node_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">sanitize_node_data</span><span class="p">(</span><span class="n">node_info</span><span class="p">)</span>
+
+    <span class="c1"># Add and init model nodes first</span>
+    <span class="k">for</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">node_info</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">NODE_NAME_MAPPING</span><span class="p">[</span><span class="n">node_info</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">MODEL</span><span class="p">:</span>
+            <span class="n">dag</span><span class="o">.</span><span class="n">add_as_node</span><span class="p">(</span><span class="n">node_id</span><span class="p">,</span> <span class="n">node_info</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="c1"># Add and init non-model nodes</span>
+    <span class="k">for</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">node_info</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">NODE_NAME_MAPPING</span><span class="p">[</span><span class="n">node_info</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]][</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">WorkflowNodeType</span><span class="o">.</span><span class="n">MODEL</span><span class="p">:</span>
+            <span class="n">dag</span><span class="o">.</span><span class="n">add_as_node</span><span class="p">(</span><span class="n">node_id</span><span class="p">,</span> <span class="n">node_info</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="c1"># Add edges</span>
+    <span class="k">for</span> <span class="n">node_id</span><span class="p">,</span> <span class="n">node_info</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">node_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;outputs&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">for</span> <span class="n">output_key</span><span class="p">,</span> <span class="n">output_val</span> <span class="ow">in</span> <span class="n">outputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">connections</span> <span class="o">=</span> <span class="n">output_val</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;connections&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="k">for</span> <span class="n">conn</span> <span class="ow">in</span> <span class="n">connections</span><span class="p">:</span>
+                <span class="n">target_node_id</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;node&quot;</span><span class="p">)</span>
+                <span class="c1"># Here it is assumed that the output of the connection is</span>
+                <span class="c1"># only connected to one of the inputs. If there are more</span>
+                <span class="c1"># complex connections, modify the logic accordingly</span>
+                <span class="n">dag</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">node_id</span><span class="p">,</span> <span class="n">target_node_id</span><span class="p">,</span> <span class="n">output_key</span><span class="o">=</span><span class="n">output_key</span><span class="p">)</span>
+
+    <span class="c1"># Check if the graph is a DAG</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nx</span><span class="o">.</span><span class="n">is_directed_acyclic_graph</span><span class="p">(</span><span class="n">dag</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The provided configuration does not form a DAG.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dag</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; 版权所有 2024, Alibaba Tongyi Lab。</p>
+  </div>
+
+  利用 <a href="https://www.sphinx-doc.org/">Sphinx</a> 构建，使用的 
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">主题</a>
+    由 <a href="https://readthedocs.org">Read the Docs</a> 开发.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

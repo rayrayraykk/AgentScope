@@ -1,4 +1,6 @@
 <!-- layout.html -->
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
@@ -6,21 +8,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>agentscope.agents.dict_dialog_agent &mdash; AgentScope  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=c9484b72" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
-        <script>mermaid.initialize({startOnLoad:true});</script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -57,15 +61,15 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">AgentScope API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.agents.html">agentscope.agents</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.memory.html">agentscope.memory</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.models.html">agentscope.models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.pipelines.html">agentscope.pipelines</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.service.html">agentscope.service</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.rpc.html">agentscope.rpc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.utils.html">agentscope.utils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.web.html">agentscope.web</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.html">agentscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.agents.html">agentscope.agents package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.memory.html">agentscope.memory package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.models.html">agentscope.models package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.pipelines.html">agentscope.pipelines package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.service.html">agentscope.service package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.rpc.html">agentscope.rpc package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.utils.html">agentscope.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.web.html">agentscope.web package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.html">agentscope package</a></li>
 </ul>
 
         </div>
@@ -107,6 +111,8 @@
 <span class="kn">from</span> <span class="nn">..utils.tools</span> <span class="kn">import</span> <span class="n">_convert_to_str</span>
 
 
+<div class="viewcode-block" id="parse_dict">
+<a class="viewcode-back" href="../../../agentscope.agents.html#agentscope.agents.dict_dialog_agent.parse_dict">[docs]</a>
 <span class="k">def</span> <span class="nf">parse_dict</span><span class="p">(</span><span class="n">response</span><span class="p">:</span> <span class="n">ModelResponse</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelResponse</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse function for DictDialogAgent&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -123,16 +129,20 @@
         <span class="c1"># TODO: maybe using a more robust json library to handle this case</span>
         <span class="n">response_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">ModelResponse</span><span class="p">(</span><span class="n">raw</span><span class="o">=</span><span class="n">response_dict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ModelResponse</span><span class="p">(</span><span class="n">raw</span><span class="o">=</span><span class="n">response_dict</span><span class="p">)</span></div>
 
 
+
+<div class="viewcode-block" id="default_response">
+<a class="viewcode-back" href="../../../agentscope.agents.html#agentscope.agents.dict_dialog_agent.default_response">[docs]</a>
 <span class="k">def</span> <span class="nf">default_response</span><span class="p">(</span><span class="n">response</span><span class="p">:</span> <span class="n">ModelResponse</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelResponse</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The default response of fault_handler&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">ModelResponse</span><span class="p">(</span><span class="n">raw</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;speak&quot;</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">ModelResponse</span><span class="p">(</span><span class="n">raw</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;speak&quot;</span><span class="p">:</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">})</span></div>
+
 
 
 <div class="viewcode-block" id="DictDialogAgent">
-<a class="viewcode-back" href="../../../agentscope.agents.html#agentscope.agents.DictDialogAgent">[docs]</a>
+<a class="viewcode-back" href="../../../agentscope.agents.html#agentscope.agents.dict_dialog_agent.DictDialogAgent">[docs]</a>
 <span class="k">class</span> <span class="nc">DictDialogAgent</span><span class="p">(</span><span class="n">AgentBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An agent that generates response in a dict format, where user can</span>
 <span class="sd">    specify the required fields in the response via prompt, e.g.</span>
@@ -220,7 +230,7 @@
 
     <span class="c1"># TODO change typing from dict to MSG</span>
 <div class="viewcode-block" id="DictDialogAgent.reply">
-<a class="viewcode-back" href="../../../agentscope.agents.html#agentscope.agents.DictDialogAgent.reply">[docs]</a>
+<a class="viewcode-back" href="../../../agentscope.agents.html#agentscope.agents.dict_dialog_agent.DictDialogAgent.reply">[docs]</a>
     <span class="k">def</span> <span class="nf">reply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reply function of the agent.</span>
 <span class="sd">        Processes the input data, generates a prompt using the current</span>

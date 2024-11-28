@@ -1,5 +1,75 @@
-agentscope.agents
-=================
+agentscope.agents package
+=========================
+
+Submodules
+----------
+
+agentscope.agents.agent module
+------------------------------
+
+.. automodule:: agentscope.agents.agent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.agents.dialog\_agent module
+--------------------------------------
+
+.. automodule:: agentscope.agents.dialog_agent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.agents.dict\_dialog\_agent module
+--------------------------------------------
+
+.. automodule:: agentscope.agents.dict_dialog_agent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.agents.operator module
+---------------------------------
+
+.. automodule:: agentscope.agents.operator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.agents.react\_agent module
+-------------------------------------
+
+.. automodule:: agentscope.agents.react_agent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.agents.rpc\_agent module
+-----------------------------------
+
+.. automodule:: agentscope.agents.rpc_agent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.agents.text\_to\_image\_agent module
+-----------------------------------------------
+
+.. automodule:: agentscope.agents.text_to_image_agent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.agents.user\_agent module
+------------------------------------
+
+.. automodule:: agentscope.agents.user_agent
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
 
 .. automodule:: agentscope.agents
    :members:

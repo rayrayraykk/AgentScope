@@ -1,4 +1,6 @@
 <!-- layout.html -->
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
@@ -6,21 +8,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>agentscope.service.file.json &mdash; AgentScope  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css?v=c9484b72" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
-        <script>mermaid.initialize({startOnLoad:true});</script>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -57,15 +61,15 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">AgentScope API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.agents.html">agentscope.agents</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.memory.html">agentscope.memory</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.models.html">agentscope.models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.pipelines.html">agentscope.pipelines</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.service.html">agentscope.service</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.rpc.html">agentscope.rpc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.utils.html">agentscope.utils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.web.html">agentscope.web</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.html">agentscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.agents.html">agentscope.agents package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.memory.html">agentscope.memory package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.models.html">agentscope.models package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.pipelines.html">agentscope.pipelines package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.service.html">agentscope.service package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.rpc.html">agentscope.rpc package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.utils.html">agentscope.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.web.html">agentscope.web package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../agentscope.html">agentscope package</a></li>
 </ul>
 
         </div>
@@ -105,7 +109,7 @@
 
 
 <div class="viewcode-block" id="read_json_file">
-<a class="viewcode-back" href="../../../../agentscope.service.html#agentscope.service.read_json_file">[docs]</a>
+<a class="viewcode-back" href="../../../../agentscope.service.file.html#agentscope.service.read_json_file">[docs]</a>
 <span class="k">def</span> <span class="nf">read_json_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ServiceResponse</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read and parse a JSON file.</span>
@@ -135,7 +139,7 @@
 
 
 <div class="viewcode-block" id="write_json_file">
-<a class="viewcode-back" href="../../../../agentscope.service.html#agentscope.service.write_json_file">[docs]</a>
+<a class="viewcode-back" href="../../../../agentscope.service.file.html#agentscope.service.write_json_file">[docs]</a>
 <span class="k">def</span> <span class="nf">write_json_file</span><span class="p">(</span>
     <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>

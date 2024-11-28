@@ -1,5 +1,27 @@
-agentscope.web.studio
-=====================
+agentscope.web.studio package
+=============================
+
+Submodules
+----------
+
+agentscope.web.studio.studio module
+-----------------------------------
+
+.. automodule:: agentscope.web.studio.studio
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.web.studio.utils module
+----------------------------------
+
+.. automodule:: agentscope.web.studio.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
 
 .. automodule:: agentscope.web.studio
    :members:

@@ -1,4 +1,6 @@
 <!-- layout.html -->
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
@@ -6,21 +8,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>agentscope.models.post_model &mdash; AgentScope  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=c9484b72" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
-        <script>mermaid.initialize({startOnLoad:true});</script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -57,15 +61,15 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">AgentScope API Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.agents.html">agentscope.agents</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.memory.html">agentscope.memory</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.models.html">agentscope.models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.pipelines.html">agentscope.pipelines</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.service.html">agentscope.service</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.rpc.html">agentscope.rpc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.utils.html">agentscope.utils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.web.html">agentscope.web</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.html">agentscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.agents.html">agentscope.agents package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.memory.html">agentscope.memory package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.models.html">agentscope.models package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.pipelines.html">agentscope.pipelines package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.service.html">agentscope.service package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.rpc.html">agentscope.rpc package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.utils.html">agentscope.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.web.html">agentscope.web package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.html">agentscope package</a></li>
 </ul>
 
         </div>
@@ -113,7 +117,7 @@
 
 
 <div class="viewcode-block" id="PostAPIModelWrapperBase">
-<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.PostAPIModelWrapperBase">[docs]</a>
+<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.post_model.PostAPIModelWrapperBase">[docs]</a>
 <span class="k">class</span> <span class="nc">PostAPIModelWrapperBase</span><span class="p">(</span><span class="n">ModelWrapperBase</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The base model wrapper for the model deployed on the POST API.&quot;&quot;&quot;</span>
 
@@ -260,7 +264,7 @@
 
 
 <div class="viewcode-block" id="PostAPIChatWrapper">
-<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.PostAPIChatWrapper">[docs]</a>
+<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.post_model.PostAPIChatWrapper">[docs]</a>
 <span class="k">class</span> <span class="nc">PostAPIChatWrapper</span><span class="p">(</span><span class="n">PostAPIModelWrapperBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A post api model wrapper compatilble with openai chat, e.g., vLLM,</span>
 <span class="sd">    FastChat.&quot;&quot;&quot;</span>
@@ -275,7 +279,7 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="PostAPIChatWrapper.format">
-<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.PostAPIChatWrapper.format">[docs]</a>
+<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.post_model.PostAPIChatWrapper.format">[docs]</a>
     <span class="k">def</span> <span class="nf">format</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">MessageBase</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">MessageBase</span><span class="p">]],</span>
@@ -318,6 +322,8 @@
 
 
 
+<div class="viewcode-block" id="PostAPIDALLEWrapper">
+<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.post_model.PostAPIDALLEWrapper">[docs]</a>
 <span class="k">class</span> <span class="nc">PostAPIDALLEWrapper</span><span class="p">(</span><span class="n">PostAPIModelWrapperBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A post api model wrapper compatible with openai dall_e&quot;&quot;&quot;</span>
 
@@ -336,6 +342,8 @@
         <span class="n">urls</span> <span class="o">=</span> <span class="p">[</span><span class="n">img</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;response&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]]</span>
         <span class="k">return</span> <span class="n">ModelResponse</span><span class="p">(</span><span class="n">image_urls</span><span class="o">=</span><span class="n">urls</span><span class="p">)</span>
 
+<div class="viewcode-block" id="PostAPIDALLEWrapper.format">
+<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.post_model.PostAPIDALLEWrapper.format">[docs]</a>
     <span class="k">def</span> <span class="nf">format</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">MessageBase</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">MessageBase</span><span class="p">]],</span>
@@ -344,7 +352,9 @@
             <span class="sa">f</span><span class="s2">&quot;Model Wrapper [</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">] doesn&#39;t &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;need to format the input. Please try to use the &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;model wrapper directly.&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>

@@ -1,5 +1,43 @@
-agentscope.service.web
-======================
+agentscope.service.web package
+==============================
+
+Submodules
+----------
+
+agentscope.service.web.arxiv module
+-----------------------------------
+
+.. automodule:: agentscope.service.web.arxiv
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.service.web.download module
+--------------------------------------
+
+.. automodule:: agentscope.service.web.download
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.service.web.search module
+------------------------------------
+
+.. automodule:: agentscope.service.web.search
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.service.web.web\_digest module
+-----------------------------------------
+
+.. automodule:: agentscope.service.web.web_digest
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
 
 .. automodule:: agentscope.service.web
    :members:

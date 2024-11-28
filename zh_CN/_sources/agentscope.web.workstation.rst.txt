@@ -1,5 +1,27 @@
-agentscope.web.workstation
-==========================
+agentscope.web.workstation package
+==================================
+
+Submodules
+----------
+
+agentscope.web.workstation.workflow module
+------------------------------------------
+
+.. automodule:: agentscope.web.workstation.workflow
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.web.workstation.workflow\_utils module
+-------------------------------------------------
+
+.. automodule:: agentscope.web.workstation.workflow_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
 
 .. automodule:: agentscope.web.workstation
    :members:

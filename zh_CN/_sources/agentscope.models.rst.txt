@@ -1,5 +1,75 @@
-agentscope.models
-=================
+agentscope.models package
+=========================
+
+Submodules
+----------
+
+agentscope.models.config module
+-------------------------------
+
+.. automodule:: agentscope.models.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.models.dashscope\_model module
+-----------------------------------------
+
+.. automodule:: agentscope.models.dashscope_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.models.gemini\_model module
+--------------------------------------
+
+.. automodule:: agentscope.models.gemini_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.models.model module
+------------------------------
+
+.. automodule:: agentscope.models.model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.models.ollama\_model module
+--------------------------------------
+
+.. automodule:: agentscope.models.ollama_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.models.openai\_model module
+--------------------------------------
+
+.. automodule:: agentscope.models.openai_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.models.post\_model module
+------------------------------------
+
+.. automodule:: agentscope.models.post_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.models.response module
+---------------------------------
+
+.. automodule:: agentscope.models.response
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
 
 .. automodule:: agentscope.models
    :members:

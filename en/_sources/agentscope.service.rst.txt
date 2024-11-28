@@ -1,5 +1,48 @@
-agentscope.service
-==================
+agentscope.service package
+==========================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   agentscope.service.execute_code
+   agentscope.service.file
+   agentscope.service.retrieval
+   agentscope.service.sql_query
+   agentscope.service.text_processing
+   agentscope.service.web
+
+Submodules
+----------
+
+agentscope.service.service\_factory module
+------------------------------------------
+
+.. automodule:: agentscope.service.service_factory
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.service.service\_response module
+-------------------------------------------
+
+.. automodule:: agentscope.service.service_response
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.service.service\_status module
+-----------------------------------------
+
+.. automodule:: agentscope.service.service_status
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
 
 .. automodule:: agentscope.service
    :members:

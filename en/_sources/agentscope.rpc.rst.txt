@@ -1,5 +1,35 @@
-agentscope.rpc
-==============
+agentscope.rpc package
+======================
+
+Submodules
+----------
+
+agentscope.rpc.rpc\_agent\_client module
+----------------------------------------
+
+.. automodule:: agentscope.rpc.rpc_agent_client
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.rpc.rpc\_agent\_pb2 module
+-------------------------------------
+
+.. automodule:: agentscope.rpc.rpc_agent_pb2
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+agentscope.rpc.rpc\_agent\_pb2\_grpc module
+-------------------------------------------
+
+.. automodule:: agentscope.rpc.rpc_agent_pb2_grpc
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
 
 .. automodule:: agentscope.rpc
    :members:

@@ -1,4 +1,6 @@
 <!-- layout.html -->
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="zh-CN" data-content_root="../../../">
 <head>
@@ -6,22 +8,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>agentscope.models.ollama_model &mdash; AgentScope  文档</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=c9484b72" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=7d86a446"></script>
-        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../../../_static/translations.js?v=beaddf03"></script>
-        <script src="https://unpkg.com/mermaid@10.2.0/dist/mermaid.min.js"></script>
-        <script>mermaid.initialize({startOnLoad:true});</script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=7d86a446"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=beaddf03"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="索引" href="../../../genindex.html" />
     <link rel="search" title="搜索" href="../../../search.html" /> 
@@ -58,15 +62,15 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">AgentScope API 文档</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.agents.html">agentscope.agents</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.memory.html">agentscope.memory</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.models.html">agentscope.models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.pipelines.html">agentscope.pipelines</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.service.html">agentscope.service</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.rpc.html">agentscope.rpc</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.utils.html">agentscope.utils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.web.html">agentscope.web</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.html">agentscope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.agents.html">agentscope.agents package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.memory.html">agentscope.memory package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.models.html">agentscope.models package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.pipelines.html">agentscope.pipelines package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.service.html">agentscope.service package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.rpc.html">agentscope.rpc package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.utils.html">agentscope.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.web.html">agentscope.web package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../agentscope.html">agentscope package</a></li>
 </ul>
 
         </div>
@@ -112,6 +116,8 @@
     <span class="n">ollama</span> <span class="o">=</span> <span class="kc">None</span>
 
 
+<div class="viewcode-block" id="OllamaWrapperBase">
+<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.ollama_model.OllamaWrapperBase">[文档]</a>
 <span class="k">class</span> <span class="nc">OllamaWrapperBase</span><span class="p">(</span><span class="n">ModelWrapperBase</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The base class for Ollama model wrappers.</span>
 
@@ -164,11 +170,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">keep_alive</span> <span class="o">=</span> <span class="n">keep_alive</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_register_default_metrics</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_default_metrics</span><span class="p">()</span></div>
+
 
 
 <div class="viewcode-block" id="OllamaChatWrapper">
-<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.OllamaChatWrapper">[文档]</a>
+<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.ollama_model.OllamaChatWrapper">[文档]</a>
 <span class="k">class</span> <span class="nc">OllamaChatWrapper</span><span class="p">(</span><span class="n">OllamaWrapperBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The model wrapper for Ollama chat API.&quot;&quot;&quot;</span>
 
@@ -266,7 +273,7 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="OllamaChatWrapper.format">
-<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.OllamaChatWrapper.format">[文档]</a>
+<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.ollama_model.OllamaChatWrapper.format">[文档]</a>
     <span class="k">def</span> <span class="nf">format</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">MessageBase</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">MessageBase</span><span class="p">]],</span>
@@ -324,7 +331,7 @@
 
 
 <div class="viewcode-block" id="OllamaEmbeddingWrapper">
-<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.OllamaEmbeddingWrapper">[文档]</a>
+<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.ollama_model.OllamaEmbeddingWrapper">[文档]</a>
 <span class="k">class</span> <span class="nc">OllamaEmbeddingWrapper</span><span class="p">(</span><span class="n">OllamaWrapperBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The model wrapper for Ollama embedding API.&quot;&quot;&quot;</span>
 
@@ -403,7 +410,7 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="OllamaEmbeddingWrapper.format">
-<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.OllamaEmbeddingWrapper.format">[文档]</a>
+<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.ollama_model.OllamaEmbeddingWrapper.format">[文档]</a>
     <span class="k">def</span> <span class="nf">format</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">MessageBase</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">MessageBase</span><span class="p">]],</span>
@@ -418,7 +425,7 @@
 
 
 <div class="viewcode-block" id="OllamaGenerationWrapper">
-<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.OllamaGenerationWrapper">[文档]</a>
+<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.ollama_model.OllamaGenerationWrapper">[文档]</a>
 <span class="k">class</span> <span class="nc">OllamaGenerationWrapper</span><span class="p">(</span><span class="n">OllamaWrapperBase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The model wrapper for Ollama generation API.&quot;&quot;&quot;</span>
 
@@ -515,7 +522,7 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="OllamaGenerationWrapper.format">
-<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.OllamaGenerationWrapper.format">[文档]</a>
+<a class="viewcode-back" href="../../../agentscope.models.html#agentscope.models.ollama_model.OllamaGenerationWrapper.format">[文档]</a>
     <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">MessageBase</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">MessageBase</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward the input to the model.</span>
 

@@ -1,5 +1,19 @@
-agentscope.service.text_processing
-==================================
+agentscope.service.text\_processing package
+===========================================
+
+Submodules
+----------
+
+agentscope.service.text\_processing.summarization module
+--------------------------------------------------------
+
+.. automodule:: agentscope.service.text_processing.summarization
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
 
 .. automodule:: agentscope.service.text_processing
    :members:
