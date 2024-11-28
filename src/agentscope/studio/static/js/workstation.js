@@ -2324,3 +2324,7 @@ function showSurveyModal() {
 function hideSurveyModal() {
     document.getElementById("surveyModal").style.display = "none";
 }
+
+function showContributePopup() {
+    alert('Contribute to GitHub function triggered!');
+}
