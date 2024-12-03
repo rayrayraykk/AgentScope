@@ -414,8 +414,6 @@ def create_gallery_pr(**kwargs: Any) -> Response:
 
         jwt_token = session.get("jwt_token")
         payload = decode_jwt(jwt_token, secret_key=SECRET_KEY)
-        jwt_token = session.get("jwt_token")
-        payload = decode_jwt(jwt_token, secret_key=SECRET_KEY)
         access_token = payload.get("access_token")
         user_login = session.get("user_login")
 
