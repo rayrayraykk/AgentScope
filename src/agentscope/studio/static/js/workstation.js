@@ -2066,15 +2066,23 @@ function showExportHTMLPopup() {
 
 function showContributePopup(userLogin) {
   if (userLogin.startsWith("guest_") || userLogin === "local_user") {
-    Swal.fire(
-      "Error",
-      "You need to be logged into GitHub via agentscope.io to contribute. Please log in and try again.",
-      "error"
-    );
-    return;
+    if(getCookie("locale") == "zh"){
+      Swal.fire(
+        "Error",
+        "要分享您的workflow，您需要通过 agentscope.io 登录 GitHub账号。请登录后重试。",
+        "error"
+      );
+      return;
+    } else {
+      Swal.fire(
+        "Error",
+        "You need to be logged into GitHub via agentscope.io to contribute. Please log in and try again.",
+        "error"
+      );
+      return;
+    }
   }
-
-  swal.fire({
+  let swalObj = {
     title: "Contribute Your Workflow to AgentScope",
     text: `You are about to perform the following actions:
             1. Create a new branch in your forked repository.
@@ -2088,41 +2096,93 @@ function showContributePopup(userLogin) {
     showCancelButton: true,
     confirmButtonText: "Yes, I'd like to contribute!",
     cancelButtonText: "No, maybe later"
-  }).then(async (result) => {
+  };
+  let swalisConfirmedHtml = `
+    <div style="text-align: left;">
+      <label for="swal-input1">Title:</label>
+      <input id="swal-input1" class="swal2-input" placeholder="Enter a descriptive title" value="${userLogin}'s workflow">
+
+      <label for="swal-input2">Description:</label>
+      <input id="swal-input2" class="swal2-input">
+
+      <label for="swal-input3">Thumbnail URL (Optional):</label>
+      <input id="swal-input3" class="swal2-input" placeholder="Enter a URL for the thumbnail">
+
+      <label>Category:</label>
+      <div id="category-buttons">
+        <button type="button" class="category-button" data-value="tool">Tool</button>
+        <button type="button" class="category-button" data-value="game">Game</button>
+        <button type="button" class="category-button" data-value="simulation">Simulation</button>
+        <button type="button" class="category-button" data-value="robotics">Robotics</button>
+        <button type="button" class="category-button" data-value="social">Social</button>
+        <button type="button" class="category-button" data-value="economic">Economic</button>
+        <button type="button" class="category-button" data-value="educational">Educational</button>
+        <button type="button" class="category-button" data-value="healthcare">Healthcare</button>
+        <button type="button" class="category-button" data-value="security">Security</button>
+        <button type="button" class="category-button" data-value="entertainment">Entertainment</button>
+        <button type="button" class="category-button" data-value="manufacturing">Manufacturing</button>
+        <button type="button" class="category-button" data-value="communication">Communication</button>
+        <button type="button" class="category-button" data-value="logistics">Logistics</button>
+        <button type="button" class="category-button" data-value="others">Others</button>
+      </div>
+
+      </div>
+  `;
+  let swalisConfirmedTitle = "Fill the Form to Create PR";
+  if(getCookie("locale") == "zh"){
+    swalObj = {
+      title: "将您的工作流程贡献给 AgentScope",
+      text: `您即将执行以下操作：
+              1.在您的分叉仓库中创建一个新分支。
+              2.将您的工作流程文件添加到此分支。
+              3.从您的分支创建一个 Pull Request（PR）到 AgentScope Gallery。
+              这些操作将允许您与 AgentScope 上的社区分享您的工作流程。
+              请确保您的提交中不包含任何 API 密钥或敏感信息。
+              继续操作即表示您授予执行这些操作的权限。`,
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonText: "是的，我想贡献！",
+      cancelButtonText: "不，也许以后再说。"
+    };
+    swalisConfirmedTitle = "填写表单以创建 PR（Pull Request）";
+    swalisConfirmedHtml =  `
+    <div style="text-align: left;">
+      <label for="swal-input1">标题:</label>
+      <input id="swal-input1" class="swal2-input" placeholder="输入一个描述性标题。" value="${userLogin}'s workflow">
+
+      <label for="swal-input2">描述:</label>
+      <input id="swal-input2" class="swal2-input">
+
+      <label for="swal-input3">缩略图网址（可选）:</label>
+      <input id="swal-input3" class="swal2-input" placeholder="输入缩略图的网址">
+
+      <label>类别:</label>
+      <div id="category-buttons">
+        <button type="button" class="category-button" data-value="tool">工具</button>
+        <button type="button" class="category-button" data-value="game">游戏</button>
+        <button type="button" class="category-button" data-value="simulation">模拟</button>
+        <button type="button" class="category-button" data-value="robotics">机器人技术</button>
+        <button type="button" class="category-button" data-value="social">社交</button>
+        <button type="button" class="category-button" data-value="economic">经济</button>
+        <button type="button" class="category-button" data-value="educational">教育</button>
+        <button type="button" class="category-button" data-value="healthcare">医疗保健</button>
+        <button type="button" class="category-button" data-value="security">安全</button>
+        <button type="button" class="category-button" data-value="entertainment">娱乐</button>
+        <button type="button" class="category-button" data-value="manufacturing">制造业</button>
+        <button type="button" class="category-button" data-value="communication">通信</button>
+        <button type="button" class="category-button" data-value="logistics">物流</button>
+        <button type="button" class="category-button" data-value="others">其他</button>
+      </div>
+
+      </div>
+  `;
+  }
+
+  swal.fire(swalObj).then(async (result) => {
     if (result.isConfirmed) {
       const {value: formValues} = await Swal.fire({
-        title: "Fill the Form to Create PR",
-        html: `
-              <div style="text-align: left;">
-                <label for="swal-input1">Title:</label>
-                <input id="swal-input1" class="swal2-input" placeholder="Enter a descriptive title" value="${userLogin}'s workflow">
-
-                <label for="swal-input2">Description:</label>
-                <input id="swal-input2" class="swal2-input">
-
-                <label for="swal-input3">Thumbnail URL (Optional):</label>
-                <input id="swal-input3" class="swal2-input" placeholder="Enter a URL for the thumbnail">
-
-                <label>Category:</label>
-                <div id="category-buttons">
-                  <button type="button" class="category-button" data-value="tool">Tool</button>
-                  <button type="button" class="category-button" data-value="game">Game</button>
-                  <button type="button" class="category-button" data-value="simulation">Simulation</button>
-                  <button type="button" class="category-button" data-value="robotics">Robotics</button>
-                  <button type="button" class="category-button" data-value="social">Social</button>
-                  <button type="button" class="category-button" data-value="economic">Economic</button>
-                  <button type="button" class="category-button" data-value="educational">Educational</button>
-                  <button type="button" class="category-button" data-value="healthcare">Healthcare</button>
-                  <button type="button" class="category-button" data-value="security">Security</button>
-                  <button type="button" class="category-button" data-value="entertainment">Entertainment</button>
-                  <button type="button" class="category-button" data-value="manufacturing">Manufacturing</button>
-                  <button type="button" class="category-button" data-value="communication">Communication</button>
-                  <button type="button" class="category-button" data-value="logistics">Logistics</button>
-                  <button type="button" class="category-button" data-value="others">Others</button>
-                </div>
-
-                </div>
-            `,
+        title: swalisConfirmedTitle,
+        html: swalisConfirmedHtml,
         focusConfirm: false,
         showCancelButton: true,
         preConfirm: () => {
@@ -2168,14 +2228,28 @@ function showContributePopup(userLogin) {
           });
 
           if (response.ok) {
-            swal.fire("Success",
-              "Thank you! Your workflow has been submitted to the gallery. It will be reviewed by our maintainers and, once approved, you'll be recognized as an AgentScope developer on our homepage!",
-              "success");
+            if(getCookie("locale") == "zh"){
+              swal.fire("Success",
+                "谢谢！您的工作流程已提交至图库。我们的维护人员会对其进行审核，一旦获得批准，您将被认可为我们主页上的 AgentScope 开发者！",
+                "success");
+            } else{
+              swal.fire("Success",
+                "Thank you! Your workflow has been submitted to the gallery. It will be reviewed by our maintainers and, once approved, you'll be recognized as an AgentScope developer on our homepage!",
+                "success");
+            }
+          } else {
+            if(getCookie("locale") == "zh"){
+              swal.fire("Error", "提交您的工作流程时出现错误。请稍后再试。", "error");
+            }else {
+              swal.fire("Error", "There was an error while submitting your workflow. Please try again later.", "error");
+            }
+          }
+        } catch (error) {
+          if(getCookie("locale") == "zh"){
+            swal.fire("Error", "提交您的工作流程时出现错误。请稍后再试。", "error");
           } else {
             swal.fire("Error", "There was an error while submitting your workflow. Please try again later.", "error");
           }
-        } catch (error) {
-          swal.fire("Error", "There was an error while submitting your workflow. Please try again later.", "error");
         }
       }
     }
