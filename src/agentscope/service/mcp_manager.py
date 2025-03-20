@@ -8,7 +8,7 @@ import asyncio
 import os
 import shutil
 import traceback
-from contextlib import AsyncExitStack
+from contextlib import AsyncExitStack, ExitStack
 from functools import wraps
 from typing import Any, Optional, Callable, Tuple
 
@@ -22,6 +22,7 @@ try:
     import mcp
     from mcp.client.sse import sse_client
     from mcp.client.stdio import stdio_client
+    from mcp.client.stdio_sync import stdio_sync_client
 
 except ImportError:
     mcp = None
@@ -155,11 +156,10 @@ class MCPSessionHandler:
         self.session: Optional[mcp.ClientSession] = None
         self.stdio_transport = None
         self._session_lock: asyncio.Lock = asyncio.Lock()
-        self._cleanup_lock: asyncio.Lock = asyncio.Lock()
         # Manage session context
         self._session_exit_stack: AsyncExitStack = AsyncExitStack()
         # Manage stdio server context
-        self._stdio_exit_stack: AsyncExitStack = AsyncExitStack()
+        self._stdio_exit_stack: ExitStack = ExitStack()
 
         # Initialize stdio_transport if necessary
         command = (
@@ -168,9 +168,9 @@ class MCPSessionHandler:
             else self.config.get("command")
         )
         if command is not None and sync:
-            self.stdio_transport = sync_exec(self._initialize_stdio_transport)
+            self.stdio_transport = self._initialize_stdio_transport()
 
-    async def _initialize_stdio_transport(
+    def _initialize_stdio_transport(
         self,
     ) -> Tuple[MemoryObjectReceiveStream, MemoryObjectSendStream]:
         """
@@ -194,65 +194,35 @@ class MCPSessionHandler:
             # in `stdio_client`, it might not raise an exception, please
             # make sure your mcp server is well-configured and the command is
             # correct before you using this function.
-            stdio_transport = await self._stdio_exit_stack.enter_async_context(
-                stdio_client(server_params),
+            stdio_transport = self._stdio_exit_stack.enter_context(
+                stdio_sync_client(server_params),
             )
             return stdio_transport
         except Exception as e:
             if self._stdio_exit_stack:
-                await self._stdio_exit_stack.aclose()
+                self._stdio_exit_stack.close()
             raise e
 
-    async def close(self) -> None:
+    def close(self) -> None:
         """
         Clean up server stream resources.
         """
         if self._stdio_exit_stack and self.stdio_transport:
-            async with self._cleanup_lock:
-                try:
-                    await self._stdio_exit_stack.aclose()
-                    self.stdio_transport = None
-                except Exception:
-                    pass
-                finally:
-                    logger.info(f"Clean up MCP Server `{self.name}` finished.")
+            try:
+                self._stdio_exit_stack.close()
+                self.stdio_transport = None
+            except Exception:
+                pass
+            finally:
+                logger.info(f"Clean up MCP Server `{self.name}` finished.")
 
     def __del__(self) -> None:
         """
         Close all resources using a potentially risky synchronous execution
         method.
-
-        Notes:
-        This method attempts to close resources across different threads and
-        event loops. While it may raise a RuntimeError due to task/event
-        loop boundary crossing, the underlying AsyncExitStack mechanism
-        ensures resource cleanup. Please use `self.close()` in async mode.
-
-        Behavior:
-        - Attempts to synchronously execute the async close method
-        - May trigger a RuntimeError during execution
-        - Resource cleanup is still performed due to AsyncExitStack's
-        internal mechanism
-        - Error is effectively suppressed, ensuring no resource leaks
-
-        Caution:
-        This is a temporary workaround that relies on implementation-specific
-        behavior of AsyncExitStack and sync_exec. Future versions should
-        implement a more robust resource management strategy.
-
-        Warning:
-        Do not modify this method without careful consideration of its
-        subtle resource management implications.
         """
-        if asyncio.get_event_loop is None:
-            # When the code is executed directly at the top level in a script,
-            # the `asyncio` will recycle before the instance. In such case,
-            # when the function is triggered by `__del__`, there is nothing to
-            # delete. Unless you call `del` in the end.
-            return
-
         if self._stdio_exit_stack and self.stdio_transport:
-            sync_exec(self.close)
+            self.close()
 
     async def create_session(self) -> None:
         """Create a session connection."""
@@ -272,7 +242,8 @@ class MCPSessionHandler:
             await session.initialize()
             self.session = session
         except Exception as e:
-            logger.error(f"Error initializing session for {self.name}: {e}")
+            logger.error(f"Error initializing session for {self.name}: {e}"
+                         f"{traceback.format_exc()}")
             await self.close_session()
             raise
 
