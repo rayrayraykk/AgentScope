@@ -175,6 +175,7 @@ setuptools.setup(
             "as_gradio=agentscope.web.gradio.studio:run_app",
             "as_workflow=agentscope.web.workstation.workflow:main",
             "as_server=agentscope.server.launcher:as_server",
+            "as_workstation=agentscope.studio:as_workstation",
         ],
     },
 )
