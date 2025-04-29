@@ -3,14 +3,17 @@
 import base64
 import datetime
 import json
+import os.path
 import secrets
 import string
-from typing import Any, Literal
+import socket
+import hashlib
+import random
+from typing import Any, Literal, List, Optional
 
 from urllib.parse import urlparse
-
+import psutil
 import requests
-from loguru import logger
 
 
 def _get_timestamp(
@@ -39,9 +42,7 @@ def to_openai_dict(item: dict) -> dict:
     if "content" in item:
         clean_dict["content"] = _convert_to_str(item["content"])
     else:
-        logger.warning(
-            f"Message {item} doesn't have `content` field for " f"OpenAI API.",
-        )
+        raise ValueError("The content of the message is missing.")
 
     return clean_dict
 
@@ -58,6 +59,35 @@ def to_dialog_str(item: dict) -> str:
         return content
     else:
         return f"{speaker}: {content}"
+
+
+def find_available_port() -> int:
+    """Get an unoccupied socket port number."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("", 0))
+        return s.getsockname()[1]
+
+
+def check_port(port: Optional[int] = None) -> int:
+    """Check if the port is available.
+
+    Args:
+        port (`int`):
+            the port number being checked.
+
+    Returns:
+        `int`: the port number that passed the check. If the port is found
+        to be occupied, an available port number will be automatically
+        returned.
+    """
+    if port is None:
+        new_port = find_available_port()
+        return new_port
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        if s.connect_ex(("localhost", port)) == 0:
+            new_port = find_available_port()
+            return new_port
+    return port
 
 
 def _guess_type_by_extension(
@@ -129,7 +159,7 @@ def _to_openai_image_url(url: str) -> str:
     """
     # See https://platform.openai.com/docs/guides/vision for details of
     # support image extensions.
-    image_extensions = (
+    support_image_extensions = (
         ".png",
         ".jpg",
         ".jpeg",
@@ -139,16 +169,17 @@ def _to_openai_image_url(url: str) -> str:
 
     parsed_url = urlparse(url)
 
-    # Checking for HTTP(S) image links
-    if parsed_url.scheme in ["http", "https"]:
-        lower_path = parsed_url.path.lower()
-        if lower_path.endswith(image_extensions):
+    lower_url = url.lower()
+
+    # Web url
+    if parsed_url.scheme != "":
+        if any(lower_url.endswith(_) for _ in support_image_extensions):
             return url
 
     # Check if it is a local file
-    elif parsed_url.scheme == "file" or not parsed_url.scheme:
-        if parsed_url.path.lower().endswith(image_extensions):
-            with open(parsed_url.path, "rb") as image_file:
+    elif os.path.exists(url) and os.path.isfile(url):
+        if any(lower_url.endswith(_) for _ in support_image_extensions):
+            with open(url, "rb") as image_file:
                 base64_image = base64.b64encode(image_file.read()).decode(
                     "utf-8",
                 )
@@ -156,7 +187,7 @@ def _to_openai_image_url(url: str) -> str:
             mime_type = f"image/{extension}"
             return f"data:{mime_type};base64,{base64_image}"
 
-    raise TypeError(f"{url} should be end with {image_extensions}.")
+    raise TypeError(f"{url} should be end with {support_image_extensions}.")
 
 
 def _download_file(url: str, path_file: str, max_retries: int = 3) -> bool:
@@ -178,7 +209,7 @@ def _download_file(url: str, path_file: str, max_retries: int = 3) -> bool:
                     file.write(chunk)
             return True
         else:
-            logger.warning(
+            raise RuntimeError(
                 f"Failed to download file from {url} (status code: "
                 f"{response.status_code}). Retry {n_retry}/{max_retries}.",
             )
@@ -200,6 +231,25 @@ def _generate_random_code(
     if digits:
         characters += string.digits
     return "".join(secrets.choice(characters) for i in range(length))
+
+
+def generate_id_from_seed(seed: str, length: int = 8) -> str:
+    """Generate random id from seed str.
+
+    Args:
+        seed (`str`): seed string.
+        length (`int`): generated id length.
+    """
+    hasher = hashlib.sha256()
+    hasher.update(seed.encode("utf-8"))
+    hash_digest = hasher.hexdigest()
+
+    random.seed(hash_digest)
+    id_chars = [
+        random.choice(string.ascii_letters + string.digits)
+        for _ in range(length)
+    ]
+    return "".join(id_chars)
 
 
 def _is_json_serializable(obj: Any) -> bool:
@@ -244,3 +294,168 @@ def _convert_to_str(content: Any) -> str:
         return json.dumps(content, ensure_ascii=False)
     else:
         return str(content)
+
+
+def reform_dialogue(input_msgs: list[dict]) -> list[dict]:
+    """record dialog history as a list of strings"""
+    messages = []
+
+    dialogue = []
+    for i, unit in enumerate(input_msgs):
+        if i == 0 and unit["role"] == "system":
+            # system prompt
+            messages.append(
+                {
+                    "role": unit["role"],
+                    "content": _convert_to_str(unit["content"]),
+                },
+            )
+        else:
+            # Merge all messages into a dialogue history prompt
+            dialogue.append(
+                f"{unit['name']}: {_convert_to_str(unit['content'])}",
+            )
+
+    dialogue_history = "\n".join(dialogue)
+
+    user_content_template = "## Dialogue History\n{dialogue_history}"
+
+    messages.append(
+        {
+            "role": "user",
+            "content": user_content_template.format(
+                dialogue_history=dialogue_history,
+            ),
+        },
+    )
+
+    return messages
+
+
+def _join_str_with_comma_and(elements: List[str]) -> str:
+    """Return the JSON string with comma, and use " and " between the last two
+    elements."""
+
+    if len(elements) == 0:
+        return ""
+    elif len(elements) == 1:
+        return elements[0]
+    elif len(elements) == 2:
+        return " and ".join(elements)
+    else:
+        return ", ".join(elements[:-1]) + f", and {elements[-1]}"
+
+
+class ImportErrorReporter:
+    """Used as a placeholder for missing packages.
+    When called, an ImportError will be raised, prompting the user to install
+    the specified extras requirement.
+    """
+
+    def __init__(self, error: ImportError, extras_require: str = None) -> None:
+        """Init the ImportErrorReporter.
+
+        Args:
+            error (`ImportError`): the original ImportError.
+            extras_require (`str`): the extras requirement.
+        """
+        self.error = error
+        self.extras_require = extras_require
+
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        return self._raise_import_error()
+
+    def __getattr__(self, name: str) -> Any:
+        return self._raise_import_error()
+
+    def __getitem__(self, __key: Any) -> Any:
+        return self._raise_import_error()
+
+    def _raise_import_error(self) -> Any:
+        """Raise the ImportError"""
+        err_msg = f"ImportError occorred: [{self.error.msg}]."
+        if self.extras_require is not None:
+            err_msg += (
+                f" Please install [{self.extras_require}] version"
+                " of agentscope."
+            )
+        raise ImportError(err_msg)
+
+
+def _hash_string(
+    data: str,
+    hash_method: Literal["sha256", "md5", "sha1"],
+) -> str:
+    """Hash the string data."""
+    hash_func = getattr(hashlib, hash_method)()
+    hash_func.update(data.encode())
+    return hash_func.hexdigest()
+
+
+def _get_process_creation_time() -> datetime.datetime:
+    """Get the creation time of the process."""
+    pid = os.getpid()
+    # Find the process by pid
+    current_process = psutil.Process(pid)
+    # Obtain the process creation time
+    create_time = current_process.create_time()
+    # Change the timestamp to a readable format
+    return datetime.datetime.fromtimestamp(create_time)
+
+
+def _is_process_alive(
+    pid: int,
+    create_time_str: str,
+    create_time_format: str = "%Y-%m-%d %H:%M:%S",
+    tolerance_seconds: int = 10,
+) -> bool:
+    """Check if the process is alive by comparing the actual creation time of
+    the process with the given creation time.
+
+    Args:
+        pid (`int`):
+            The process id.
+        create_time_str (`str`):
+            The given creation time string.
+        create_time_format (`str`, defaults to `"%Y-%m-%d %H:%M:%S"`):
+            The format of the given creation time string.
+        tolerance_seconds (`int`, defaults to `10`):
+            The tolerance seconds for comparing the actual creation time with
+            the given creation time.
+
+    Returns:
+        `bool`: True if the process is alive, False otherwise.
+    """
+    try:
+        # Try to create a process object by pid
+        proc = psutil.Process(pid)
+        # Obtain the actual creation time of the process
+        actual_create_time_timestamp = proc.create_time()
+
+        # Convert the given creation time string to a datetime object
+        given_create_time_datetime = datetime.datetime.strptime(
+            create_time_str,
+            create_time_format,
+        )
+
+        # Calculate the time difference between the actual creation time and
+        time_difference = abs(
+            actual_create_time_timestamp
+            - given_create_time_datetime.timestamp(),
+        )
+
+        # Compare the actual creation time with the given creation time
+        if time_difference <= tolerance_seconds:
+            return True
+
+    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+        # If the process is not found, access is denied, or the process is a
+        # zombie process, return False
+        return False
+
+    return False
+
+
+def _is_windows() -> bool:
+    """Check if the system is Windows."""
+    return os.name == "nt"
