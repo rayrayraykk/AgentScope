@@ -1,142 +1,114 @@
-English | [**中文**](README_ZH.md)
+[**中文主页**](https://github.com/modelscope/agentscope/blob/main/README_ZH.md) | [**日本語のホームページ**](https://github.com/modelscope/agentscope/blob/main/README_JA.md) | [**Tutorial**](https://doc.agentscope.io/) | [**Roadmap**](https://github.com/modelscope/agentscope/blob/main/docs/ROADMAP.md) | [**FAQ**](https://doc.agentscope.io/tutorial/faq.html)
 
-# AgentScope
+<h2 align="center">AgentScope: Agent-Oriented Programming for Building LLM Applications</h2>
 
-Start building LLM-empowered multi-agent applications in an easier way.
+<p align="center">
+    <a href="https://arxiv.org/abs/2402.14034">
+        <img
+            src="https://img.shields.io/badge/cs.MA-2402.14034-B31C1C?logo=arxiv&logoColor=B31C1C"
+            alt="arxiv"
+        />
+    </a>
+    <a href="https://pypi.org/project/agentscope/">
+        <img
+            src="https://img.shields.io/badge/python-3.9+-blue?logo=python"
+            alt="pypi"
+        />
+    </a>
+    <a href="https://pypi.org/project/agentscope/">
+        <img
+            src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fpypi.org%2Fpypi%2Fagentscope%2Fjson&query=%24.info.version&prefix=v&logo=pypi&label=version"
+            alt="pypi"
+        />
+    </a>
+    <a href="https://doc.agentscope.io/">
+        <img
+            src="https://img.shields.io/badge/Docs-English%7C%E4%B8%AD%E6%96%87-blue?logo=markdown"
+            alt="docs"
+        />
+    </a>
+    <a href="https://agentscope.io/">
+        <img
+            src="https://img.shields.io/badge/Drag_and_drop_UI-WorkStation-blue?logo=html5&logoColor=green&color=dark-green"
+            alt="workstation"
+        />
+    </a>
+    <a href="./LICENSE">
+        <img
+            src="https://img.shields.io/badge/license-Apache--2.0-black"
+            alt="license"
+        />
+    </a>
+</p>
 
-[![](https://img.shields.io/badge/cs.MA-2402.14034-B31C1C?logo=arxiv&logoColor=B31C1C)](https://arxiv.org/abs/2402.14034)
-[![](https://img.shields.io/badge/python-3.9+-blue)](https://pypi.org/project/agentscope/)
-[![](https://img.shields.io/badge/pypi-v0.0.3-blue?logo=pypi)](https://pypi.org/project/agentscope/)
-[![](https://img.shields.io/badge/Docs-English%7C%E4%B8%AD%E6%96%87-blue?logo=markdown)](https://modelscope.github.io/agentscope/#welcome-to-agentscope-tutorial-hub)
-[![](https://img.shields.io/badge/Docs-API_Reference-blue?logo=markdown)](https://modelscope.github.io/agentscope/)
-[![](https://img.shields.io/badge/ModelScope-Demos-4e29ff.svg?logo=data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjI0IDEyMS4zMyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KCTxwYXRoIGQ9Im0wIDQ3Ljg0aDI1LjY1djI1LjY1aC0yNS42NXoiIGZpbGw9IiM2MjRhZmYiIC8+Cgk8cGF0aCBkPSJtOTkuMTQgNzMuNDloMjUuNjV2MjUuNjVoLTI1LjY1eiIgZmlsbD0iIzYyNGFmZiIgLz4KCTxwYXRoIGQ9Im0xNzYuMDkgOTkuMTRoLTI1LjY1djIyLjE5aDQ3Ljg0di00Ny44NGgtMjIuMTl6IiBmaWxsPSIjNjI0YWZmIiAvPgoJPHBhdGggZD0ibTEyNC43OSA0Ny44NGgyNS42NXYyNS42NWgtMjUuNjV6IiBmaWxsPSIjMzZjZmQxIiAvPgoJPHBhdGggZD0ibTAgMjIuMTloMjUuNjV2MjUuNjVoLTI1LjY1eiIgZmlsbD0iIzM2Y2ZkMSIgLz4KCTxwYXRoIGQ9Im0xOTguMjggNDcuODRoMjUuNjV2MjUuNjVoLTI1LjY1eiIgZmlsbD0iIzYyNGFmZiIgLz4KCTxwYXRoIGQ9Im0xOTguMjggMjIuMTloMjUuNjV2MjUuNjVoLTI1LjY1eiIgZmlsbD0iIzM2Y2ZkMSIgLz4KCTxwYXRoIGQ9Im0xNTAuNDQgMHYyMi4xOWgyNS42NXYyNS42NWgyMi4xOXYtNDcuODR6IiBmaWxsPSIjNjI0YWZmIiAvPgoJPHBhdGggZD0ibTczLjQ5IDQ3Ljg0aDI1LjY1djI1LjY1aC0yNS42NXoiIGZpbGw9IiMzNmNmZDEiIC8+Cgk8cGF0aCBkPSJtNDcuODQgMjIuMTloMjUuNjV2LTIyLjE5aC00Ny44NHY0Ny44NGgyMi4xOXoiIGZpbGw9IiM2MjRhZmYiIC8+Cgk8cGF0aCBkPSJtNDcuODQgNzMuNDloLTIyLjE5djQ3Ljg0aDQ3Ljg0di0yMi4xOWgtMjUuNjV6IiBmaWxsPSIjNjI0YWZmIiAvPgo8L3N2Zz4K)](https://modelscope.cn/studios?name=agentscope&page=1&sort=latest)
+<p align="center">
+<img src="https://trendshift.io/api/badge/repositories/10079" alt="modelscope%2Fagentscope | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
+</p>
 
-[![](https://img.shields.io/badge/license-Apache--2.0-black)](./LICENSE)
-[![](https://img.shields.io/badge/Contribute-Welcome-green)](https://modelscope.github.io/agentscope/tutorial/contribute.html)
+## ✨ Why AgentScope?
 
-If you find our work helpful, please kindly
-cite [our paper](https://arxiv.org/abs/2402.14034).
+Easy for beginners, powerful for experts.
+
+- **Transparent to Developers**: Transparent is our **FIRST principle**. Prompt engineering, API invocation, agent building, workflow orchestration, all are visible and controllable for developers. No deep encapsulation or implicit magic.
+- **Model Agnostic**: Programming once, run with all models. More than **17+** LLM API providers are supported.
+- **LEGO-style Agent Building**: All components are **modular** and **independent**. Use them or not, your choice.
+- **Multi-Agent Oriented**: Designed for **multi-agent**, **explicit** message passing and workflow orchestration, NO deep encapsulation.
+- **Native Distribution/Parallelization**: Centralized programming for distributed application, and **automatic parallelization**.
+- **Highly Customizable**: Tools, prompt, agent, workflow, third-party libs & visualization, customization is encouraged everywhere.
+- **Developer-friendly**: Low-code development, visual tracing & monitoring. From developing to deployment, all in one place.
+
+## 📢 News
+- **[2025-07-01]** A new version AgentScope is under development. In this new version, AgentScope will be more powerful and flexible, with a new architecture and more features. Refer to our [Roadmap](https://github.com/modelscope/agentscope/blob/main/docs/ROADMAP.md) for more details!
+- **[2025-04-27]** A new 💻 AgentScope Studio is online now. Refer [here](https://doc.agentscope.io/build_tutorial/visual.html) for more details.
+- **[2025-03-21]** AgentScope supports hooks functions now. Refer to our [tutorial](https://doc.agentscope.io/build_tutorial/hook.html) for more details.
+- **[2025-03-19]** AgentScope supports 🔧 tools API now. Refer to our [tutorial](https://doc.agentscope.io/build_tutorial/tool.html).
+- **[2025-03-20]** Agentscope now supports [MCP Server](https://github.com/modelcontextprotocol/servers)! You can learn how to use it by following this [tutorial](https://doc.agentscope.io/build_tutorial/MCP.html).
+- **[2025-03-05]** Our [🎓 AgentScope Copilot](applications/multisource_rag_app/README.md), a multi-source RAG application is open-source now!
+- **[2025-02-24]** [🇨🇳 Chinese version tutorial](https://doc.agentscope.io/zh_CN) is online now!
+- **[2025-02-13]** We have released the [📁 technical report](https://doc.agentscope.io/tutorial/swe.html) of our solution in [SWE-Bench(Verified)](https://www.swebench.com/)!
+- **[2025-02-07]** 🎉🎉 AgentScope has achieved a **63.4% resolve rate** in [SWE-Bench(Verified)](https://www.swebench.com/).
+- **[2025-01-04]** AgentScope supports Anthropic API now.
+
+👉👉 [**Older News**](https://github.com/modelscope/agentscope/blob/main/docs/news_en.md)
+
+## 💬 Contact
 
 Welcome to join our community on
 
 | [Discord](https://discord.gg/eYMpfnkG8h)                                                                                         | DingTalk                                                                                                                          |
 |----------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| <img src="https://gw.alicdn.com/imgextra/i1/O1CN01hhD1mu1Dd3BWVUvxN_!!6000000000238-2-tps-400-400.png" width="100" height="100"> | <img src="https://img.alicdn.com/imgextra/i2/O1CN01tuJ5971OmAqNg9cOw_!!6000000001747-0-tps-444-460.jpg" width="100" height="100"> |
+| <img src="https://gw.alicdn.com/imgextra/i1/O1CN01hhD1mu1Dd3BWVUvxN_!!6000000000238-2-tps-400-400.png" width="100" height="100"> | <img src="https://img.alicdn.com/imgextra/i1/O1CN01LxzZha1thpIN2cc2E_!!6000000005934-2-tps-497-477.png" width="100" height="100"> |
 
-----
 
-## News
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## 📑 Table of Contents
 
-- <img src="https://img.alicdn.com/imgextra/i3/O1CN01SFL0Gu26nrQBFKXFR_!!6000000007707-2-tps-500-500.png" alt="new" width="30" height="30"/>**[2024-04-19]** AgentScope supports Llama3 now! We provide [scripts](./examples/model_llama3) and example [model configuration](./examples/model_llama3) for quick set-up. Feel free to try llama3 in our examples!
+- [🚀 Quickstart](#-quickstart)
+  - [💻 Installation](#-installation)
+    - [🛠️ From source](#-from-source)
+    - [📦 From PyPi](#-from-pypi)
+- [📝 Example](#-example)
+  - [👋 Hello AgentScope](#-hello-agentscope)
+  - [🧑‍🤝‍🧑 Multi-Agent Conversation](#-multi-agent-conversation)
+  - [💡 Reasoning with Tools & MCP](#-reasoning-with-tools--mcp)
+  - [🔠 Structured Output](#-structured-output)
+  - [✏️ Workflow Orchestration](#-workflow-orchestration)
+  - [⚡️ Distribution and Parallelization](#%EF%B8%8F-distribution-and-parallelization)
+  - [👀 Tracing & Monitoring](#-tracing--monitoring)
+- [⚖️ License](#-license)
+- [📚 Publications](#-publications)
+- [✨ Contributors](#-contributors)
 
-- <img src="https://img.alicdn.com/imgextra/i3/O1CN01SFL0Gu26nrQBFKXFR_!!6000000007707-2-tps-500-500.png" alt="new" width="30" height="30"/>**[2024-04-06]** We release **AgentScope** v0.0.3 now!
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-- <img src="https://img.alicdn.com/imgextra/i3/O1CN01SFL0Gu26nrQBFKXFR_!!6000000007707-2-tps-500-500.png" alt="new" width="30" height="30"/>**[2024-04-06]** New examples [Gomoku](./examples/game_gomoku), [Conversation with ReAct Agent](./examples/conversation_with_react_agent), [Conversation with RAG Agent](./examples/conversation_with_RAG_agents) and [Distributed Parallel Search](./examples/distributed_search) are available now!
+## 🚀 Quickstart
 
-- <img src="https://img.alicdn.com/imgextra/i3/O1CN01SFL0Gu26nrQBFKXFR_!!6000000007707-2-tps-500-500.png" alt="new" width="30" height="30"/>**[2024-03-19]** We release **AgentScope** v0.0.2 now! In this new version,
-AgentScope supports [ollama](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#supported-models)(A local CPU inference engine), [DashScope](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#supported-models) and Google [Gemini](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#supported-models) APIs.
+### 💻 Installation
 
-- <img src="https://img.alicdn.com/imgextra/i3/O1CN01SFL0Gu26nrQBFKXFR_!!6000000007707-2-tps-500-500.png" alt="new" width="30" height="30"/>**[2024-03-19]** New examples ["Autonomous Conversation with Mentions"](./examples/conversation_with_mentions) and ["Basic Conversation with LangChain library"](./examples/conversation_with_langchain) are available now!
+> AgentScope requires **Python 3.9** or higher.
 
-- <img src="https://img.alicdn.com/imgextra/i3/O1CN01SFL0Gu26nrQBFKXFR_!!6000000007707-2-tps-500-500.png" alt="new" width="30" height="30"/>**[2024-03-19]** The [Chinese tutorial](https://modelscope.github.io/agentscope/zh_CN/index.html) of AgentScope is online now!
-
-- **[2024-02-27]** We release **AgentScope v0.0.1** now, which is also
-available in [PyPI](https://pypi.org/project/agentscope/)!
-- **[2024-02-14]** We release our paper "AgentScope: A Flexible yet Robust
-Multi-Agent Platform" in [arXiv](https://arxiv.org/abs/2402.14034) now!
-
----
-
-## What's AgentScope?
-
-AgentScope is an innovative multi-agent platform designed to empower developers
-to build multi-agent applications with large-scale models.
-It features three high-level capabilities:
-
-- 🤝 **Easy-to-Use**: Designed for developers, with [fruitful components](https://modelscope.github.io/agentscope/en/tutorial/204-service.html#),
-[comprehensive documentation](https://modelscope.github.io/agentscope/en/index.html), and broad compatibility.
-
-- ✅ **High Robustness**: Supporting customized fault-tolerance controls and
-retry mechanisms to enhance application stability.
-
-- 🚀 **Actor-Based Distribution**: Building distributed multi-agent
-applications in a centralized programming manner for streamlined development.
-
-**Supported Model Libraries**
-
-AgentScope provides a list of `ModelWrapper` to support both local model
-services and third-party model APIs.
-
-| API                    | Task            | Model Wrapper                                                                                                                   | Configuration                                                                      | Some Supported Models                         |
-|------------------------|-----------------|---------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|-----------------------------------------------|
-| OpenAI API             | Chat            | [`OpenAIChatWrapper`](https://github.com/modelscope/agentscope/blob/main/src/agentscope/models/openai_model.py)                 |[guidance](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#openai-api)  <br> [template](https://github.com/modelscope/agentscope/blob/main/examples/model_configs_template/openai_chat_template.json)       | gpt-4, gpt-3.5-turbo, ...                     |
-|                        | Embedding       | [`OpenAIEmbeddingWrapper`](https://github.com/modelscope/agentscope/blob/main/src/agentscope/models/openai_model.py)            | [guidance](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#openai-api) <br> [template](https://github.com/modelscope/agentscope/blob/main/examples/model_configs_template/openai_embedding_template.json)       | text-embedding-ada-002, ...                   |
-|                        | DALL·E          | [`OpenAIDALLEWrapper`](https://github.com/modelscope/agentscope/blob/main/src/agentscope/models/openai_model.py)                | [guidance](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#openai-api) <br> [template](https://github.com/modelscope/agentscope/blob/main/examples/model_configs_template/openai_dall_e_template.json)       | dall-e-2, dall-e-3                            |
-| DashScope API          | Chat            | [`DashScopeChatWrapper`](https://github.com/modelscope/agentscope/blob/main/src/agentscope/models/dashscope_model.py)           | [guidance](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#dashscope-api) <br> [template](https://github.com/modelscope/agentscope/blob/main/examples/model_configs_template/dashscope_chat_template.json)    | qwen-plus, qwen-max, ...                      |
-|                        | Image Synthesis | [`DashScopeImageSynthesisWrapper`](https://github.com/modelscope/agentscope/blob/main/src/agentscope/models/dashscope_model.py) | [guidance](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#dashscope-api)  <br>[template](https://github.com/modelscope/agentscope/blob/main/examples/model_configs_template/dashscope_image_synthesis_template.json)    | wanx-v1                                       |
-|                        | Text Embedding  | [`DashScopeTextEmbeddingWrapper`](https://github.com/modelscope/agentscope/blob/main/src/agentscope/models/dashscope_model.py)  | [guidance](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#dashscope-api) <br> [template](https://github.com/modelscope/agentscope/blob/main/examples/model_configs_template/dashscope_text_embedding_template.json)    | text-embedding-v1, text-embedding-v2, ...     |
-|                        | Multimodal      | [`DashScopeMultiModalWrapper`](https://github.com/modelscope/agentscope/blob/main/src/agentscope/models/dashscope_model.py)     | [guidance](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#dashscope-api) <br> [template](https://github.com/modelscope/agentscope/blob/main/examples/model_configs_template/dashscope_multimodal_template.json)    | qwen-vl-max, qwen-vl-chat-v1, qwen-audio-chat |
-| Gemini API             | Chat            | [`GeminiChatWrapper`](https://github.com/modelscope/agentscope/blob/main/src/agentscope/models/gemini_model.py)                 | [guidance](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#gemini-api) <br> [template](https://github.com/modelscope/agentscope/blob/main/examples/model_configs_template/gemini_chat_template.json)       | gemini-pro, ...                               |
-|                        | Embedding       | [`GeminiEmbeddingWrapper`](https://github.com/modelscope/agentscope/blob/main/src/agentscope/models/gemini_model.py)            | [guidance](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#gemini-api) <br> [template](https://github.com/modelscope/agentscope/blob/main/examples/model_configs_template/gemini_embedding_template.json)       | models/embedding-001, ...                     |
-| ollama                 | Chat            | [`OllamaChatWrapper`](https://github.com/modelscope/agentscope/blob/main/src/agentscope/models/ollama_model.py)                 | [guidance](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#ollama-api) <br> [template](https://github.com/modelscope/agentscope/blob/main/examples/model_configs_template/ollama_chat_template.json)       | llama3, llama2, Mistral, ...                  |
-|                        | Embedding       | [`OllamaEmbeddingWrapper`](https://github.com/modelscope/agentscope/blob/main/src/agentscope/models/ollama_model.py)            | [guidance](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#ollama-api) <br> [template](https://github.com/modelscope/agentscope/blob/main/examples/model_configs_template/ollama_embedding_template.json)       | llama2, Mistral, ...                          |
-|                        | Generation      | [`OllamaGenerationWrapper`](https://github.com/modelscope/agentscope/blob/main/src/agentscope/models/ollama_model.py)           | [guidance](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#ollama-api) <br> [template](https://github.com/modelscope/agentscope/blob/main/examples/model_configs_template/ollama_generate_template.json)       | llama2, Mistral, ...                          |
-| Post Request based API | -               | [`PostAPIModelWrapper`](https://github.com/modelscope/agentscope/blob/main/src/agentscope/models/post_model.py)                 | [guidance](https://modelscope.github.io/agentscope/en/tutorial/203-model.html#post-request-api) <br> [template](https://github.com/modelscope/agentscope/blob/main/examples/model_configs_template/postapi_model_config_template.json) | -                                             |
-
-**Supported Local Model Deployment**
-
-AgentScope enables developers to rapidly deploy local model services using
-the following libraries.
-
-- [ollama (CPU inference)](https://github.com/modelscope/agentscope/blob/main/scripts/README.md#ollama)
-- [Flask + Transformers](https://github.com/modelscope/agentscope/blob/main/scripts/README.md#with-transformers-library)
-- [Flask + ModelScope](https://github.com/modelscope/agentscope/blob/main/scripts/README.md#with-modelscope-library)
-- [FastChat](https://github.com/modelscope/agentscope/blob/main/scripts/README.md#fastchat)
-- [vllm](https://github.com/modelscope/agentscope/blob/main/scripts/README.md#vllm)
-
-**Supported Services**
-
-- Web Search
-- Data Query
-- Retrieval
-- Code Execution
-- File Operation
-- Text Processing
-
-**Example Applications**
-
-- Model
-  - <img src="https://img.alicdn.com/imgextra/i3/O1CN01SFL0Gu26nrQBFKXFR_!!6000000007707-2-tps-500-500.png" alt="new" width="30" height="30"/>[Using Llama3 in AgentScope](./examples/model_llama3)
-
-- Conversation
-  - [Basic Conversation](./examples/conversation_basic)
-  - [Autonomous Conversation with Mentions](./examples/conversation_with_mentions)
-  - [Self-Organizing Conversation](./examples/conversation_self_organizing)
-  - [Basic Conversation with LangChain library](./examples/conversation_with_langchain)
-  - [Conversation with ReAct Agent](./examples/conversation_with_react_agent)
-  - [Conversation with RAG Agent](./examples/conversation_with_RAG_agents)
-
-- Game
-  - [Gomoku](./examples/game_gomoku)
-  - [Werewolf](./examples/game_werewolf)
-
-- Distribution
-  - [Distributed Conversation](./examples/distributed_basic)
-  - [Distributed Debate](./examples/distributed_debate)
-  - [Distributed Parallel Search](./examples/distributed_search)
-
-More models, services and examples are coming soon!
-
-## Installation
-
-AgentScope requires **Python 3.9** or higher.
-
-**_Note: This project is currently in active development, it's recommended to
-install AgentScope from source._**
-
-### From source
-
-- Install AgentScope in editable mode:
+#### 🛠️ From source
 
 ```bash
 # Pull the source code from GitHub
@@ -147,199 +119,386 @@ cd agentscope
 pip install -e .
 ```
 
-- To build distributed multi-agent applications:
-
-```bash
-# On windows
-pip install -e .[distribute]
-# On mac
-pip install -e .\[distribute\]
-```
-
-### Using pip
-
-- Install AgentScope from pip:
+#### 📦 From PyPi
 
 ```bash
 pip install agentscope
 ```
 
-## Quick Start
+## 📝 Example
 
-### Configuration
+### 👋 Hello AgentScope
 
-In AgentScope, the model deployment and invocation are decoupled by
-`ModelWrapper`.
+![](https://img.shields.io/badge/✨_Feature-Transparent-green)
+![](https://img.shields.io/badge/✨_Feature-Model--Agnostic-b)
 
-To use these model wrappers, you need to prepare a model config file as
-follows.
-
-```python
-model_config = {
-    # The identifies of your config and used model wrapper
-    "config_name": "{your_config_name}",          # The name to identify the config
-    "model_type": "{model_type}",                 # The type to identify the model wrapper
-
-    # Detailed parameters into initialize the model wrapper
-    # ...
-}
-```
-
-Taking OpenAI Chat API as an example, the model configuration is as follows:
-
-```python
-openai_model_config = {
-    "config_name": "my_openai_config",             # The name to identify the config
-    "model_type": "openai_chat",                   # The type to identify the model wrapper
-
-    # Detailed parameters into initialize the model wrapper
-    "model_name": "gpt-4",                         # The used model in openai API, e.g. gpt-4, gpt-3.5-turbo, etc.
-    "api_key": "xxx",                              # The API key for OpenAI API. If not set, env
-                                                   # variable OPENAI_API_KEY will be used.
-    "organization": "xxx",                         # The organization for OpenAI API. If not set, env
-                                                   # variable OPENAI_ORGANIZATION will be used.
-}
-```
-
-More details about how to set up local model services and prepare model
-configurations is in our
-[tutorial](https://modelscope.github.io/agentscope/index.html#welcome-to-agentscope-tutorial-hub).
-
-### Create Agents
-
-Create built-in user and assistant agents as follows.
+Creating a basic conversation **explicitly** between **a user** and **an assistant** with AgentScope:
 
 ```python
 from agentscope.agents import DialogAgent, UserAgent
 import agentscope
 
 # Load model configs
-agentscope.init(model_configs="./model_configs.json")
+agentscope.init(
+    model_configs=[
+        {
+            "config_name": "my_config",
+            "model_type": "dashscope_chat",
+            "model_name": "qwen-max",
+        }
+    ]
+)
 
 # Create a dialog agent and a user agent
-dialog_agent = DialogAgent(name="assistant",
-                           model_config_name="my_openai_config")
-user_agent = UserAgent()
-```
+dialog_agent = DialogAgent(
+    name="Friday",
+    model_config_name="my_config",
+    sys_prompt="You're a helpful assistant named Friday"
+)
+user_agent = UserAgent(name="user")
 
-### Construct Conversation
-
-In AgentScope, **message** is the bridge among agents, which is a
-**dict** that contains two necessary fields `name` and `content` and an
-optional field `url` to local files (image, video or audio) or website.
-
-```python
-from agentscope.message import Msg
-
-x = Msg(name="Alice", content="Hi!")
-x = Msg("Bob", "What about this picture I took?", url="/path/to/picture.jpg")
-```
-
-Start a conversation between two agents (e.g. dialog_agent and user_agent)
-with the following code:
-
-```python
+# Build the workflow/conversation explicitly
 x = None
-while True:
+while x is None or x.content != "exit":
     x = dialog_agent(x)
     x = user_agent(x)
-    if x.content == "exit":  # user input "exit" to exit the conversation_basic
-        break
 ```
 
-### AgentScope Studio
+### 🧑‍🤝‍🧑 Multi-Agent Conversation
 
-AgentScope provides an easy-to-use runtime user interface capable of
-displaying multimodal output on the front end, including text, images,
-audio and video. To start a studio, you should install the `full` version
-of AgentScope.
+AgentScope is designed for **multi-agent** applications, offering flexible control over information flow and communication between agents.
 
+![](https://img.shields.io/badge/✨_Feature-Transparent-green)
+![](https://img.shields.io/badge/✨_Feature-Multi--Agent-purple)
+
+```python
+from agentscope.agents import DialogAgent
+from agentscope.message import Msg
+from agentscope.pipelines import sequential_pipeline
+from agentscope import msghub
+import agentscope
+
+# Load model configs
+agentscope.init(
+    model_configs=[
+        {
+            "config_name": "my_config",
+            "model_type": "dashscope_chat",
+            "model_name": "qwen-max",
+        }
+    ]
+)
+
+# Create three agents
+friday = DialogAgent(
+    name="Friday",
+    model_config_name="my_config",
+    sys_prompt="You're a helpful assistant named Friday"
+)
+
+saturday = DialogAgent(
+    name="Saturday",
+    model_config_name="my_config",
+    sys_prompt="You're a helpful assistant named Saturday"
+)
+
+sunday = DialogAgent(
+    name="Sunday",
+    model_config_name="my_config",
+    sys_prompt="You're a helpful assistant named Sunday"
+)
+
+# Create a chatroom by msghub, where agents' messages are broadcast to all participants
+with msghub(
+    participants=[friday, saturday, sunday],
+    announcement=Msg("user", "Counting from 1 and report one number each time without other things", "user"),  # A greeting message
+) as hub:
+    # Speak in sequence
+    sequential_pipeline([friday, saturday, sunday], x=None)
 ```
-# On windows
-pip install -e .[full]
-# On mac
-pip install -e .\[full\]
+
+### 💡 Reasoning with Tools & MCP
+
+![](https://img.shields.io/badge/✨_Feature-Transparent-green)
+
+Creating a reasoning agent with built-in tools and **MCP servers**!
+
+```python
+from agentscope.agents import ReActAgentV2, UserAgent
+from agentscope.service import ServiceToolkit, execute_python_code
+import agentscope
+
+agentscope.init(
+    model_configs={
+        "config_name": "my_config",
+        "model_type": "dashscope_chat",
+        "model_name": "qwen-max",
+    }
+)
+
+# Add tools
+toolkit = ServiceToolkit()
+toolkit.add(execute_python_code)
+
+# Connect to Gaode MCP server
+toolkit.add_mcp_servers(
+    {
+        "mcpServers": {
+            "amap-amap-sse": {
+            "url": "https://mcp.amap.com/sse?key={YOUR_GAODE_API_KEY}"
+            }
+        }
+    }
+)
+
+# Create a reasoning-acting agent
+agent = ReActAgentV2(
+    name="Friday",
+    model_config_name="my_config",
+    service_toolkit=toolkit,
+    sys_prompt="You're a helpful assistant named Friday."
+)
+user_agent = UserAgent(name="user")
+
+# Build the workflow/conversation explicitly
+x = None
+while x is None or x.content != "exit":
+    x = agent(x)
+    x = user_agent(x)
 ```
 
-Once installed, you can just run
+### 🔠 Structured Output
 
+![](https://img.shields.io/badge/✨_Feature-Easy--to--use-yellow)
+
+Specifying structured output with a Pydantic base model.
+
+```python
+from agentscope.agents import ReActAgentV2
+from agentscope.service import ServiceToolkit
+from agentscope.message import Msg
+from pydantic import BaseModel, Field
+from typing import Literal
+import agentscope
+
+agentscope.init(
+    model_configs={
+        "config_name": "my_config",
+        "model_type": "dashscope_chat",
+        "model_name": "qwen-max",
+    }
+)
+
+# Create a reasoning-acting agent
+agent = ReActAgentV2(
+    name="Friday",
+    model_config_name="my_config",
+    service_toolkit=ServiceToolkit(),
+    max_iters=20
+)
+
+class CvModel(BaseModel):
+    name: str = Field(max_length=50, description="The name")
+    description: str = Field(max_length=200, description="The brief description")
+    aget: int = Field(gt=0, le=120, description="The age of the person")
+
+class ChoiceModel(BaseModel):
+    choice: Literal["apple", "banana"]
+
+# Specify structured output using `structured_model`
+res_msg = agent(
+    Msg("user", "Introduce Einstein", "user"),
+    structured_model=CvModel
+)
+print(res_msg.metadata)
+
+# Switch to different structured model
+res_msg = agent(
+    Msg("user", "Choice a fruit", "user"),
+    structured_model=ChoiceModel
+)
+print(res_msg.metadata)
 ```
-as_studio  path/to/your/script.py
+
+### ✏️ Workflow Orchestration
+
+![](https://img.shields.io/badge/✨_Feature-Transparent-green)
+
+[Routing](https://www.anthropic.com/engineering/building-effective-agents), [parallelization](https://www.anthropic.com/engineering/building-effective-agents), [orchestrator-workers](https://www.anthropic.com/engineering/building-effective-agents), or [evaluator-optimizer](https://www.anthropic.com/engineering/building-effective-agents).
+Build your own workflow with AgentScope easily! Taking routing as an example:
+
+```python
+from agentscope.agents import ReActAgentV2
+from agentscope.service import ServiceToolkit
+from agentscope.message import Msg
+from pydantic import BaseModel, Field
+from typing import Literal, Union
+import agentscope
+
+agentscope.init(
+    model_configs={
+        "config_name": "my_config",
+        "model_type": "dashscope_chat",
+        "model_name": "qwen-max",
+    }
+)
+
+# Workflow: Routing
+routing_agent = ReActAgentV2(
+    name="Routing",
+    model_config_name="my_config",
+    sys_prompt="You're a routing agent. Your target is to route the user query to the right follow-up task",
+    service_toolkit=ServiceToolkit()
+)
+
+# Use structured output to specify the routing task
+class RoutingChoice(BaseModel):
+    your_choice: Literal[
+        'Content Generation',
+        'Programming',
+        'Information Retrieval',
+        None
+    ] = Field(description="Choice the right follow-up task, and choice `None` if the task is too simple or no suitable task")
+    task_description: Union[str, None] = Field(description="The task description", default=None)
+
+res_msg = routing_agent(
+    Msg("user", "Help me to write a poem", "user"),
+    structured_model=RoutingChoice
+)
+
+# Execute the follow-up task
+if res_msg.metadata["your_choice"] == "Content Generation":
+    ...
+elif res_msg.metadata["your_choice"] == "Programming":
+    ...
+elif res_msg.metadata["your_choice"] == "Information Retrieval":
+    ...
+else:
+    ...
 ```
 
-Then the studio will be launched at `localhost:xxxx`, and you can see the UI similar to the
-following:
-![](https://gw.alicdn.com/imgextra/i3/O1CN01X673v81WaHV1oCxEN_!!6000000002804-0-tps-2992-1498.jpg)
-To be able to use the `as_studio` functionality, please implement the `main` function in your code. More detail can be found in [src/agentscope/web/README.md](src/agentscope/web/README.md).
+### ⚡️ Distribution and Parallelization
 
-## Tutorial
+![](https://img.shields.io/badge/✨_Feature-Transparent-green)
+![](https://img.shields.io/badge/✨_Feature-Distribution-darkblue)
+![](https://img.shields.io/badge/✨_Feature-Efficiency-green)
 
-- [Getting Started](https://modelscope.github.io/agentscope/en/tutorial/quick_start.html)
-  - [About AgentScope](https://modelscope.github.io/agentscope/en/tutorial/101-agentscope.html)
-  - [Installation](https://modelscope.github.io/agentscope/en/tutorial/102-installation.html)
-  - [Quick Start](https://modelscope.github.io/agentscope/en/tutorial/103-example.html)
-  - [Crafting Your First Application](https://modelscope.github.io/agentscope/en/tutorial/104-usecase.html)
-  - [Logging and WebUI](https://modelscope.github.io/agentscope/en/tutorial/105-logging.html#)
-- [Advanced Exploration](https://modelscope.github.io/agentscope/en/tutorial/advance.html)
-  - [Customize Your Own Agent](https://modelscope.github.io/agentscope/en/tutorial/201-agent.html)
-  - [Pipeline and MsgHub](https://modelscope.github.io/agentscope/en/tutorial/202-pipeline.html)
-  - [Model](https://modelscope.github.io/agentscope/en/tutorial/203-model.html)
-  - [Service](https://modelscope.github.io/agentscope/en/tutorial/204-service.html)
-  - [Memory](https://modelscope.github.io/agentscope/en/tutorial/205-memory.html)
-  - [Prompt Engineering](https://modelscope.github.io/agentscope/en/tutorial/206-prompt.html)
-  - [Monitor](https://modelscope.github.io/agentscope/en/tutorial/207-monitor.html)
-  - [Distribution](https://modelscope.github.io/agentscope/en/tutorial/208-distribute.html)
-- [Get Involved](https://modelscope.github.io/agentscope/en/tutorial/contribute.html)
-  - [Join AgentScope Community](https://modelscope.github.io/agentscope/en/tutorial/301-community.html)
-  - [Contribute to AgentScope](https://modelscope.github.io/agentscope/en/tutorial/302-contribute.html)
+Using `to_dist` function to run the agent in distributed mode!
 
-## License
+```python
+from agentscope.agents import DialogAgent
+from agentscope.message import Msg
+import agentscope
+
+# Load model configs
+agentscope.init(
+    model_configs=[
+        {
+            "config_name": "my_config",
+            "model_type": "dashscope_chat",
+            "model_name": "qwen-max",
+        }
+    ]
+)
+
+# Using `to_dist()` to run the agent in distributed mode
+agent1 = DialogAgent(
+   name="Saturday",
+   model_config_name="my_config"
+).to_dist()
+
+agent2 = DialogAgent(
+   name="Sunday",
+   model_config_name="my_config"
+).to_dist()
+
+# The two agent will run in parallel
+agent1(Msg("user", "Execute task1 ...", "user"))
+agent2(Msg("user", "Execute task2 ...", "user"))
+```
+
+### 👀 Tracing & Monitoring
+
+![](https://img.shields.io/badge/✨_Feature-Visualization-8A2BE2)
+![](https://img.shields.io/badge/✨_Feature-Customization-6495ED)
+
+AgentScope provides a local visualization and monitoring tool, **AgentScope Studio**.
+
+```bash
+# Install AgentScope Studio
+npm install -g @agentscope/studio
+# Run AgentScope Studio
+as_studio
+```
+
+```python
+import agentscope
+
+# Connect application to AgentScope Studio
+agentscope.init(
+  model_configs = {
+    "config_name": "my_config",
+    "model_type": "dashscope_chat",
+    "model_name": "qwen_max",
+  },
+  studio_url="http://localhost:3000", # The URL of AgentScope Studio
+)
+
+# ...
+```
+
+<div align="center">
+       <img
+        src="https://img.alicdn.com/imgextra/i4/O1CN01eCEYvA1ueuOkien7T_!!6000000006063-1-tps-960-600.gif"
+        alt="AgentScope Studio"
+        width="100%"
+    />
+   <div align="center">AgentScope Studio, a local visualization tool</div>
+</div>
+
+
+## ⚖️ License
 
 AgentScope is released under Apache License 2.0.
 
-## Contributing
+## 📚 Publications
 
-Contributions are always welcomed!
+If you find our work helpful for your research or application, please cite our papers.
 
-We provide a developer version with additional pre-commit hooks to perform
-checks compared to the official version:
-
-```bash
-# For windows
-pip install -e .[dev]
-# For mac
-pip install -e .\[dev\]
-
-# Install pre-commit hooks
-pre-commit install
-```
-
-Please refer to our [Contribution Guide](https://modelscope.github.io/agentscope/en/tutorial/302-contribute.html) for more details.
-
-## References
-
-If you find our work helpful for your research or application, please
-cite [our paper](https://arxiv.org/abs/2402.14034):
+[AgentScope: A Flexible yet Robust Multi-Agent Platform](https://arxiv.org/abs/2402.14034)
 
 ```
 @article{agentscope,
-  author  = {Dawei Gao and
-             Zitao Li and
-             Weirui Kuang and
-             Xuchen Pan and
-             Daoyuan Chen and
-             Zhijian Ma and
-             Bingchen Qian and
-             Liuyi Yao and
-             Lin Zhu and
-             Chen Cheng and
-             Hongzhu Shi and
-             Yaliang Li and
-             Bolin Ding and
-             Jingren Zhou},
-  title   = {AgentScope: A Flexible yet Robust Multi-Agent Platform},
-  journal = {CoRR},
-  volume  = {abs/2402.14034},
-  year    = {2024},
+    author  = {Dawei Gao and
+               Zitao Li and
+               Xuchen Pan and
+               Weirui Kuang and
+               Zhijian Ma and
+               Bingchen Qian and
+               Fei Wei and
+               Wenhao Zhang and
+               Yuexiang Xie and
+               Daoyuan Chen and
+               Liuyi Yao and
+               Hongyi Peng and
+               Ze Yu Zhang and
+               Lin Zhu and
+               Chen Cheng and
+               Hongzhu Shi and
+               Yaliang Li and
+               Bolin Ding and
+               Jingren Zhou}
+    title   = {AgentScope: A Flexible yet Robust Multi-Agent Platform},
+    journal = {CoRR},
+    volume  = {abs/2402.14034},
+    year    = {2024},
 }
 ```
+
+## ✨ Contributors
+
+All thanks to our contributors:
+
+<a href="https://github.com/modelscope/agentscope/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=modelscope/agentscope&max=999&columns=12&anon=1" />
+</a>

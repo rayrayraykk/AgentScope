@@ -17,66 +17,114 @@ with open("src/agentscope/_version.py", encoding="UTF-8") as f:
 NAME = "agentscope"
 URL = "https://github.com/modelscope/agentscope"
 
-rpc_requires = [
+# released requires
+minimal_requires = [
+    "json5",
+    "jsonschema",
+    "networkx",
+    "black",
+    "docstring_parser",
+    "pydantic",
+    "loguru==0.6.0",
+    "tiktoken",
+    "Pillow",
+    "requests",
+    "inputimeout",
+    "numpy",
+    "flask_sqlalchemy",
+    "python-socketio",
+    "flake8",
+    "psutil",
+    "shortuuid",
+    "scipy",
+    # Leaving openai and dashscope here as default supports
+    "openai>=1.3.0",
+    "dashscope>=1.19.0",
+    "nest_asyncio",
+]
+
+extra_service_requires = [
+    "docker",
+    "pymongo",
+    "pymysql",
+    "bs4",
+    "beautifulsoup4",
+    "feedparser",
+    "notebook",
+    "nbclient",
+    "nbformat",
+    "playwright",
+    "markdownify",
+    "mcp>=1.8.0,<1.10.0; python_version>='3.10'",
+]
+
+extra_distribute_requires = [
     "grpcio==1.60.0",
     "grpcio-tools==1.60.0",
     "protobuf==4.25.0",
     "expiringdict",
+    "cloudpickle",
+    "redis",
 ]
 
-service_requires = [
-    "docker",
-    "pymongo",
-    "pymysql",
-    "beautifulsoup4",
-    "feedparser",
-]
-
-doc_requires = [
+extra_dev_requires = [
+    # unit test
+    "pytest",
+    "pytest-cov",
+    "pre-commit",
+    # doc
     "sphinx",
     "sphinx-autobuild",
     "sphinx_rtd_theme",
     "myst-parser",
     "sphinxcontrib-mermaid",
+    "sphinx-gallery",
+    "sphinx-autobuild",
+    "matplotlib",
+    # extra
+    "transformers",
 ]
 
-test_requires = ["pytest", "pytest-cov", "pre-commit"]
-
-gradio_requires = ["networkx", "gradio==4.19.1", "modelscope_studio==0.0.5"]
-
-# released requires
-minimal_requires = [
-    "docstring_parser",
-    "loguru==0.6.0",
-    "tiktoken",
-    "Pillow",
-    "requests",
-    "chardet",
-    "inputimeout",
-    "openai>=1.3.0",
-    "numpy",
-    "Flask==3.0.0",
-    "Flask-Cors==4.0.0",
-    "Flask-SocketIO==5.3.6",
-    # TODO: move into other requires
-    "dashscope==1.14.1",
-    "openai>=1.3.0",
-    "ollama>=0.1.7",
-    "google-generativeai>=0.4.0",
+extra_gradio_requires = [
+    "gradio==4.44.1",
+    "modelscope_studio==0.0.5",
 ]
 
-distribute_requires = minimal_requires + rpc_requires
+extra_rag_requires = [
+    "llama-index==0.10.30",
+    "llama-index-retrievers-bm25==0.2.0",
+]
 
-dev_requires = minimal_requires + test_requires
+# API requires
+extra_gemini_requires = ["google-generativeai>=0.4.0"]
+# TODO: The latest version has bug in importing, waiting for fix in this issue
+#  https://github.com/BerriAI/litellm/issues/10349
+extra_litellm_requires = ["litellm==1.65"]
+extra_zhipuai_requires = ["zhipuai"]
+extra_ollama_requires = ["ollama>=0.1.7"]
+extra_anthropic_requires = ["anthropic"]
 
-full_requires = (
-    minimal_requires
-    + rpc_requires
-    + service_requires
-    + doc_requires
-    + test_requires
-    + gradio_requires
+# Full requires
+extra_full_requires = (
+    extra_distribute_requires
+    + extra_service_requires
+    + extra_dev_requires
+    + extra_gradio_requires
+    + extra_rag_requires
+    + extra_gemini_requires
+    + extra_litellm_requires
+    + extra_zhipuai_requires
+    + extra_ollama_requires
+    + extra_anthropic_requires
 )
+
+# For online workstation
+extra_online_requires = extra_full_requires + [
+    "oss2",
+    "flask_babel",
+    "babel==2.15.0",
+    "gunicorn",
+]
 
 with open("README.md", "r", encoding="UTF-8") as fh:
     long_description = fh.read()
@@ -94,12 +142,28 @@ setuptools.setup(
     keywords=["deep-learning", "multi agents", "agents"],
     package_dir={"": "src"},
     packages=setuptools.find_packages("src"),
-    package_data={"agentscope.web": ["static/**/*"]},
+    package_data={
+        "agentscope.prompt": ["_prompt_examples.json"],
+        "agentscope.service.browser": ["markpage.js"],
+    },
     install_requires=minimal_requires,
     extras_require={
-        "distribute": distribute_requires,
-        "dev": dev_requires,
-        "full": full_requires,
+        # For specific LLM API
+        "ollama": extra_ollama_requires,
+        "litellm": extra_litellm_requires,
+        "zhipuai": extra_zhipuai_requires,
+        "gemini": extra_gemini_requires,
+        "anthropic": extra_anthropic_requires,
+        # For service functions
+        "service": extra_service_requires,
+        # For distribution mode
+        "distribute": extra_distribute_requires,
+        # With unit test requires
+        "dev": extra_dev_requires,
+        # With full requires
+        "full": extra_full_requires,
+        # With online workstation requires
+        "online": extra_online_requires,
     },
     license="Apache License 2.0",
     classifiers=[
@@ -112,8 +176,9 @@ setuptools.setup(
     python_requires=">=3.9",
     entry_points={
         "console_scripts": [
-            "as_studio=agentscope.web.studio.studio:run_app",
+            "as_gradio=agentscope.web.gradio.studio:run_app",
             "as_workflow=agentscope.web.workstation.workflow:main",
+            "as_server=agentscope.server.launcher:as_server",
         ],
     },
 )

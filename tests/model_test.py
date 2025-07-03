@@ -1,57 +1,85 @@
 # -*- coding: utf-8 -*-
-"""
-Unit tests for model wrapper classes and functions
-"""
-
+"""Unit tests for model wrapper classes and functions"""
 from typing import Any, Union, List, Sequence
 import unittest
 from unittest.mock import patch, MagicMock
 
-from agentscope.message import MessageBase
+import agentscope
+from agentscope.manager import ModelManager, ASManager
+from agentscope.message import Msg
 from agentscope.models import (
     ModelResponse,
     ModelWrapperBase,
+    YiChatWrapper,
+    LiteLLMChatWrapper,
+    ZhipuAIEmbeddingWrapper,
+    ZhipuAIChatWrapper,
+    GeminiEmbeddingWrapper,
+    GeminiChatWrapper,
+    OllamaGenerationWrapper,
+    OllamaEmbeddingWrapper,
+    OllamaChatWrapper,
+    DashScopeMultiModalWrapper,
+    DashScopeTextEmbeddingWrapper,
+    DashScopeChatWrapper,
+    DashScopeImageSynthesisWrapper,
+    OpenAIEmbeddingWrapper,
+    OpenAIDALLEWrapper,
     OpenAIChatWrapper,
-    PostAPIModelWrapperBase,
-    _get_model_wrapper,
-    read_model_configs,
-    load_model_by_config_name,
-    clear_model_configs,
+    PostAPIChatWrapper,
+    AnthropicChatWrapper,
 )
 
 
 class TestModelWrapperSimple(ModelWrapperBase):
     """A simple model wrapper class for test usage"""
 
+    model_type: str = "TestModelWrapperSimple"
+
     def __call__(self, *args: Any, **kwargs: Any) -> ModelResponse:
         return ModelResponse(text=self.config_name)
 
     def format(
         self,
-        *args: Union[MessageBase, Sequence[MessageBase]],
+        *args: Union[Msg, Sequence[Msg], None],
     ) -> Union[List[dict], str]:
+        """Format the input for the model"""
+        print(*args)
         return ""
 
 
 class BasicModelTest(unittest.TestCase):
     """Test cases for basic model wrappers"""
 
-    def test_model_registry(self) -> None:
-        """Test the automatic registration mechanism of model wrapper."""
+    def setUp(self) -> None:
+        """Init for BasicModelTest"""
+        agentscope.init(disable_saving=True)
+
+    def test_build_in_model_wrapper_classes(self) -> None:
+        """Test the build in model wrapper classes."""
         # get model wrapper class by class name
-        self.assertEqual(
-            _get_model_wrapper(model_type="TestModelWrapperSimple"),
-            TestModelWrapperSimple,
-        )
-        # get model wrapper class by model type
-        self.assertEqual(
-            _get_model_wrapper(model_type="openai_chat"),
-            OpenAIChatWrapper,
-        )
-        # return PostAPIModelWrapperBase if model_type is not supported
-        self.assertEqual(
-            _get_model_wrapper(model_type="unknown_model_wrapper"),
-            PostAPIModelWrapperBase,
+        self.assertDictEqual(
+            ModelManager.get_instance().model_wrapper_mapping,
+            {
+                "post_api_chat": PostAPIChatWrapper,
+                "openai_chat": OpenAIChatWrapper,
+                "openai_dall_e": OpenAIDALLEWrapper,
+                "openai_embedding": OpenAIEmbeddingWrapper,
+                "dashscope_chat": DashScopeChatWrapper,
+                "dashscope_image_synthesis": DashScopeImageSynthesisWrapper,
+                "dashscope_text_embedding": DashScopeTextEmbeddingWrapper,
+                "dashscope_multimodal": DashScopeMultiModalWrapper,
+                "ollama_chat": OllamaChatWrapper,
+                "ollama_embedding": OllamaEmbeddingWrapper,
+                "ollama_generate": OllamaGenerationWrapper,
+                "gemini_chat": GeminiChatWrapper,
+                "gemini_embedding": GeminiEmbeddingWrapper,
+                "zhipuai_chat": ZhipuAIChatWrapper,
+                "zhipuai_embedding": ZhipuAIEmbeddingWrapper,
+                "litellm_chat": LiteLLMChatWrapper,
+                "yi_chat": YiChatWrapper,
+                "anthropic_chat": AnthropicChatWrapper,
+            },
         )
 
     @patch("loguru.logger.warning")
@@ -67,50 +95,88 @@ class BasicModelTest(unittest.TestCase):
                 "generate_args": {"temperature": 0.5},
             },
             {
-                "model_type": "post_api",
+                "model_type": "post_api_chat",
                 "config_name": "my_post_api",
+                "model_name": "llama",
                 "api_url": "https://xxx",
                 "headers": {},
                 "json_args": {},
             },
         ]
         # load a list of configs
-        read_model_configs(configs=configs, clear_existing=True)
-        model = load_model_by_config_name("gpt-4")
+        model_manager = ModelManager.get_instance()
+        model_manager.load_model_configs(
+            model_configs=configs,
+            clear_existing=True,
+        )
+
+        model = model_manager.get_model_by_config_name("gpt-4")
         self.assertEqual(model.config_name, "gpt-4")
-        model = load_model_by_config_name("my_post_api")
+        model = model_manager.get_model_by_config_name("my_post_api")
         self.assertEqual(model.config_name, "my_post_api")
         self.assertRaises(
             ValueError,
-            load_model_by_config_name,
+            model_manager.get_model_by_config_name,
             "non_existent_id",
         )
 
         # load a single config
-        read_model_configs(configs=configs[0], clear_existing=True)
-        model = load_model_by_config_name("gpt-4")
+        model_manager.load_model_configs(
+            model_configs=configs[0],
+            clear_existing=True,
+        )
+        model = model_manager.get_model_by_config_name("gpt-4")
         self.assertEqual(model.config_name, "gpt-4")
-        self.assertRaises(ValueError, load_model_by_config_name, "my_post_api")
-
-        # load model with the same id
-        read_model_configs(configs=configs[0], clear_existing=False)
-        mock_logging.assert_called_once_with(
-            "config_name [gpt-4] already exists.",
+        self.assertRaises(
+            ValueError,
+            model_manager.get_model_by_config_name,
+            "my_post_api",
         )
 
-        read_model_configs(
-            configs={
+        # load model with the same id
+        model_manager.load_model_configs(
+            model_configs=configs[0],
+            clear_existing=False,
+        )
+        mock_logging.assert_called_once_with(
+            "Config name [gpt-4] already exists.",
+        )
+
+    def test_register_model_wrapper_class(self) -> None:
+        """Test the model wrapper class registration."""
+        model_manager = ModelManager.get_instance()
+        model_manager.load_model_configs(
+            model_configs={
                 "model_type": "TestModelWrapperSimple",
+                "model_name": "test_model_wrapper",
                 "config_name": "test_model_wrapper",
                 "args": {},
             },
         )
-        test_model = load_model_by_config_name("test_model_wrapper")
-        response = test_model()
-        self.assertEqual(response.text, "test_model_wrapper")
-        clear_model_configs()
+
+        # Not registered model wrapper class
         self.assertRaises(
             ValueError,
-            load_model_by_config_name,
+            model_manager.get_model_by_config_name,
             "test_model_wrapper",
         )
+
+        # Register model wrapper class
+        agentscope.register_model_wrapper_class(TestModelWrapperSimple)
+
+        test_model = model_manager.get_model_by_config_name(
+            "test_model_wrapper",
+        )
+
+        response = test_model()
+        self.assertEqual(response.text, "test_model_wrapper")
+        model_manager.clear_model_configs()
+        self.assertRaises(
+            ValueError,
+            model_manager.get_model_by_config_name,
+            "test_model_wrapper",
+        )
+
+    def tearDown(self) -> None:
+        """Clean up the test environment"""
+        ASManager.get_instance().flush()

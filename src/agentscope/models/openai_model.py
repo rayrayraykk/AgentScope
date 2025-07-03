@@ -1,26 +1,62 @@
 # -*- coding: utf-8 -*-
 """Model wrapper for OpenAI models"""
+import json
 from abc import ABC
-from typing import Union, Any, List, Sequence
+from typing import (
+    Union,
+    Any,
+    List,
+    Optional,
+    Generator,
+)
 
 from loguru import logger
 
+from ._model_usage import ChatUsage
+from ._model_utils import (
+    _verify_text_content_in_openai_delta_response,
+    _verify_text_content_in_openai_message_response,
+)
 from .model import ModelWrapperBase, ModelResponse
-from ..file_manager import file_manager
-from ..message import MessageBase
-from ..utils.tools import _convert_to_str
-
-try:
-    import openai
-except ImportError:
-    openai = None
-
+from ..formatters import OpenAIFormatter, CommonFormatter
+from ..manager import FileManager
+from ..message import Msg, ToolUseBlock
 from ..utils.token_utils import get_openai_max_length
-from ..constants import _DEFAULT_API_BUDGET
 
 
 class OpenAIWrapperBase(ModelWrapperBase, ABC):
-    """The model wrapper for OpenAI API."""
+    """The model wrapper for OpenAI API.
+
+    Response:
+        - From https://platform.openai.com/docs/api-reference/chat/create
+
+        .. code-block:: json
+
+            {
+                "id": "chatcmpl-123",
+                "object": "chat.completion",
+                "created": 1677652288,
+                "model": "gpt-4o-mini",
+                "system_fingerprint": "fp_44709d6fcb",
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {
+                            "role": "assistant",
+                            "content": "Hello there, how may I assist you?",
+                        },
+                        "logprobs": null,
+                        "finish_reason": "stop"
+                    }
+                ],
+                "usage": {
+                    "prompt_tokens": 9,
+                    "completion_tokens": 12,
+                    "total_tokens": 21
+                }
+            }
+
+    """
 
     def __init__(
         self,
@@ -30,7 +66,6 @@ class OpenAIWrapperBase(ModelWrapperBase, ABC):
         organization: str = None,
         client_args: dict = None,
         generate_args: dict = None,
-        budget: float = _DEFAULT_API_BUDGET,
         **kwargs: Any,
     ) -> None:
         """Initialize the openai client.
@@ -51,24 +86,23 @@ class OpenAIWrapperBase(ModelWrapperBase, ABC):
             generate_args (`dict`, default `None`):
                 The extra keyword arguments used in openai api generation,
                 e.g. `temperature`, `seed`.
-            budget (`float`, default `None`):
-                The total budget using this model. Set to `None` means no
-                limit.
         """
 
         if model_name is None:
             model_name = config_name
             logger.warning("model_name is not set, use config_name instead.")
 
-        super().__init__(config_name=config_name)
+        super().__init__(config_name=config_name, model_name=model_name)
 
-        if openai is None:
-            raise ImportError(
-                "Cannot find openai package in current python environment.",
-            )
-
-        self.model_name = model_name
         self.generate_args = generate_args or {}
+
+        try:
+            import openai
+        except ImportError as e:
+            raise ImportError(
+                "Cannot find openai package, please install it by "
+                "`pip install openai`",
+            ) from e
 
         self.client = openai.OpenAI(
             api_key=api_key,
@@ -81,23 +115,9 @@ class OpenAIWrapperBase(ModelWrapperBase, ABC):
             self.max_length = get_openai_max_length(self.model_name)
         except Exception as e:
             logger.warning(
-                f"fail to get max_length for {self.model_name}: " f"{e}",
+                f"Fail to get max_length for {self.model_name}: " f"{e}",
             )
             self.max_length = None
-
-        # Set monitor accordingly
-        self._register_budget(model_name, budget)
-        self._register_default_metrics()
-
-    def format(
-        self,
-        *args: Union[MessageBase, Sequence[MessageBase]],
-    ) -> Union[List[dict], str]:
-        raise RuntimeError(
-            f"Model Wrapper [{type(self).__name__}] doesn't "
-            f"need to format the input. Please try to use the "
-            f"model wrapper directly.",
-        )
 
 
 class OpenAIChatWrapper(OpenAIWrapperBase):
@@ -105,31 +125,57 @@ class OpenAIChatWrapper(OpenAIWrapperBase):
 
     model_type: str = "openai_chat"
 
-    deprecated_model_type: str = "openai"
+    def __init__(
+        self,
+        config_name: str,
+        model_name: str = None,
+        api_key: str = None,
+        organization: str = None,
+        client_args: dict = None,
+        stream: bool = False,
+        generate_args: dict = None,
+        **kwargs: Any,
+    ) -> None:
+        """Initialize the openai client.
 
-    def _register_default_metrics(self) -> None:
-        # Set monitor accordingly
-        # TODO: set quota to the following metrics
-        self.monitor.register(
-            self._metric("call_counter"),
-            metric_unit="times",
+        Args:
+            config_name (`str`):
+                The name of the model config.
+            model_name (`str`, default `None`):
+                The name of the model to use in OpenAI API.
+            api_key (`str`, default `None`):
+                The API key for OpenAI API. If not specified, it will
+                be read from the environment variable `OPENAI_API_KEY`.
+            organization (`str`, default `None`):
+                The organization ID for OpenAI API. If not specified, it will
+                be read from the environment variable `OPENAI_ORGANIZATION`.
+            client_args (`dict`, default `None`):
+                The extra keyword arguments to initialize the OpenAI client.
+            stream (`bool`, default `False`):
+                Whether to enable stream mode.
+            generate_args (`dict`, default `None`):
+                The extra keyword arguments used in openai api generation,
+                e.g. `temperature`, `seed`.
+        """
+
+        super().__init__(
+            config_name=config_name,
+            model_name=model_name,
+            api_key=api_key,
+            organization=organization,
+            client_args=client_args,
+            generate_args=generate_args,
+            **kwargs,
         )
-        self.monitor.register(
-            self._metric("prompt_tokens"),
-            metric_unit="token",
-        )
-        self.monitor.register(
-            self._metric("completion_tokens"),
-            metric_unit="token",
-        )
-        self.monitor.register(
-            self._metric("total_tokens"),
-            metric_unit="token",
-        )
+
+        self.stream = stream
 
     def __call__(
         self,
-        messages: list,
+        messages: list[dict],
+        stream: Optional[bool] = None,
+        tools: Optional[list[dict]] = None,
+        tool_choice: Optional[str] = None,
         **kwargs: Any,
     ) -> ModelResponse:
         """Processes a list of messages to construct a payload for the OpenAI
@@ -146,6 +192,13 @@ class OpenAIChatWrapper(OpenAIWrapperBase):
         Args:
             messages (`list`):
                 A list of messages to process.
+            stream (`Optional[bool]`, defaults to `None`)
+                Whether to enable stream mode, which will override the
+                `stream` argument in the constructor if provided.
+            tools (`Optional[list[dict]]`, defaults to `None`):
+                The tool JSON schemas that the model can use.
+            tool_choice (`Optional[str]`, defaults to `None`):
+                The function name that force the model to use.
             **kwargs (`Any`):
                 The keyword arguments to OpenAI chat completions API,
                 e.g. `temperature`, `max_tokens`, `top_p`, etc. Please refer to
@@ -187,43 +240,156 @@ class OpenAIChatWrapper(OpenAIWrapperBase):
             )
 
         # step3: forward to generate response
-        response = self.client.chat.completions.create(
-            model=self.model_name,
-            messages=messages,
-            **kwargs,
-        )
+        if stream is None:
+            stream = self.stream
 
-        # step4: record the api invocation if needed
-        self._save_model_invocation(
-            arguments={
+        kwargs.update(
+            {
                 "model": self.model_name,
                 "messages": messages,
-                **kwargs,
+                "stream": stream,
             },
-            response=response.model_dump(),
         )
 
-        # step5: update monitor accordingly
-        self.update_monitor(call_counter=1, **response.usage.model_dump())
+        if tools:
+            kwargs["tools"] = tools
 
-        # step6: return response
-        return ModelResponse(
-            text=response.choices[0].message.content,
-            raw=response.model_dump(),
+        if tool_choice:
+            kwargs["tool_choice"] = {
+                "type": "function",
+                "function": {
+                    "name": tool_choice,
+                },
+            }
+
+        if stream:
+            kwargs["stream_options"] = {"include_usage": True}
+
+        response = self.client.chat.completions.create(**kwargs)
+
+        if stream:
+
+            def generator() -> Generator[str, None, None]:
+                text = ""
+                last_chunk = {}
+                for chunk in response:
+                    chunk = chunk.model_dump()
+                    if _verify_text_content_in_openai_delta_response(chunk):
+                        text += chunk["choices"][0]["delta"]["content"]
+                        yield text
+                    last_chunk = chunk
+
+                # Update the last chunk to save locally
+                if last_chunk.get("choices", []) in [None, []]:
+                    last_chunk["choices"] = [{}]
+
+                last_chunk["choices"][0]["message"] = {
+                    "role": "assistant",
+                    "content": text,
+                }
+
+                self._save_model_invocation_and_update_monitor(
+                    kwargs,
+                    last_chunk,
+                )
+
+            return ModelResponse(
+                stream=generator(),
+            )
+        else:
+            response = response.model_dump()
+            self._save_model_invocation_and_update_monitor(
+                kwargs,
+                response,
+            )
+
+            if _verify_text_content_in_openai_message_response(
+                response,
+                allow_content_none=True,
+            ):
+                tool_calls = response["choices"][0]["message"].get(
+                    "tool_calls",
+                    None,
+                )
+
+                if tool_calls is not None:
+                    tool_calls = [
+                        ToolUseBlock(
+                            type="tool_use",
+                            id=_["id"],
+                            name=_["function"]["name"],
+                            input=json.loads(_["function"]["arguments"]),
+                        )
+                        for _ in tool_calls
+                    ]
+
+                # return response
+                return ModelResponse(
+                    text=response["choices"][0]["message"]["content"],
+                    raw=response,
+                    tool_calls=tool_calls,
+                )
+            else:
+                raise RuntimeError(
+                    f"Invalid response from OpenAI API: {response}",
+                )
+
+    def _save_model_invocation_and_update_monitor(
+        self,
+        kwargs: dict,
+        response: dict,
+    ) -> None:
+        """Save model invocation and update the monitor accordingly.
+
+        Args:
+            kwargs (`dict`):
+                The keyword arguments used in model invocation
+            response (`dict`):
+                The response from model API
+        """
+        usage = response.get("usage", None)
+
+        if usage and "prompt_tokens" in usage and "completion_tokens" in usage:
+            formatted_usage = ChatUsage(
+                prompt_tokens=usage.get("prompt_tokens"),
+                completion_tokens=usage.get("completion_tokens"),
+            )
+        else:
+            formatted_usage = None
+
+        self._save_model_invocation(
+            arguments=kwargs,
+            response=response,
+            usage=formatted_usage,
         )
+
+        usage = response.get("usage", None)
+        if usage is not None:
+            self.monitor.update_text_and_embedding_tokens(
+                model_name=self.model_name,
+                prompt_tokens=usage.get("prompt_tokens", 0),
+                completion_tokens=usage.get("completion_tokens", 0),
+            )
 
     def format(
         self,
-        *args: Union[MessageBase, Sequence[MessageBase]],
+        *args: Union[Msg, list[Msg], None],
+        multi_agent_mode: bool = True,
     ) -> List[dict]:
         """Format the input string and dictionary into the format that
-        OpenAI Chat API required.
+        OpenAI Chat API required. If you're using a OpenAI-compatible model
+        without a prefix "gpt-" in its name, the format method will
+        automatically format the input messages into the required format.
 
         Args:
-            args (`Union[MessageBase, Sequence[MessageBase]]`):
+            args (`Union[Msg, list[Msg], None]`):
                 The input arguments to be formatted, where each argument
-                should be a `Msg` object, or a list of `Msg` objects.
-                In distribution, placeholder is also allowed.
+                should be a `Msg` object, or a list of `Msg` objects. The
+                `None` input will be ignored.
+            multi_agent_mode (`bool`, defaults to `True`):
+                Formatting the messages in multi-agent mode or not. If false,
+                the messages will be formatted in chat mode, where only a user
+                and an assistant roles are involved.
 
         Returns:
             `List[dict]`:
@@ -231,31 +397,85 @@ class OpenAIChatWrapper(OpenAIWrapperBase):
                 required.
         """
 
-        messages = []
-        for arg in args:
-            if arg is None:
-                continue
-            if isinstance(arg, MessageBase):
-                messages.append(
-                    {
-                        "role": arg.role,
-                        "name": arg.name,
-                        "content": _convert_to_str(arg.content),
-                    },
-                )
-            elif isinstance(arg, list):
-                messages.extend(self.format(*arg))
-            else:
-                raise TypeError(
-                    f"The input should be a Msg object or a list "
-                    f"of Msg objects, got {type(arg)}.",
-                )
+        # Multi agent scenario
+        if multi_agent_mode:
+            # Format messages according to the model name
+            if OpenAIFormatter.is_supported_model(self.model_name):
+                return OpenAIFormatter.format_multi_agent(*args)
 
-        return messages
+            return CommonFormatter.format_multi_agent(*args)
+
+        # Chat scenario
+        if OpenAIFormatter.is_supported_model(self.model_name):
+            return OpenAIFormatter.format_chat(*args)
+
+        return CommonFormatter.format_chat(*args)
+
+    def format_tools_json_schemas(
+        self,
+        schemas: dict[str, dict],
+    ) -> list[dict]:
+        """Format the JSON schemas of the tool functions to the format that
+        the model API provider expects.
+
+        Example:
+            An example of the input schemas parsed from the service toolkit
+
+            ..code-block:: json
+
+                {
+                    "bing_search": {
+                        "type": "function",
+                        "function": {
+                            "name": "bing_search",
+                            "description": "Search the web using Bing.",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {
+                                    "query": {
+                                        "type": "string",
+                                        "description": "The search query.",
+                                    }
+                                },
+                                "required": ["query"],
+                            }
+                        }
+                    }
+                }
+
+        Args:
+            schemas (`dict[str, dict]`):
+                The tools JSON schemas parsed from the service toolkit module,
+                which can be accessed by `service_toolkit.json_schemas`.
+
+        Returns:
+            `list[dict]`:
+                The formatted JSON schemas of the tool functions.
+        """
+        return OpenAIFormatter.format_tools_json_schemas(schemas)
 
 
 class OpenAIDALLEWrapper(OpenAIWrapperBase):
-    """The model wrapper for OpenAI's DALL·E API."""
+    """The model wrapper for OpenAI's DALL·E API.
+
+    Response:
+        - Refer to https://platform.openai.com/docs/api-reference/images/create
+
+        .. code-block:: json
+
+            {
+                "created": 1589478378,
+                "data": [
+                    {
+                        "url": "https://..."
+                    },
+                    {
+                        "url": "https://..."
+                    }
+                ]
+            }
+
+    """
 
     model_type: str = "openai_dall_e"
 
@@ -266,19 +486,6 @@ class OpenAIDALLEWrapper(OpenAIWrapperBase):
         "512*512",
         "256*256",
     ]
-
-    def _register_default_metrics(self) -> None:
-        # Set monitor accordingly
-        # TODO: set quota to the following metrics
-        self.monitor.register(
-            self._metric("call_counter"),
-            metric_unit="times",
-        )
-        for resolution in self._resolutions:
-            self.monitor.register(
-                self._metric(resolution),
-                metric_unit="image",
-            )
 
     def __call__(
         self,
@@ -344,7 +551,16 @@ class OpenAIDALLEWrapper(OpenAIWrapperBase):
         )
 
         # step4: update monitor accordingly
-        self.update_monitor(call_counter=1)
+        resolution = (
+            kwargs.get("quality", "standard")
+            + "-"
+            + kwargs.get("size", "1024*1024")
+        )
+        self.monitor.update_image_tokens(
+            model_name=self.model_name,
+            resolution=resolution,
+            image_count=kwargs.get("n", 1),
+        )
 
         # step5: return response
         raw_response = response.model_dump()
@@ -359,6 +575,7 @@ class OpenAIDALLEWrapper(OpenAIWrapperBase):
         # Get image urls as a list
         urls = [_["url"] for _ in images]
 
+        file_manager = FileManager.get_instance()
         if save_local:
             # Return local url if save_local is True
             urls = [file_manager.save_image(_) for _ in urls]
@@ -366,25 +583,38 @@ class OpenAIDALLEWrapper(OpenAIWrapperBase):
 
 
 class OpenAIEmbeddingWrapper(OpenAIWrapperBase):
-    """The model wrapper for OpenAI embedding API."""
+    """The model wrapper for OpenAI embedding API.
+
+    Response:
+        - Refer to
+        https://platform.openai.com/docs/api-reference/embeddings/create
+
+        .. code-block:: json
+
+            {
+                "object": "list",
+                "data": [
+                    {
+                        "object": "embedding",
+                        "embedding": [
+                            0.0023064255,
+                            -0.009327292,
+                            .... (1536 floats total for ada-002)
+                            -0.0028842222,
+                        ],
+                        "index": 0
+                    }
+                ],
+                "model": "text-embedding-ada-002",
+                "usage": {
+                    "prompt_tokens": 8,
+                    "total_tokens": 8
+                }
+            }
+
+    """
 
     model_type: str = "openai_embedding"
-
-    def _register_default_metrics(self) -> None:
-        # Set monitor accordingly
-        # TODO: set quota to the following metrics
-        self.monitor.register(
-            self._metric("call_counter"),
-            metric_unit="times",
-        )
-        self.monitor.register(
-            self._metric("prompt_tokens"),
-            metric_unit="token",
-        )
-        self.monitor.register(
-            self._metric("total_tokens"),
-            metric_unit="token",
-        )
 
     def __call__(
         self,
@@ -441,17 +671,15 @@ class OpenAIEmbeddingWrapper(OpenAIWrapperBase):
         )
 
         # step4: update monitor accordingly
-        self.update_monitor(call_counter=1, **response.usage.model_dump())
+        self.monitor.update_text_and_embedding_tokens(
+            model_name=self.model_name,
+            prompt_tokens=response.usage.prompt_tokens,
+            total_tokens=response.usage.total_tokens,
+        )
 
         # step5: return response
         response_json = response.model_dump()
-        if len(response_json["data"]) == 0:
-            return ModelResponse(
-                embedding=response_json["data"]["embedding"][0],
-                raw=response_json,
-            )
-        else:
-            return ModelResponse(
-                embedding=[_["embedding"] for _ in response_json["data"]],
-                raw=response_json,
-            )
+        return ModelResponse(
+            embedding=[_["embedding"] for _ in response_json["data"]],
+            raw=response_json,
+        )

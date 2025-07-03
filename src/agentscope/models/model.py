@@ -1,75 +1,24 @@
 # -*- coding: utf-8 -*-
-"""The configuration file should contain one or a list of model configs,
-and each model config should follow the following format.
+"""The model wrapper base class."""
 
-.. code-block:: python
-
-    {
-        "config_name": "{config_name}",
-        "model_type": "openai_chat" | "post_api" | ...,
-        ...
-    }
-
-After that, you can specify model by {config_name}.
-
-Note:
-    The parameters for different types of models are different. For OpenAI API,
-    the format is:
-
-        .. code-block:: python
-
-            {
-                "config_name": "{id of your model}",
-                "model_type": "openai_chat",
-                "model_name": "{model_name_for_openai, e.g. gpt-3.5-turbo}",
-                "api_key": "{your_api_key}",
-                "organization": "{your_organization, if needed}",
-                "client_args": {
-                    # ...
-                },
-                "generate_args": {
-                    # ...
-                }
-            }
-
-
-    For Post API, toking huggingface inference API as an example, its format
-    is:
-
-        .. code-block:: python
-
-            {
-                "config_name": "{config_name}",
-                "model_type": "post_api",
-                "api_url": "{api_url}",
-                "headers": {"Authorization": "Bearer {API_TOKEN}"},
-                "max_length": {max_length_of_model},
-                "timeout": {timeout},
-                "max_retries": {max_retries},
-                "generate_args": {
-                    "temperature": 0.5,
-                    # ...
-                }
-            }
-
-"""
 from __future__ import annotations
 import inspect
 import time
-from abc import ABCMeta
+from abc import ABC, abstractmethod
+from collections import OrderedDict
 from functools import wraps
-from typing import Sequence, Any, Callable, Union, List, Type
+from typing import Any, Callable, Union, List, Optional
 
 from loguru import logger
 
-from agentscope.utils import QuotaExceededError
-from .response import ResponseParsingError, ModelResponse
+from ._model_usage import ChatUsage
+from .response import ModelResponse
+from ..exception import ResponseParsingError
 
-from ..file_manager import file_manager
-from ..message import MessageBase
-from ..utils import MonitorFactory
-from ..utils.monitor import get_full_name
-from ..utils.tools import _get_timestamp
+from ..manager import FileManager
+from ..manager import MonitorManager
+from ..message import Msg
+from ..utils.common import _get_timestamp
 from ..constants import _DEFAULT_MAX_RETRIES
 from ..constants import _DEFAULT_RETRY_INTERVAL
 
@@ -123,7 +72,7 @@ def _response_parse_decorator(
             # Parse the response if needed
             try:
                 return parse_func(response)
-            except Exception as e:
+            except ResponseParsingError as e:
                 if itr < max_retries:
                     logger.warning(
                         f"Fail to parse response ({itr}/{max_retries}):\n"
@@ -135,43 +84,13 @@ def _response_parse_decorator(
                     if fault_handler is not None and callable(fault_handler):
                         return fault_handler(response)
                     else:
-                        error_info = f"{e.__class__.__name__}: {e}"
-                        raise ResponseParsingError(
-                            parse_func=parse_func,
-                            error_info=error_info,
-                            response=response,
-                        ) from None
+                        raise
         return {}
 
     return checking_wrapper
 
 
-class _ModelWrapperMeta(ABCMeta):
-    """A meta call to replace the model wrapper's __call__ function with
-    wrapper about error handling."""
-
-    def __new__(mcs, name: Any, bases: Any, attrs: Any) -> Any:
-        if "__call__" in attrs:
-            attrs["__call__"] = _response_parse_decorator(attrs["__call__"])
-        return super().__new__(mcs, name, bases, attrs)
-
-    def __init__(cls, name: Any, bases: Any, attrs: Any) -> None:
-        if not hasattr(cls, "_registry"):
-            cls._registry = {}
-            cls._type_registry = {}
-            cls._deprecated_type_registry = {}
-        else:
-            cls._registry[name] = cls
-            if hasattr(cls, "model_type"):
-                cls._type_registry[cls.model_type] = cls
-                if hasattr(cls, "deprecated_model_type"):
-                    cls._deprecated_type_registry[
-                        cls.deprecated_model_type
-                    ] = cls
-        super().__init__(name, bases, attrs)
-
-
-class ModelWrapperBase(metaclass=_ModelWrapperMeta):
+class ModelWrapperBase(ABC):
     """The base class for model wrapper."""
 
     model_type: str
@@ -184,9 +103,28 @@ class ModelWrapperBase(metaclass=_ModelWrapperMeta):
     model_name: str
     """The name of the model, which is used in model api calling."""
 
+    _class_hooks_save_model_invocation: dict[
+        str,
+        Callable[
+            [
+                ModelWrapperBase,  # self object
+                str,  # model invocation id
+                str,  # timestamp
+                dict,  # arguments
+                Union[dict, str],  # response
+                dict,  # usage
+            ],
+            None,
+        ],
+    ] = OrderedDict()
+    """The class hooks in saving model invocations, which takes the model
+    wrapper object, model invocation id, timestamp, arguments, response,
+     and usage as input"""
+
     def __init__(
         self,  # pylint: disable=W0613
-        config_name: str,
+        config_name: Optional[str] = None,
+        model_name: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
         """Base class for model wrapper.
@@ -195,32 +133,27 @@ class ModelWrapperBase(metaclass=_ModelWrapperMeta):
         `__call__` function.
 
         Args:
-            config_name (`str`):
+            config_name (`Optional[str]`, defaults to `None`):
                 The id of the model, which is used to extract configuration
                 from the config file.
+            model_name (`Optional[str]`, defaults to `None`):
+                The name of the model.
         """
-        self.monitor = MonitorFactory.get_monitor()
+        self.monitor = MonitorManager.get_instance()
 
         self.config_name = config_name
-        logger.info(f"Initialize model [{config_name}]")
 
-    @classmethod
-    def get_wrapper(cls, model_type: str) -> Type[ModelWrapperBase]:
-        """Get the specific model wrapper"""
-        if model_type in cls._type_registry:
-            return cls._type_registry[model_type]  # type: ignore[return-value]
-        elif model_type in cls._registry:
-            return cls._registry[model_type]  # type: ignore[return-value]
-        elif model_type in cls._deprecated_type_registry:
-            deprecated_cls = cls._deprecated_type_registry[model_type]
-            logger.warning(
-                f"Model type [{model_type}] will be deprecated in future "
-                f"releases, please use [{deprecated_cls.model_type}] instead.",
+        if model_name is None:
+            raise ValueError(
+                "Model name should be provided for model "
+                f"configuration [{config_name}].",
             )
-            return deprecated_cls  # type: ignore[return-value]
-        else:
-            return None  # type: ignore[return-value]
 
+        self.model_name = model_name
+
+        logger.debug(f"Initialize model by configuration [{config_name}]")
+
+    @abstractmethod
     def __call__(self, *args: Any, **kwargs: Any) -> ModelResponse:
         """Processing input with the model."""
         raise NotImplementedError(
@@ -231,79 +164,155 @@ class ModelWrapperBase(metaclass=_ModelWrapperMeta):
 
     def format(
         self,
-        *args: Union[MessageBase, Sequence[MessageBase]],
+        *args: Union[Msg, list[Msg], None],
+        multi_agent_mode: bool = True,
     ) -> Union[List[dict], str]:
-        """Format the input string or dict into the format that the model
+        """Format the input messages into the format that the model
         API required."""
         raise NotImplementedError(
-            f"Model Wrapper [{type(self).__name__}]"
-            f" is missing the required `format` method",
+            f"The method `format` is not implemented for model wrapper "
+            f"[{type(self).__name__}].",
+        )
+
+    def format_tools_json_schemas(
+        self,
+        schemas: dict[str, dict],
+    ) -> list[dict]:
+        """Format the JSON schemas of the tool functions to the format that
+        the model API provider expects.
+
+        Example:
+            An example of the input schemas parsed from the service toolkit
+
+            ..code-block:: json
+
+                {
+                    "bing_search": {
+                        "type": "function",
+                        "function": {
+                            "name": "bing_search",
+                            "description": "Search the web using Bing.",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {
+                                    "query": {
+                                        "type": "string",
+                                        "description": "The search query.",
+                                    }
+                                },
+                                "required": ["query"],
+                            }
+                        }
+                    }
+                }
+
+        Args:
+            schemas (`dict[str, dict]`):
+                The tools JSON schemas parsed from the service toolkit module,
+                which can be accessed by `service_toolkit.json_schemas`.
+
+        Returns:
+            `list[dict]`:
+                The formatted JSON schemas of the tool functions.
+        """
+
+        raise NotImplementedError(
+            f"The method `format_tools_json_schemas` is not implemented "
+            f"for model wrapper [{type(self).__name__}].",
         )
 
     def _save_model_invocation(
         self,
         arguments: dict,
-        response: Any,
+        response: Union[dict, str],
+        usage: Optional[ChatUsage] = None,
     ) -> None:
         """Save model invocation."""
         model_class = self.__class__.__name__
         timestamp = _get_timestamp("%Y%m%d-%H%M%S")
+
+        usage_dict = usage.model_dump() if usage else {}
 
         invocation_record = {
             "model_class": model_class,
             "timestamp": timestamp,
             "arguments": arguments,
             "response": response,
+            "usage": usage_dict,
         }
 
-        file_manager.save_api_invocation(
-            f"model_{model_class}_{timestamp}",
+        invocation_id = f"model_{model_class}_{timestamp}"
+
+        FileManager.get_instance().save_api_invocation(
+            invocation_id,
             invocation_record,
         )
 
-    def _register_budget(self, model_name: str, budget: float) -> None:
-        """Register the budget of the model by model_name."""
-        self.monitor.register_budget(
-            model_name=model_name,
-            value=budget,
-            prefix=model_name,
-        )
-
-    def _register_default_metrics(self) -> None:
-        """Register metrics to the monitor."""
-
-    def _metric(self, metric_name: str) -> str:
-        """Add the class name and model name as prefix to the metric name.
-
-        Args:
-            metric_name (`str`):
-                The metric name.
-
-        Returns:
-            `str`: Metric name of this wrapper.
-        """
-
-        if hasattr(self, "model_name"):
-            return get_full_name(name=metric_name, prefix=self.model_name)
-        else:
-            return get_full_name(name=metric_name)
-
-    def update_monitor(self, **kwargs: Any) -> None:
-        """Update the monitor with the given values.
-
-        Args:
-            kwargs (`dict`):
-                The values to be updated to the monitor.
-        """
-        if hasattr(self, "model_name"):
-            prefix = self.model_name
-        else:
-            prefix = None
-
-        try:
-            self.monitor.update(
-                kwargs,
-                prefix=prefix,
+        # hooks
+        for (
+            hook
+        ) in ModelWrapperBase._class_hooks_save_model_invocation.values():
+            hook(
+                self,
+                invocation_id,
+                timestamp,
+                arguments,
+                response,
+                usage_dict,
             )
-        except QuotaExceededError as e:
-            logger.error(e.message)
+
+    @classmethod
+    def register_save_model_invocation_hook(
+        cls,
+        hook_name: str,
+        hook: Callable[
+            [
+                ModelWrapperBase,  # self object
+                str,  # model invocation id
+                str,  # timestamp
+                dict,  # arguments
+                dict,  # response
+                dict,  # usage
+            ],
+            None,
+        ],
+    ) -> None:
+        """Register save model invocation hook.
+
+        Args:
+            hook_name (`str`):
+                The name of the hook.
+            hook (`Callable[[dict, dict], None]`):
+                The hook function, which should take
+        """
+        if hook_name in cls._class_hooks_save_model_invocation:
+            logger.warning(
+                f"Hook [{hook_name}] already exists. "
+                f"Overwriting the existing hook.",
+            )
+
+        cls._class_hooks_save_model_invocation[hook_name] = hook
+
+    @classmethod
+    def remove_save_model_invocation_hook(
+        cls,
+        hook_name: str,
+    ) -> None:
+        """Remove model invocation saving hook by its name.
+
+        Args:
+            hook_name (`str`):
+                The name of the hook to be removed.
+        """
+        if hook_name in cls._class_hooks_save_model_invocation:
+            cls._class_hooks_save_model_invocation.pop(hook_name)
+        else:
+            logger.warning(
+                f"Hook [{hook_name}] doesn't exist. "
+                f"Cannot remove the non-existing hook.",
+            )
+
+    @classmethod
+    def clear_save_model_invocation_hook(cls) -> None:
+        """Clear all the hooks in saving model invocations."""
+        cls._class_hooks_save_model_invocation.clear()

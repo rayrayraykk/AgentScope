@@ -4,8 +4,10 @@ Unit tests for agent classes and functions
 """
 
 import unittest
+from typing import Optional, Union
 
 from agentscope.agents import AgentBase
+from agentscope.message import Msg
 
 
 class TestAgent(AgentBase):
@@ -26,10 +28,10 @@ class TestAgent(AgentBase):
             use_memory=(
                 kwargs["use_memory"] if "use_memory" in kwargs else None
             ),
-            memory_config=(
-                kwargs["memory_config"] if "memory_config" in kwargs else None
-            ),
         )
+
+    def reply(self, x: Optional[Union[Msg, list[Msg]]] = None) -> Msg:
+        return x
 
 
 class TestAgentCopy(TestAgent):
@@ -40,7 +42,7 @@ class BasicAgentTest(unittest.TestCase):
     """Test cases for basic agents"""
 
     def test_agent_init(self) -> None:
-        """Test the init of agentbase sub-class."""
+        """Test the init of AgentBase subclass."""
         a1 = TestAgent(
             "a",
             "Hi",
@@ -72,12 +74,10 @@ class BasicAgentTest(unittest.TestCase):
             {"sys_prompt": "Hello", "attribute_2": "Bye"},
         )
         self.assertNotEqual(a1.agent_id, a2.agent_id)
-        self.assertTrue(a1.agent_id.startswith("TestAgent"))
-        self.assertTrue(a2.agent_id.startswith("TestAgent"))
         a3 = TestAgentCopy("c")
-        self.assertTrue(a3.agent_id.startswith("TestAgentCopy"))
+        self.assertNotEqual(a3.agent_id, a2.agent_id)
         a4 = TestAgent(
             "d",
         )
-        a4._agent_id = "agent_id_for_d"  # pylint: disable=W0212
+        a4.agent_id = "agent_id_for_d"  # pylint: disable=W0212
         self.assertEqual(a4.agent_id, "agent_id_for_d")

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Utils and helpers for performing sql querys.
+Utils and helpers for performing sql queries.
 Referenced from https://github.com/BeachWang/DAIL-SQL.
 """
 import sqlite3
@@ -112,8 +112,8 @@ class SQLPrompt:
         self.template_info = "/* Given the following database schema: */\n{}"
         self.template_question = "/* Answer the following: {} */"
         self.template_agent_prompt = (
-            "You are a helpful agent that preform"
-            "SQL querys base on natual language instructions."
+            "You are a helpful agent that perform"
+            "SQL queries base on natural language instructions."
             "Please describe the database schema provided"
             "in a simple and understandable manner. "
         )
@@ -261,11 +261,10 @@ class DailSQLPromptGenerator:
         }
         return self.sql_prompt.is_sql_question(target)
 
-    def generate_prompt(self, x: dict = None) -> dict:
+    def generate_prompt(self, question: str) -> dict:
         """
         Generate prompt given input question
         """
-        question = x["content"]
         target = {
             "path_db": self.db_path,
             "question": question,
@@ -277,7 +276,6 @@ class DailSQLPromptGenerator:
                 self.NUM_EXAMPLE * self.scope_factor,
             )
             prompt_example = []
-            question = target["question"]
             example_prefix = self.question_style.get_example_prefix()
             for example in examples:
                 example_format = self.question_style.format_example(example)

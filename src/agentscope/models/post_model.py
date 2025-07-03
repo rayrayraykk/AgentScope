@@ -3,7 +3,7 @@
 import json
 import time
 from abc import ABC
-from typing import Any, Union, Sequence, List
+from typing import Any, Union, List, Optional
 
 import requests
 from loguru import logger
@@ -12,19 +12,20 @@ from .model import ModelWrapperBase, ModelResponse
 from ..constants import _DEFAULT_MAX_RETRIES
 from ..constants import _DEFAULT_MESSAGES_KEY
 from ..constants import _DEFAULT_RETRY_INTERVAL
-from ..message import MessageBase
-from ..utils.tools import _convert_to_str
+from ..formatters import OpenAIFormatter, GeminiFormatter, CommonFormatter
+from ..message import Msg
 
 
 class PostAPIModelWrapperBase(ModelWrapperBase, ABC):
     """The base model wrapper for the model deployed on the POST API."""
 
-    model_type: str = "post_api"
+    model_type: str
 
     def __init__(
         self,
         config_name: str,
         api_url: str,
+        model_name: Optional[str] = None,
         headers: dict = None,
         max_length: int = 2048,
         timeout: int = 30,
@@ -42,6 +43,9 @@ class PostAPIModelWrapperBase(ModelWrapperBase, ABC):
                 The id of the model.
             api_url (`str`):
                 The url of the post request api.
+            model_name (`str`):
+                The name of the model. If `None`, the model name will be
+                extracted from the `json_args`.
             headers (`dict`, defaults to `None`):
                 The headers of the api. Defaults to None.
             max_length (`int`, defaults to `2048`):
@@ -76,7 +80,16 @@ class PostAPIModelWrapperBase(ModelWrapperBase, ABC):
                     **post_args
                 )
         """
-        super().__init__(config_name=config_name)
+        if model_name is None:
+            if json_args is not None:
+                model_name = json_args.get(
+                    "model",
+                    json_args.get("model_name", None),
+                )
+            else:
+                model_name = None
+
+        super().__init__(config_name=config_name, model_name=model_name)
 
         self.api_url = api_url
         self.headers = headers
@@ -145,14 +158,21 @@ class PostAPIModelWrapperBase(ModelWrapperBase, ABC):
         # step3: record model invocation
         # record the model api invocation, which will be skipped if
         # `FileManager.save_api_invocation` is `False`
+        try:
+            response_json = response.json()
+        except requests.exceptions.JSONDecodeError as e:
+            raise RuntimeError(
+                f"Fail to serialize the response to json: \n{str(response)}",
+            ) from e
+
         self._save_model_invocation(
             arguments=request_kwargs,
-            response=response.json(),
+            response=response_json,
         )
 
         # step4: parse the response
         if response.status_code == requests.codes.ok:
-            return self._parse_response(response.json())
+            return self._parse_response(response_json)
         else:
             logger.error(json.dumps(request_kwargs, indent=4))
             raise RuntimeError(
@@ -161,7 +181,7 @@ class PostAPIModelWrapperBase(ModelWrapperBase, ABC):
 
 
 class PostAPIChatWrapper(PostAPIModelWrapperBase):
-    """A post api model wrapper compatilble with openai chat, e.g., vLLM,
+    """A post api model wrapper compatible with openai chat, e.g., vLLM,
     FastChat."""
 
     model_type: str = "post_api_chat"
@@ -175,50 +195,51 @@ class PostAPIChatWrapper(PostAPIModelWrapperBase):
 
     def format(
         self,
-        *args: Union[MessageBase, Sequence[MessageBase]],
+        *args: Union[Msg, list[Msg], None],
+        multi_agent_mode: bool = True,
     ) -> Union[List[dict]]:
-        """Format the input messages into a list of dict, which is
-        compatible to OpenAI Chat API.
+        """Format the input messages into a list of dict according to the model
+        name. For example, if the model name is prefixed with "gpt-", the
+        input messages will be formatted for OpenAI models.
 
         Args:
-            args (`Union[MessageBase, Sequence[MessageBase]]`):
+            args (`Union[Msg, list[Msg], None]`):
                 The input arguments to be formatted, where each argument
-                should be a `Msg` object, or a list of `Msg` objects.
-                In distribution, placeholder is also allowed.
+                should be a `Msg` object, or a list of `Msg` objects. The
+                `None` input will be ignored.
+            multi_agent_mode (`bool`, defaults to `True`):
+                Formatting the messages in multi-agent mode or not. If false,
+                the messages will be formatted in chat mode, where only a user
+                and an assistant roles are involved.
 
         Returns:
             `Union[List[dict]]`:
                 The formatted messages.
         """
-        messages = []
-        for arg in args:
-            if arg is None:
-                continue
-            if isinstance(arg, MessageBase):
-                messages.append(
-                    {
-                        "role": arg.role,
-                        "name": arg.name,
-                        "content": _convert_to_str(arg.content),
-                    },
-                )
-            elif isinstance(arg, list):
-                messages.extend(self.format(*arg))
-            else:
-                raise TypeError(
-                    f"The input should be a Msg object or a list "
-                    f"of Msg objects, got {type(arg)}.",
-                )
+        # Format according to the potential model field in the json_args
+        model_name = self.json_args.get(
+            "model",
+            self.json_args.get("model_name", None),
+        )
 
-        return messages
+        # OpenAI
+        if OpenAIFormatter.is_supported_model(model_name or ""):
+            return OpenAIFormatter.format_multi_agent(*args)
+
+        # Gemini
+        if GeminiFormatter.is_supported_model(model_name or ""):
+            return GeminiFormatter.format_multi_agent(*args)
+
+        # Include DashScope, ZhipuAI, Ollama, the other models supported by
+        # litellm and unknown models
+        else:
+            return CommonFormatter.format_multi_agent(*args)
 
 
 class PostAPIDALLEWrapper(PostAPIModelWrapperBase):
     """A post api model wrapper compatible with openai dall_e"""
 
     model_type: str = "post_api_dall_e"
-
-    deprecated_model_type: str = "post_api_dalle"
 
     def _parse_response(self, response: dict) -> ModelResponse:
         if "data" not in response["data"]["response"]:
@@ -231,12 +252,52 @@ class PostAPIDALLEWrapper(PostAPIModelWrapperBase):
         urls = [img["url"] for img in response["data"]["response"]["data"]]
         return ModelResponse(image_urls=urls)
 
-    def format(
-        self,
-        *args: Union[MessageBase, Sequence[MessageBase]],
-    ) -> Union[List[dict], str]:
-        raise RuntimeError(
-            f"Model Wrapper [{type(self).__name__}] doesn't "
-            f"need to format the input. Please try to use the "
-            f"model wrapper directly.",
+
+class PostAPIEmbeddingWrapper(PostAPIModelWrapperBase):
+    """
+    A post api model wrapper for embedding model
+    """
+
+    model_type: str = "post_api_embedding"
+
+    def _parse_response(self, response: dict) -> ModelResponse:
+        """
+        Parse the response json data into ModelResponse with embedding.
+        Args:
+            response (`dict`):
+            The response obtained from the API. This parsing assume the
+            structure of the response is the same as OpenAI's as following:
+        {
+          "object": "list",
+          "data": [
+            {
+              "object": "embedding",
+              "embedding": [
+                0.0023064255,
+                -0.009327292,
+                .... (1536 floats total for ada-002)
+                -0.0028842222,
+              ],
+              "index": 0
+            }
+          ],
+          "model": "text-embedding-ada-002",
+          "usage": {
+            "prompt_tokens": 8,
+            "total_tokens": 8
+          }
+        }
+        """
+        if (
+            "data" not in response
+            or len(response["data"]) < 1
+            or "embedding" not in response["data"][0]
+        ):
+            error_msg = json.dumps(response, ensure_ascii=False, indent=2)
+            logger.error(f"Error in embedding API call:\n{error_msg}")
+            raise ValueError(f"Error in embedding API call:\n{error_msg}")
+        embeddings = [data["embedding"] for data in response["data"]]
+        return ModelResponse(
+            embedding=embeddings,
+            raw=response,
         )

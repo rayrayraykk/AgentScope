@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 """ Unit test for msghub."""
 import unittest
-from typing import Optional
+from typing import Optional, Union, Sequence
 
 from agentscope.agents import AgentBase
 from agentscope import msghub
+from agentscope.message import Msg
 
 
 class TestAgent(AgentBase):
     """Test agent class for msghub."""
 
-    def reply(self, x: Optional[dict] = None) -> dict:
+    def reply(self, x: Optional[Union[Msg, Sequence[Msg]]] = None) -> Msg:
         """Reply function for agent."""
         if x is not None:
             self.memory.add(x)
@@ -26,17 +27,17 @@ class MsgHubTest(unittest.TestCase):
 
     def setUp(self) -> None:
         """Init for ExampleTest."""
-        self.wisper = TestAgent("wisper")
+        self.whisper = TestAgent("whisper")
         self.agent1 = TestAgent("agent1")
         self.agent2 = TestAgent("agent2")
         self.agent3 = TestAgent("agent3")
 
     def test_msghub_operation(self) -> None:
         """Test add, delete and broadcast operations"""
-        msg1 = {"msg": 1}
-        msg2 = {"msg": 2}
-        msg3 = {"msg": 3}
-        msg4 = {"msg": 4}
+        msg1 = Msg(name="a1", content="msg1", role="assistant")
+        msg2 = Msg(name="a2", content="msg2", role="assistant")
+        msg3 = Msg(name="a3", content="msg3", role="assistant")
+        msg4 = Msg(name="a4", content="msg4", role="assistant")
 
         with msghub(participants=[self.agent1, self.agent2]) as hub:
             self.agent1(msg1)
@@ -68,17 +69,18 @@ class MsgHubTest(unittest.TestCase):
         """msghub test."""
 
         ground_truth = [
-            {
-                "role": "wisper",
-                "content": "This secret that my password is 123456 can't be"
+            Msg(
+                name="w1",
+                content="This secret that my password is 123456 can't be"
                 " leaked!",
-            },
+                role="assistant",
+            ),
         ]
 
-        with msghub(participants=[self.wisper, self.agent1, self.agent2]):
-            self.wisper(ground_truth)
+        with msghub(participants=[self.whisper, self.agent1, self.agent2]):
+            self.whisper(ground_truth)
 
-        # agent1 and agent2 heard wisper's secret!
+        # agent1 and agent2 heard whisper's secret!
         self.assertListEqual(
             self.agent1.memory.get_memory(),
             ground_truth,
@@ -89,7 +91,7 @@ class MsgHubTest(unittest.TestCase):
             ground_truth,
         )
 
-        # agent3 didn't hear wisper's secret!
+        # agent3 didn't hear whisper's secret!
         self.assertListEqual(
             self.agent3.memory.get_memory(),
             [],

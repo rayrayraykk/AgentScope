@@ -22,7 +22,7 @@ def get_response() -> dict:
     """Receive post request and return response"""
     json = request.get_json()
 
-    inputs = json.pop("inputs")
+    inputs = json.pop("messages")
 
     global model, tokenizer
 

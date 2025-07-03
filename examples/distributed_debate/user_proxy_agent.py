@@ -1,27 +1,30 @@
 # -*- coding: utf-8 -*-
 """User Proxy Agent class for distributed usage"""
-from typing import Sequence, Union
+from typing import Sequence, Union, Type
 from typing import Optional
 
+from pydantic import BaseModel
+
 from agentscope.agents import UserAgent
+from agentscope.message import Msg
 
 
 class UserProxyAgent(UserAgent):
     """User proxy agent class"""
 
-    def reply(  # type: ignore[override]
+    def reply(
         self,
-        x: dict = None,
-        required_keys: Optional[Union[list[str], str]] = None,
-    ) -> dict:
+        x: Optional[Union[Msg, Sequence[Msg]]] = None,
+        structured_output: Optional[Type[BaseModel]] = None,
+    ) -> Msg:
         """
         Reply with `self.speak(x)`
         """
         if x is not None:
             self.speak(x)
-        return super().reply(x, required_keys)
+        return super().reply(x, structured_output)
 
-    def observe(self, x: Union[dict, Sequence[dict]]) -> None:
+    def observe(self, x: Union[Msg, Sequence[Msg]]) -> None:
         """
         Observe with `self.speak(x)`
         """

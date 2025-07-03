@@ -4,7 +4,7 @@
 from tools import load_txt, extract_scenario_and_participants
 import agentscope
 from agentscope.agents import DialogAgent
-from agentscope.pipelines.functional import sequentialpipeline
+from agentscope.pipelines._functional import sequential_pipeline
 from agentscope.message import Msg
 
 model_configs = [
@@ -26,7 +26,11 @@ model_configs = [
         "json_args": {},
     },
 ]
-agentscope.init(model_configs=model_configs)
+
+agentscope.init(
+    model_configs=model_configs,
+    project="Self-Organizing Conversation",
+)
 
 
 # init the self-organizing conversation
@@ -51,7 +55,7 @@ x = load_txt(
 
 x = Msg("user", x, role="user")
 settings = agent_builder(x)
-scenario_participants = extract_scenario_and_participants(settings["content"])
+scenario_participants = extract_scenario_and_participants(settings.content)
 
 # set the agents that participant the discussion
 agents = [
@@ -66,4 +70,4 @@ agents = [
 # begin discussion
 msg = Msg("user", f"let's discuss to solve the question: {query}", role="user")
 for i in range(max_round):
-    msg = sequentialpipeline(agents, msg)
+    msg = sequential_pipeline(agents, msg)
