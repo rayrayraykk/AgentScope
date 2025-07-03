@@ -23,7 +23,7 @@ jobs:
         pip install setuptools==68.2.2 wheel==0.41.2
     - name: Install Minimal Dependencies
       run: |
-        pip install -q -e .
+        pip install -e .
     - name: Run minimal import tests
       run: |
         python tests/minimal.py
