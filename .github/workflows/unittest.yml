@@ -29,7 +29,7 @@ jobs:
         python tests/minimal.py
     - name: Install Full Dependencies
       run: |
-        pip install -q -e .[full]
+        pip install -e .[full]
         pip install coverage
     - name: Run tests with coverage
       run: |
