@@ -225,15 +225,24 @@ class ReActAgent(ReActAgentBase):
         self.plan_notebook = None
         if plan_notebook:
             self.plan_notebook = plan_notebook
-            self.toolkit.create_tool_group(
-                "plan_related",
-                description=self.plan_notebook.description,
-            )
-            for tool in plan_notebook.list_tools():
-                self.toolkit.register_tool_function(
-                    tool,
-                    group_name="plan_related",
+            # When enable_meta_tool is True, plan tools are in plan_related
+            # group and active by agent.
+            # Otherwise, plan tools in bassic group and always active.
+            if enable_meta_tool:
+                self.toolkit.create_tool_group(
+                    "plan_related",
+                    description=self.plan_notebook.description,
                 )
+                for tool in plan_notebook.list_tools():
+                    self.toolkit.register_tool_function(
+                        tool,
+                        group_name="plan_related",
+                    )
+            else:
+                for tool in plan_notebook.list_tools():
+                    self.toolkit.register_tool_function(
+                        tool,
+                    )
 
         # If print the reasoning hint messages
         self.print_hint_msg = print_hint_msg
