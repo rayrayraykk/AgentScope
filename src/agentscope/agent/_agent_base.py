@@ -202,7 +202,12 @@ class AgentBase(StateModule, metaclass=_AgentMeta):
             f"{self.__class__.__name__} class.",
         )
 
-    async def print(self, msg: Msg, last: bool = True) -> None:
+    async def print(
+        self,
+        msg: Msg,
+        last: bool = True,
+        speech: AudioBlock | list[AudioBlock] | None = None,
+    ) -> None:
         """The function to display the message.
 
         Args:
@@ -211,9 +216,12 @@ class AgentBase(StateModule, metaclass=_AgentMeta):
             last (`bool`, defaults to `True`):
                 Whether this is the last one in streaming messages. For
                 non-streaming message, this should always be `True`.
+            speech (`AudioBlock | list[AudioBlock] | None`, optional):
+                The audio content block(s) to be played along with the
+                message.
         """
         if not self._disable_msg_queue:
-            await self.msg_queue.put((deepcopy(msg), last))
+            await self.msg_queue.put((deepcopy(msg), last, speech))
 
         if self._disable_console_output:
             return
@@ -223,10 +231,7 @@ class AgentBase(StateModule, metaclass=_AgentMeta):
         thinking_and_text_to_print = []
 
         for block in msg.get_content_blocks():
-            if block["type"] == "audio":
-                self._process_audio_block(msg.id, block)
-
-            elif block["type"] == "text":
+            if block["type"] == "text":
                 self._print_text_block(
                     msg.id,
                     name_prefix=msg.name,
@@ -244,6 +249,13 @@ class AgentBase(StateModule, metaclass=_AgentMeta):
 
             elif last:
                 self._print_last_block(block, msg)
+
+        # Play audio block if exists
+        if isinstance(speech, list):
+            for audio_block in speech:
+                self._process_audio_block(msg.id, audio_block)
+        elif isinstance(speech, dict):
+            self._process_audio_block(msg.id, speech)
 
         # Clean up resources if this is the last message in streaming
         if last and msg.id in self._stream_prefix:
@@ -392,18 +404,28 @@ class AgentBase(StateModule, metaclass=_AgentMeta):
 
     def _print_last_block(
         self,
-        block: ToolUseBlock | ToolResultBlock | ImageBlock | VideoBlock,
+        block: ToolUseBlock
+        | ToolResultBlock
+        | ImageBlock
+        | VideoBlock
+        | AudioBlock,
         msg: Msg,
     ) -> None:
         """Process and print the last content block, and the block type
-        is not audio, text, or thinking.
+        is not text, or thinking.
 
         Args:
-            block (`ToolUseBlock | ToolResultBlock | ImageBlock | VideoBlock`):
+            block (`ToolUseBlock | ToolResultBlock | ImageBlock | VideoBlock \
+            | AudioBlock`):
                 The content block to be printed
             msg (`Msg`):
                 The message object
         """
+        # TODO: We should consider how to handle the multimodal blocks in the
+        #  terminal, since the base64 data may be too long to display.
+        if block.get("type") in ["image", "video", "audio"]:
+            return
+
         text_prefix = self._stream_prefix.get(msg.id, {}).get("text", "")
 
         if text_prefix:
